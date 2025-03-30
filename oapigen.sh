@@ -15,4 +15,4 @@ else
     cd ..
 fi
 
-OPENAPI_GENERATOR_VERSION="7.11.0" ./$DIRECTORY/openapi-generator-cli generate -g rust-axum -i $DIRECTORY/openapi.yml -o $(pwd)/oapicode
+OPENAPI_GENERATOR_VERSION="7.11.0" ./$DIRECTORY/openapi-generator-cli generate -g python -i $DIRECTORY/openapi.yml -o $(pwd)/oapicode
