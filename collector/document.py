@@ -223,12 +223,17 @@ class Document:
                 doc_hash = hashlib.file_digest(f, "sha256").hexdigest()
 
             # Extract text from all pages
-            extract = await extract_file(
-                f"{self.fileid}.pdf",
-                config=ExtractionConfig(
-                    ocr_config=TesseractConfig(language="deu", psm=PSMMode.SINGLE_BLOCK)
-                ),
-            )
+            try:
+                extract = await extract_file(
+                    f"{self.fileid}.pdf",
+                    config=ExtractionConfig(
+                        ocr_config=TesseractConfig(language="deu", psm=PSMMode.SINGLE_BLOCK)
+                    ),
+                )
+            except Exception as e:
+                logger.warning(f"No text extracted from PDF or extraction failed for document: {self.url}")
+                logger.warning(f"Failed with Error: {e}")
+                raise
             full_text = extract.content
             created = (
                 extract.metadata.get("created_at")
@@ -253,13 +258,9 @@ class Document:
 
             title = extract.metadata.get("title") or "Ohne Titel"
 
-            # Check if we got any text from the document
-            if not full_text:
-                logger.warning(f"No text extracted from PDF: {self.url}")
 
         except Exception as e:
-            logger.error(f"Error extracting metadata from PDF: {e}")
-            raise
+            logger.error(f"Error extracting metadata from PDF: {e}") 
         finally:
             self._cleanup_tempfiles()
         # Create metadata object
@@ -290,7 +291,7 @@ class Document:
         elif self.typehint == "stellungnahme":
             await self._extract_stellungnahme_semantics()
         elif self.typehint == "redeprotokoll":
-            self._extract_redeprotokoll_semantics()
+            await self._extract_redeprotokoll_semantics()
         else:
             self._extract_default_semantics()
 
@@ -306,7 +307,7 @@ class Document:
 
     async def _extract_redeprotokoll_semantics(self):
         header_prompt = """Du wirst einen Auszug aus einem Dokument erhalten. Extrahiere daraus die Daten, die in folgendem JSON-Pseudo Code beschrieben werden:
-        {'titel': 'Titel des Dokuments', 'kurztitel': 'Zusammenfassung des Titels in einfacher Sprache', 'date': 'Datum auf das sich das Dokument bezieht'
+        {'titel': 'Titel des Dokuments', 'kurztitel': 'Zusammenfassung des Titels in einfacher Sprache', 'date': 'Datum auf das sich das Dokument bezieht als YYYY-MM-DD'
         'autoren': [{'person': 'name einer person', organisation: 'name der organisation der die person angehört'}], 'institutionen': ['liste von institutionen von denen das dokument stammt']}
         sollten sich einige Informationen nicht extrahieren lassen, füge einfach keinen Eintrag hinzu (autor/institution) oder füge 'Unbekannt' ein. Halluziniere unter keinen Umständen nicht vorhandene Informationen.
         Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert.END PROMPT\n"""
@@ -347,7 +348,7 @@ class Document:
 
     async def _extract_gesetzentwurf_semantics(self):
         header_prompt = """Extrahiere aus dem folgenden Auszug aus einem Gesetzentwurf folgende Eckdaten als JSON:
-        {'titel': 'Offizieller Titel des Dokuments', 'kurztitel': 'zusammenfassung des titels in einfacher Sprache', 'date': 'datum auf das sich das Dokument bezieht',
+        {'titel': 'Offizieller Titel des Dokuments', 'kurztitel': 'zusammenfassung des titels in einfacher Sprache', 'date': 'datum auf das sich das Dokument bezieht als YYYY-MM-DD',
          'autoren': [{'person': 'name einer person', organisation: 'name der organisation der die person angehört'}], 'institutionen': ['liste von institutionen von denen das dokument stammt']}
           Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert. END PROMPT\n         
         """
@@ -393,14 +394,14 @@ class Document:
 
     async def _extract_stellungnahme_semantics(self):
         header_prompt = """Extrahiere aus dem folgenden Auszug aus einem Gesetzentwurf folgende Eckdaten als JSON:
-        {'titel': 'Offizieller Titel des Dokuments', 'kurztitel': 'zusammenfassung des titels in einfacher Sprache', 'date': 'datum auf das sich das Dokument bezieht',
+        {'titel': 'Offizieller Titel des Dokuments', 'kurztitel': 'zusammenfassung des titels in einfacher Sprache', 'date': 'datum auf das sich das Dokument bezieht als YYYY-MM-DD',
          'autoren': [{'person': 'name einer person', organisation: 'name der organisation der die person angehört'}], 'institutionen': ['liste von institutionen von denen das dokument stammt']}
           Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert. END PROMPT\n         
         """
         body_prompt = """Extrahiere aus dem gesamttext des folgenden Gesetzes eine Liste an schlagworten, die inhaltlich bedeutsam sind sowie eine Zusammenfassung in 150-250 Worten. 
         Gib außerdem eine "Meinung" an als einen Wert zwischen 1(grundsätzlich ablehnend) und 5(lobend), der das Meinungsbild des Dokuments wiederspiegelt
-        Formatiere sie als JSON wie folgt:
-        {'schlagworte': [], summary: '150-250 Worte', 'meinung': <int>}"""
+        Formatiere sie als JSON wie folgt: {'schlagworte': [], summary: '150-250 Worte', 'meinung': <int>}
+        Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert. END PROMPT"""
 
         try:
             full_text = self.meta.full_text.strip()
