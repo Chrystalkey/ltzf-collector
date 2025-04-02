@@ -46,19 +46,21 @@ class Scraper(ABC):
         )
         logger.info(f"Set Collector ID to {self.collector_id}")
 
-    def log_object(self, item: models.Vorgang, override = True):
-        logdir = self.config.api_obj_log if self.config.api_obj_log else ("locallogs" if override else None)
+    def log_object(self, item: models.Vorgang, override=True):
+        logdir = (
+            self.config.api_obj_log
+            if self.config.api_obj_log
+            else ("locallogs" if override else None)
+        )
         if logdir is not None:
-                logger.info(f"Logging Item to {logdir}")
-                try:
-                    filepath = (
-                        Path(logdir) / f"{self.collector_id}.json"
-                    )
-                    with filepath.open("a", encoding="utf-8") as file:
-                        file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
-                except Exception as e:
-                    logger.error(f"Failed to write to API object log: {e}")
-    
+            logger.info(f"Logging Item to {logdir}")
+            try:
+                filepath = Path(logdir) / f"{self.collector_id}.json"
+                with filepath.open("a", encoding="utf-8") as file:
+                    file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
+            except Exception as e:
+                logger.error(f"Failed to write to API object log: {e}")
+
     async def senditem(self, item: models.Vorgang) -> Optional[models.Vorgang]:
         """
         Send a Vorgang item to the API
