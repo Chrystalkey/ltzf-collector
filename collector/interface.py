@@ -1,3 +1,4 @@
+import json
 import logging
 from abc import ABC, abstractmethod
 from datetime import timedelta
@@ -45,6 +46,19 @@ class Scraper(ABC):
         )
         logger.info(f"Set Collector ID to {self.collector_id}")
 
+    def log_object(self, item: models.Vorgang, override = True):
+        logdir = self.config.api_obj_log if self.config.api_obj_log else ("locallogs" if override else None)
+        if logdir is not None:
+                logger.info(f"Logging Item to {logdir}")
+                try:
+                    filepath = (
+                        Path(logdir) / f"{self.collector_id}.json"
+                    )
+                    with filepath.open("a", encoding="utf-8") as file:
+                        file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
+                except Exception as e:
+                    logger.error(f"Failed to write to API object log: {e}")
+    
     async def senditem(self, item: models.Vorgang) -> Optional[models.Vorgang]:
         """
         Send a Vorgang item to the API
@@ -60,23 +74,13 @@ class Scraper(ABC):
         logger.debug(f"Collector ID: {self.collector_id}")
 
         # Save to log file if configured
-        if self.config.api_object_log is not None:
-            try:
-                filepath = (
-                    Path(self.config.api_object_log) / f"{self.collector_id}.json"
-                )
-                with filepath.open("a", encoding="utf-8") as file:
-                    file.write(str(sanitize_for_serialization(item)) + ",\n")
-            except Exception as e:
-                logger.error(f"Failed to write to API object log: {e}")
-
+        self.log_object(item)
         # Send to API
         with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
             api_instance = openapi_client.DefaultApi(api_client)
             try:
                 # Note: Changed from gsvh_post to vorgang_put to match API spec
-                ret = api_instance.vorgang_put(str(self.collector_id), item)
-                logger.info(f"API Response: {ret}")
+                api_instance.vorgang_put(str(self.collector_id), item)
                 return item
             except openapi_client.ApiException as e:
                 logger.error(f"API Exception: {e}")
@@ -85,15 +89,7 @@ class Scraper(ABC):
                     logger.error(
                         "Unprocessable Entity, tried to send item(see above)\n"
                     )
-                    try:
-                        filepath = (
-                            Path(self.config.api_object_log or "locallogs")
-                            / f"{self.collector_id}.json"
-                        )
-                        with filepath.open("a", encoding="utf-8") as file:
-                            file.write(str(sanitize_for_serialization(item)) + ",\n")
-                    except Exception as e:
-                        logger.error(f"Failed to write to API object log: {e}")
+                    self.log_object(item, override=True)
                 elif e.status == 401:
                     logger.error("Authentication failed. Check your API key.")
                 return None

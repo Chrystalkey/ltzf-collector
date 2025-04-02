@@ -15,7 +15,7 @@ class CollectorConfiguration:
     redis_host: str = None
     redis_port: int = None
     ltzfdb: str = None
-    api_object_log: str = None
+    api_obj_log: str = None
     scrapers_dir: Path = None
     api_key: str = None
     trojan_threshold: int = None
