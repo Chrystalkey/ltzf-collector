@@ -32,13 +32,17 @@ match = [
     "bündnis 90 /die grünen",
     "bündnis 90 / die grünen",
     "fraktion bündnis 90/die grünen",
-    "fraktion bundnis 90/die grünen im bayerischen landtag"
+    "fraktion bundnis 90/die grünen im bayerischen landtag",
+    "fraktion (bündnis 90/die grünen)",
+    "fraktion (bündnis 90/ die grünen)"
 ]
 [[org.match]]
 replace_with = "Christlich Soziale Union (CSU)"
 match = [
     "csu",
-    "christlich soziale union"
+    "christlich soziale union",
+    "fraktion (csu)",
+    "csu-fraktion"
 ]
 [[org.match]]
 replace_with = "Alternative für Deutschland (AfD)"
@@ -50,7 +54,8 @@ match = [
 [[org.match]]
 replace_with = "Freie Wähler (FW)"
 match = [
-    "freie wähler"
+    "freie wähler",
+    "fraktion (freie wähler)"
 ]
 [[org.match]]
 replace_with = "Staatsregierung Bayern"

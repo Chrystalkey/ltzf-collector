@@ -6,10 +6,12 @@ import time
 import aiohttp
 import asyncio
 from openapi_client import Configuration
+from dotenv import load_dotenv
 
 from collector.config import CollectorConfiguration
 from collector.interface import Scraper
 
+load_dotenv()
 logger = logging.getLogger(__name__)
 
 
