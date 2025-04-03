@@ -21,6 +21,7 @@ COPY pyproject.toml poetry.lock ./
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
 FROM python:3.13-slim-bookworm AS runtime
+RUN apt-get install --no-install-recommends --yes tesseract-ocr tesseract-ocr-deu pandoc
 
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"

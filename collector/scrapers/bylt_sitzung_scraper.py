@@ -2,6 +2,7 @@ import logging
 import json
 import os
 import re
+from typing import List, Tuple
 import uuid
 import datetime  # required because of the eval() call later down the line
 from datetime import date as dt_date
@@ -20,11 +21,15 @@ NULL_UUID = uuid.UUID("00000000-0000-0000-0000-000000000000")
 TEST_DATE = dt_datetime.fromisoformat("1940-01-01T00:00:00+00:00")
 
 sample_url = "https://www.bayern.landtag.de/ajaxcalendar.html?week=17.03.2025&currentDate=1.4.2025&all=true&fullYear=false&contentUid=51169"
-
+## Listing pages are weekly.
+## this means a listing page gets extracted into days containing a list of sessions
+## currently this is represented by an item being a tuple of datetime and a list of Sitzung
+## item = Tuple[datetime.datetime, List[models.Sitzung]]
 # scrapes from yesterday until four weeks from now
 class BYLTSitzungScraper(Scraper):
     def __init__(self, config, session: aiohttp.ClientSession):
         start_date = datetime.datetime.now().astimezone(datetime.UTC) - datetime.timedelta(days=1)
+        start_date = start_date - datetime.timedelta(weeks=(start_date.weekday - 1)) # reset date to monday of the respective week
         listing_urls = []
         for week in range(4): # four weeks
             date = (start_date + datetime.timedelta(weeks=week)).date()
@@ -36,7 +41,7 @@ class BYLTSitzungScraper(Scraper):
 
 
     # since a single url yields up to six days
-    async def listing_page_extractor(self, url):
+    async def listing_page_extractor(self, url) -> List[Tuple[datetime.datetime, List[models.Sitzung]]]:
         async with self.session.get(url) as result:
             object = json.loads(await result.text())
             listing_soup = BeautifulSoup(object["html"], "html.parser")
@@ -58,9 +63,9 @@ class BYLTSitzungScraper(Scraper):
                 else:
                     continue
             
-            return day_items.items() # an item is a list of individual sessions ordered by day
+            return day_items.items() # an item is a list of individual sessions grouped by day
     
-    async def item_extractor(self, listing_item):
+    async def item_extractor(self, listing_item: Tuple[datetime.datetime, List[models.Sitzung]]):
         # a listing item is a pair of (date, [entries])
         for (termin, sitzungen) in listing_item:
             for sitzung in sitzungen:
@@ -80,26 +85,39 @@ class BYLTSitzungScraper(Scraper):
                 gremium  = models.Gremium.from_dict({
                     "parlament": "BY",
                     "wahlperiode": 19,
-                    "name": grname
+                    "name": grname,
                 })
                 sitzung = models.Sitzung.from_dict({
                     "titel": title,
                     "termin": full_termin,
                     "gremium": gremium,
-                    "nummer" : None,
-                    "public" : True,
-                    "link": None,
-                    "tops": [],
-                    "dokumente": [],
+                    "nummer" : None, # can be extracted from document link
+                    "public" : True, # no idea how to extract that
+                    "link": None,    # nonexistent for bavarian sessions
+                    "tops": [],      # are the exact state of the last nachtragsTOPs
+                    "dokumente": [], # currently only the TOPs
                     "experten": [] if "Anhörung" in title_line else None,
                 })
                 dok_span = sitzung.find("span", class_="agenda-docs")
                 for link in dok_span.find_all("a"):
                     doc_link = link.get("href")
-                    # for each doc build + extract document
+                    tphint = None
+                    if link.find("sup") is None:
+                        tphint = "tops"
+                    else:
+                        tphint = "tops-ergz"
+                    # de-parse doc_link
+                    # extract query parameter "sitzungsnr"
+
+                    dok = Document(self.session, doc_link, tphint, self.config)
+                    dok.run_extraction()
+                    sitzung.dokumente.append(dok.package())
+                ## extract TOPS from the last TOPList
+
 
 
 def parse_natural_date(date) -> datetime.date:
     split = date.split(" ")
     number = split[0][:-1]
     month = split[1].lower()
+    

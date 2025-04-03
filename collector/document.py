@@ -292,6 +292,8 @@ class Document:
             await self._extract_stellungnahme_semantics()
         elif self.typehint == "redeprotokoll":
             await self._extract_redeprotokoll_semantics()
+        elif self.typehint in ["tops", "tops-aend", "tops-ergz"]:
+            await self._extract_top_semantics()
         else:
             self._extract_default_semantics()
 
@@ -304,6 +306,21 @@ class Document:
             "sonstig": "Dokument",
         }
         return type_titles.get(self.typehint, "Unbekanntes Dokument")
+
+    async def _extract_top_semantics(self):
+        header_prompt = """Du wirst einen Auszug aus einer Ankündigung einer Sitzung erhalten. Extrahiere daraus die Daten, die in folgendem JSON-Pseudo Code beschrieben werden:
+        {'titel': 'Titel des Dokuments', 'kurztitel': 'Zusammenfassung des Titels in einfacher Sprache', 'date': 'Datum auf das sich das Dokument bezieht als YYYY-MM-DD'
+        'autoren': [{'person': 'name einer person', organisation: 'name der organisation der die person angehört'}], 'institutionen': ['liste von institutionen von denen das dokument stammt'], 
+        'nummer': <Nummer der Sitzung als Integer>, 'public': <boolean ob die Sitzung öffentlich stattfindet>, }
+        sollten sich einige Informationen nicht extrahieren lassen, füge einfach keinen Eintrag hinzu (autor/institution) oder füge 'Unbekannt' ein. Halluziniere unter keinen Umständen nicht vorhandene Informationen.
+        Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert.END PROMPT\n"""
+
+        body_prompt = """Du wirst den Text von Tagesordnungspunkten für eine Sitzung erhalten.
+        Extrahiere die 
+        Gib dein Ergebnis in JSON aus, wie folgt: {'schlagworte': [], 'summary': '150-250 Worte', 'tops': [{'titel': 'titel des TOPs', 'drucksachen': [<Liste an behandelten Drucksachennummern als string>]}]}
+        Achte darauf, dass Tagesordnungspunkte auch mehrere Unterpunkte oder Anträge enthalten können - diese sollst du trotzdem nur zu dem Toplevel-TOP zuordnen.
+        Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert.END PROMPT
+        """
 
     async def _extract_redeprotokoll_semantics(self):
         header_prompt = """Du wirst einen Auszug aus einem Dokument erhalten. Extrahiere daraus die Daten, die in folgendem JSON-Pseudo Code beschrieben werden:

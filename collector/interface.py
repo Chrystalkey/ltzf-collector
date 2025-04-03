@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from datetime import timedelta
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 from uuid import UUID
 from pathlib import Path
 
@@ -199,7 +199,6 @@ class VorgangsScraper(Scraper):
         with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
             api_instance = openapi_client.DefaultApi(api_client)
             try:
-                # Note: Changed from gsvh_post to vorgang_put to match API spec
                 ret = api_instance.vorgang_put(str(self.collector_id), item)
                 logger.info(f"API Response: {ret}")
                 return item
@@ -227,7 +226,7 @@ class VorgangsScraper(Scraper):
                 return None
 
 class SitzungsScraper(Scraper):
-    async def senditem(self, item: List[models.Sitzung]) -> Optional[List[models.Sitzung]]:
+    async def senditem(self, item: Tuple[List[models.Sitzung]]) -> Optional[Tuple[List[models.Sitzung]]]:
         global logger
         logger.info(f"Sending Item with id `{item.api_id}` to Database")
         logger.debug(f"Collector ID: {self.collector_id}")
@@ -247,8 +246,10 @@ class SitzungsScraper(Scraper):
         with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
             api_instance = openapi_client.DefaultApi(api_client)
             try:
-                # Note: Changed from gsvh_post to vorgang_put to match API spec
-                ret = api_instance.vorgang_put(str(self.collector_id), item)
+                ret = api_instance.kal_date_put(parlament=models.Parlament.BY, 
+                                                datum=item[0],
+                                                sitzung=item[1]
+                                                )
                 logger.info(f"API Response: {ret}")
                 return item
             except openapi_client.ApiException as e:
