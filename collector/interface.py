@@ -45,61 +45,8 @@ class Scraper(ABC):
         )
         logger.info(f"Set Collector ID to {self.collector_id}")
 
-    async def senditem(self, item: models.Vorgang) -> Optional[models.Vorgang]:
-        """
-        Send a Vorgang item to the API
-
-        Args:
-            item: The Vorgang object to send
-
-        Returns:
-            The sent item on success, None on failure
-        """
-        global logger
-        logger.info(f"Sending Item with id `{item.api_id}` to Database")
-        logger.debug(f"Collector ID: {self.collector_id}")
-
-        # Save to log file if configured
-        if self.config.api_object_log is not None:
-            try:
-                filepath = (
-                    Path(self.config.api_object_log) / f"{self.collector_id}.json"
-                )
-                with filepath.open("a", encoding="utf-8") as file:
-                    file.write(str(sanitize_for_serialization(item)) + ",\n")
-            except Exception as e:
-                logger.error(f"Failed to write to API object log: {e}")
-
-        # Send to API
-        with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
-            api_instance = openapi_client.DefaultApi(api_client)
-            try:
-                # Note: Changed from gsvh_post to vorgang_put to match API spec
-                ret = api_instance.vorgang_put(str(self.collector_id), item)
-                logger.info(f"API Response: {ret}")
-                return item
-            except openapi_client.ApiException as e:
-                logger.error(f"API Exception: {e}")
-                if e.status == 422:
-                    logger.error(sanitize_for_serialization(item))
-                    logger.error(
-                        "Unprocessable Entity, tried to send item(see above)\n"
-                    )
-                    try:
-                        filepath = (
-                            Path(self.config.api_object_log or "locallogs")
-                            / f"{self.collector_id}.json"
-                        )
-                        with filepath.open("a", encoding="utf-8") as file:
-                            file.write(str(sanitize_for_serialization(item)) + ",\n")
-                    except Exception as e:
-                        logger.error(f"Failed to write to API object log: {e}")
-                elif e.status == 401:
-                    logger.error("Authentication failed. Check your API key.")
-                return None
-            except Exception as e:
-                logger.error(f"Unexpected error sending item to API: {e}")
-                return None
+    async def senditem(self, item: Any) -> Optional[Any]:
+        assert False, "Abstract Base Method Called"
 
     async def item_processing(self, item):
         """Process an item by extracting and sending it to the API"""
@@ -230,3 +177,99 @@ class Scraper(ABC):
             A Vorgang object containing the extracted information
         """
         assert False, "Warn: Abstract Method Called"
+
+class VorgangsScraper(Scraper):
+    async def senditem(self, item: models.Vorgang) -> Optional[models.Vorgang]:
+        global logger
+        logger.info(f"Sending Item with id `{item.api_id}` to Database")
+        logger.debug(f"Collector ID: {self.collector_id}")
+
+        # Save to log file if configured
+        if self.config.api_object_log is not None:
+            try:
+                filepath = (
+                    Path(self.config.api_object_log) / f"{self.collector_id}.json"
+                )
+                with filepath.open("a", encoding="utf-8") as file:
+                    file.write(str(sanitize_for_serialization(item)) + ",\n")
+            except Exception as e:
+                logger.error(f"Failed to write to API object log: {e}")
+
+        # Send to API
+        with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
+            api_instance = openapi_client.DefaultApi(api_client)
+            try:
+                # Note: Changed from gsvh_post to vorgang_put to match API spec
+                ret = api_instance.vorgang_put(str(self.collector_id), item)
+                logger.info(f"API Response: {ret}")
+                return item
+            except openapi_client.ApiException as e:
+                logger.error(f"API Exception: {e}")
+                if e.status == 422:
+                    logger.error(sanitize_for_serialization(item))
+                    logger.error(
+                        "Unprocessable Entity, tried to send item(see above)\n"
+                    )
+                    try:
+                        filepath = (
+                            Path(self.config.api_object_log or "locallogs")
+                            / f"{self.collector_id}.json"
+                        )
+                        with filepath.open("a", encoding="utf-8") as file:
+                            file.write(str(sanitize_for_serialization(item)) + ",\n")
+                    except Exception as e:
+                        logger.error(f"Failed to write to API object log: {e}")
+                elif e.status == 401:
+                    logger.error("Authentication failed. Check your API key.")
+                return None
+            except Exception as e:
+                logger.error(f"Unexpected error sending item to API: {e}")
+                return None
+
+class SitzungsScraper(Scraper):
+    async def senditem(self, item: List[models.Sitzung]) -> Optional[List[models.Sitzung]]:
+        global logger
+        logger.info(f"Sending Item with id `{item.api_id}` to Database")
+        logger.debug(f"Collector ID: {self.collector_id}")
+
+        # Save to log file if configured
+        if self.config.api_object_log is not None:
+            try:
+                filepath = (
+                    Path(self.config.api_object_log) / f"{self.collector_id}.json"
+                )
+                with filepath.open("a", encoding="utf-8") as file:
+                    file.write(str(sanitize_for_serialization(item)) + ",\n")
+            except Exception as e:
+                logger.error(f"Failed to write to API object log: {e}")
+
+        # Send to API
+        with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
+            api_instance = openapi_client.DefaultApi(api_client)
+            try:
+                # Note: Changed from gsvh_post to vorgang_put to match API spec
+                ret = api_instance.vorgang_put(str(self.collector_id), item)
+                logger.info(f"API Response: {ret}")
+                return item
+            except openapi_client.ApiException as e:
+                logger.error(f"API Exception: {e}")
+                if e.status == 422:
+                    logger.error(sanitize_for_serialization(item))
+                    logger.error(
+                        "Unprocessable Entity, tried to send item(see above)\n"
+                    )
+                    try:
+                        filepath = (
+                            Path(self.config.api_object_log or "locallogs")
+                            / f"{self.collector_id}.json"
+                        )
+                        with filepath.open("a", encoding="utf-8") as file:
+                            file.write(str(sanitize_for_serialization(item)) + ",\n")
+                    except Exception as e:
+                        logger.error(f"Failed to write to API object log: {e}")
+                elif e.status == 401:
+                    logger.error("Authentication failed. Check your API key.")
+                return None
+            except Exception as e:
+                logger.error(f"Unexpected error sending item to API: {e}")
+                return None
