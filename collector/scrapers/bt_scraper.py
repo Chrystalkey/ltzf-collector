@@ -91,10 +91,10 @@ class BundestagAPIScraper(Scraper):
                 })
             ],
             "links": [self._create_dip_url(vorgang.get("id"), vorgang.get("titel"))], 
-            "stationen": self._extract_stationen(positionen) #ToDo: Fehlende Beratungsstande mappen
+            "stationen": await self._extract_stationen(positionen) 
         })
         
-        logger.info(f"Daten: {gsvh}") #Kann weg, wenn's läuft
+        logger.info(f"Titel: {gsvh.titel}") #Kann weg, wenn's läuft
         return gsvh
 
     async def _get_vorgangspositionen(self, vorgang_id: str) -> List[Dict]:
@@ -155,18 +155,18 @@ class BundestagAPIScraper(Scraper):
             initiatoren.extend(vorgang["initiative"])
         return initiatoren
 
-    def _extract_stationen(self, positionen: List[Dict]) -> List[models.Station]:
+    async def _extract_stationen(self, positionen: List[Dict]) -> List[models.Station]:
         """Extrahiert die Station aus den Vorgangsdaten"""
         stationen = []
         
         for position in positionen:
-            station = self._create_station_from_position(position)
+            station = await self._create_station_from_position(position)
             if station:
                 stationen.append(station)
         
         return stationen
 
-    def _create_station_from_position(self, position: Dict) -> Optional[models.Station]:
+    async def _create_station_from_position(self, position: Dict) -> Optional[models.Station]:
         """Erstellt eine Station aus einer Vorgangsaktivität"""
         station_mapping = {
             "Gesetzentwurf": models.Stationstyp.PARL_MINUS_INITIATIV,
@@ -206,51 +206,83 @@ class BundestagAPIScraper(Scraper):
         #Wenn gar nichts passt, setze auf Sonstig
         if not typ:
             typ = models.Stationstyp.SONSTIG
-            
-        datum = self._parse_date(position.get("datum"))
-
+         
         #Ermittle die zugehörigen Dokumente
-        dokumente = self._extract_dokumente(position, typ)
+        dokumente = await self._extract_dokumente(position, typ)
         #Erstelle die Station
         return models.Station.from_dict({
-            "datum": datum,
-            "start_zeitpunkt": f"{datum}T00:00:00",  # Startzeitpunkt als Datum mit 00:00:00
+            "zp_start": self._parse_date(position.get("datum")),  
             "dokumente": dokumente,             
             "parlament": position.get("zuordnung"),
             "typ": typ,
         })
+    
+        
 
-    def _extract_dokumente(self, position: Dict, typ: models.Stationstyp) -> List[models.Dokument]:
-        """Extrahiert Dokumente aus einer Vorgangsaktivität"""
+    async def _extract_dokumente(self, position: Dict, typ: models.Stationstyp) -> List[Dict]:
+        """Extrahiert Dokumente zu einem Vorgang und gibt sie als serialisierbares Dictionary zurück"""
         if not position:
             return []
-        #Ermittle den korrekten Typ
+
+        #Ermittle die korrekten Typen
         if typ == models.Stationstyp.PARL_MINUS_INITIATIV:
-            dokument_typ = models.Dokumententyp.entwurf
-            drsnr = position.get("fundstelle", {}).get("dokumentnummer", "")
-            #hier noch die Urheber ermitteln
-            #hier Zusammenfassung erstellen -> checken, ob schon vorhanden
-        
+            dokument_typ = models.Doktyp.ENTWURF  # Gesetzesentwurf auf einer Drucksache
         elif typ == models.Stationstyp.PARL_MINUS_BERABGESCHL:
-            dokument_typ = models.Dokumententyp.beschlussempf
-            drsnr = position.get("fundstelle", {}).get("dokumentnummer", "")
-            #hier noch die Urheber ermitteln
-            #hier Zusammenfassung erstellen -> checken, ob schon vorhanden
+            dokument_typ = models.Doktyp.BESCHLUSSEMPF  # Beschlussempfehlung von Ausschüssen
         else:
             return []
 
-        #Erzeuge die Dokumente
-        return [models.Dokument.from_dict({
+        btapi_doctyp = position.get("fundstelle", {}).get("drucksachetyp", "")
+        drsnr = position.get("fundstelle", {}).get("dokumentnummer", "")
+
+        #Hole Volltext aus API
+        endpoint = f"{self.listing_urls[0]}/drucksache-text"    
+        params = {
+            "apikey": self.BT_API_KEY,
+            "f.dokumentnummer" : drsnr,
+            "f.wahlperiode" : self.CURRENT_WP,
+            "f.drucksachetyp" : btapi_doctyp
+        }
+
+        async with self.session.get(endpoint, params=params) as response:
+            if response.status == 200:
+                data = await response.json()
+                volltext = data.get("documents", [{}])[0].get("text", "")
+        
+        if volltext != "":
+            zusammenfassung = await self._get_zusammenfassung(volltext)
+        else:
+            zusammenfassung = ""
+            volltext = ""
+        
+        logger.info(f"Dokument: {drsnr}, {btapi_doctyp}, Zusammenfassung: {zusammenfassung}")  
+
+        # Erzeuge ein serialisierbares Dictionary für das Dokument
+        return [{
             "titel": position.get("titel", ""),
-            "last_mod": datetime.now().isoformat(),
+            "zp_modifiziert": self._parse_date(datetime.now().isoformat()),
+            "zp_referenz": self._parse_date(data.get("documents", [{}])[0].get("datum", "")),
             "link": position.get("fundstelle", {}).get("pdf_url", ""),
             "hash": "",  # Muss noch implementiert werden
             "typ": dokument_typ,
-            "zusammenfassung": "",
+            "zusammenfassung": zusammenfassung,
             "schlagworte": [],
-            "drucksnr": drsnr
-        })]
+            "drucksnr": drsnr,
+            "volltext": volltext,
+            "autoren": [] # ToDo: Hier müssen die Autoren noch implementiert werden
+        }]
+    
 
+    async def _get_zusammenfassung(self, volltext: str) -> str:
+        """Holt Zusammenfassung von OpenAI"""
+        if not volltext:
+            return ""
+        
+        #TODO: Zusammenfassung von OpenAI holen
+        
+        
+        return "Zusammenfassung erstellt"
+        
     def _create_dip_url(self, vorgangid, titel):
         #Bildet die URL zum Bundestags DIP aus dem Gesetzestitel
         cleantitle = re.sub(r"[^a-zA-Z0-9]", "-", titel)
@@ -265,9 +297,8 @@ class BundestagAPIScraper(Scraper):
     def _parse_date(self, date_str: str) -> str:
         """Konvertiert ein Datum-String in das erwartete ISO-Format"""
         if not date_str:
-            return datetime.now().date().isoformat()
+            return datetime.now().date().isoformat() #Aktuelles Datum, wenn kein Datum vorhanden
         try:
-            return datetime.strptime(date_str, "%Y-%m-%d").date().isoformat()
+            return datetime.strptime(date_str, "%Y-%m-%dT00:00:00+00:00").date().isoformat()
         except ValueError:
-            return datetime.now().date().isoformat()
-
+            return datetime.now().date().isoformat() #Aktuelles Datum, wenn kein Datum vorhanden
