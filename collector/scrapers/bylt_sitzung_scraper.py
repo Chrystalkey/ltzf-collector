@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 NULL_UUID = uuid.UUID("00000000-0000-0000-0000-000000000000")
 TEST_DATE = dt_datetime.fromisoformat("1940-01-01T00:00:00+00:00")
 
+sample_url = "https://www.bayern.landtag.de/ajaxcalendar.html?week=17.03.2025&currentDate=1.4.2025&all=true&fullYear=false&contentUid=51169"
 
 # scrapes from yesterday until four weeks from now
 class BYLTSitzungScraper(Scraper):
