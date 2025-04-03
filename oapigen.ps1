@@ -1,4 +1,4 @@
-echo "Checking for openapi-generator-cli"
+Write-Output "Checking for openapi-generator-cli"
 
 if (-Not (Test-Path -Path "oapi-generator" -PathType Container)) {
     Write-Host "Creating oapi-generator directory"
