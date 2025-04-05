@@ -58,7 +58,7 @@ class Scraper(ABC):
                 # Erstelle das Verzeichnis, falls es nicht existiert
                 logdir_path = Path(logdir)
                 logdir_path.mkdir(parents=True, exist_ok=True)
-                
+
                 filepath = logdir_path / f"{self.collector_id}.json"
                 with filepath.open("a", encoding="utf-8") as file:
                     file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
