@@ -1,6 +1,6 @@
 import logging
 from typing import List, Dict, Any, Optional
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 import uuid
 import aiohttp
 import json
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class BundestagAPIScraper(Scraper):
-    CURRENT_WP = 20
+    CURRENT_WP = 21
     BT_API_KEY = "I9FKdCn.hbfefNWCY336dL6x62vfwNKpoN2RZ1gp21"
 
     def __init__(self, config, session: aiohttp.ClientSession):
@@ -32,11 +32,15 @@ class BundestagAPIScraper(Scraper):
         Holt Gesetzesvorhaben von der Bundestags-API
         """
         tage = 5
-        startdatum = datetime.today() - timedelta(days=tage)
-        #startdatum = datetime(2025, 2, 3)
+        if self.config.testing_mode:
+            startdatum = datetime(2025, 2, 3)
+        else:
+            startdatum = datetime.today() - timedelta(days=tage)
         startdatum = startdatum.strftime("%Y-%m-%dT00:00:00")
-        enddatum = datetime.today()
-        #enddatum = datetime(2025, 2, 3)
+        if self.config.testing_mode:
+            enddatum = datetime(2025, 2, 3)
+        else:
+            enddatum = datetime.today()
         enddatum = enddatum.strftime("%Y-%m-%dT23:59:59")
         endpoint = f"{self.listing_urls[0]}/vorgang"
         params = {
@@ -94,7 +98,7 @@ class BundestagAPIScraper(Scraper):
             "stationen": await self._extract_stationen(positionen) 
         })
         
-        logger.info(f"Titel: {gsvh.titel}") #Kann weg, wenn's läuft
+        #logger.info(gsvh.to_dict()) #Kann weg, wenn's läuft
         return gsvh
 
     async def _get_vorgangspositionen(self, vorgang_id: str) -> List[Dict]:
@@ -148,12 +152,27 @@ class BundestagAPIScraper(Scraper):
         # Ansonsten den einzigen gefundenen Typ zurückgeben
         return gefundene_typen.pop()
     
-    def _extract_initiatoren(self, vorgang: Dict) -> List[str]:
-        """Extrahiert die Initiatoren aus den Vorgangsdaten"""
+    def _extract_initiatoren(self, vorgang: Dict) -> List[Dict]:
+        """Extrahiert die Initiatoren aus den Vorgangsdaten und erstellt Autor-Modelle"""
         initiatoren = []
         if vorgang.get("initiative"):
-            initiatoren.extend(vorgang["initiative"])
+            for initiator in vorgang["initiative"]:
+                autor = models.Autor.from_dict({
+                    "organisation": initiator
+                }).to_dict()
+                initiatoren.append(autor)
         return initiatoren
+    
+    def _extract_autoren(self, position: Dict) -> List[Dict]:
+        """Extrahiert die Autoren aus den Vorgangsdaten und erstellt Autor-Modelle"""
+        autoren = []
+        if position.get("fundstelle", {}).get("urheber", {}):
+            for urheber in position["fundstelle"]["urheber"]:
+                autor = models.Autor.from_dict({
+                    "organisation": urheber
+                }).to_dict()
+                autoren.append(autor)
+        return autoren
 
     async def _extract_stationen(self, positionen: List[Dict]) -> List[models.Station]:
         """Extrahiert die Station aus den Vorgangsdaten"""
@@ -209,9 +228,16 @@ class BundestagAPIScraper(Scraper):
          
         #Ermittle die zugehörigen Dokumente
         dokumente = await self._extract_dokumente(position, typ)
+        
+        # Stelle sicher, dass das Datum korrekt gesetzt wird
+        datum = position.get("datum")
+        if not datum:
+            logger.warning(f"Kein Datum gefunden für Position {position.get('titel', '')}, verwende aktuelles Datum")
+            datum = datetime.now().isoformat()
+        
         #Erstelle die Station
         return models.Station.from_dict({
-            "zp_start": self._parse_date(position.get("datum")),  
+            "zp_start": self._parse_date(datum),
             "dokumente": dokumente,             
             "parlament": position.get("zuordnung"),
             "typ": typ,
@@ -230,7 +256,7 @@ class BundestagAPIScraper(Scraper):
         elif typ == models.Stationstyp.PARL_MINUS_BERABGESCHL:
             dokument_typ = models.Doktyp.BESCHLUSSEMPF  # Beschlussempfehlung von Ausschüssen
         else:
-            return []
+            dokument_typ = models.Doktyp.SONSTIG  # Für alle anderen Stationstypen
 
         btapi_doctyp = position.get("fundstelle", {}).get("drucksachetyp", "")
         drsnr = position.get("fundstelle", {}).get("dokumentnummer", "")
@@ -248,6 +274,8 @@ class BundestagAPIScraper(Scraper):
             if response.status == 200:
                 data = await response.json()
                 volltext = data.get("documents", [{}])[0].get("text", "")
+            else:
+                volltext = ""
         
         if volltext != "":
             zusammenfassung = await self._get_zusammenfassung(volltext)
@@ -261,7 +289,7 @@ class BundestagAPIScraper(Scraper):
         return [{
             "titel": position.get("titel", ""),
             "zp_modifiziert": self._parse_date(datetime.now().isoformat()),
-            "zp_referenz": self._parse_date(data.get("documents", [{}])[0].get("datum", "")),
+            "zp_referenz": self._parse_date(position.get("fundstelle", {}).get("datum", "")),
             "link": position.get("fundstelle", {}).get("pdf_url", ""),
             "hash": "",  # Muss noch implementiert werden
             "typ": dokument_typ,
@@ -269,7 +297,7 @@ class BundestagAPIScraper(Scraper):
             "schlagworte": [],
             "drucksnr": drsnr,
             "volltext": volltext,
-            "autoren": [] # ToDo: Hier müssen die Autoren noch implementiert werden
+            "autoren": self._extract_autoren(position)
         }]
     
 
@@ -295,10 +323,29 @@ class BundestagAPIScraper(Scraper):
     
 
     def _parse_date(self, date_str: str) -> str:
-        """Konvertiert ein Datum-String in das erwartete ISO-Format"""
+        """Konvertiert ein Datum-String in das erwartete ISO-Format mit Zeitzone"""
         if not date_str:
-            return datetime.now().date().isoformat() #Aktuelles Datum, wenn kein Datum vorhanden
-        try:
-            return datetime.strptime(date_str, "%Y-%m-%dT00:00:00+00:00").date().isoformat()
-        except ValueError:
-            return datetime.now().date().isoformat() #Aktuelles Datum, wenn kein Datum vorhanden
+            return datetime.now().astimezone().isoformat()
+        
+        # Liste der möglichen Datumsformate
+        date_formats = [
+            "%Y-%m-%dT%H:%M:%S.%f",  # ISO mit Millisekunden
+            "%Y-%m-%dT%H:%M:%S%z",   # ISO 8601 mit Zeitzone
+            "%Y-%m-%dT%H:%M:%S",     # ISO 8601 ohne Zeitzone
+            "%Y-%m-%dT00:00:00+00:00",  # Spezifisches Format aus der API
+            "%Y-%m-%d"               # Einfaches Datum
+        ]
+        
+        for date_format in date_formats:
+            try:
+                parsed_date = datetime.strptime(date_str, date_format)
+                # Stelle sicher, dass die Zeitzone gesetzt ist
+                if parsed_date.tzinfo is None:
+                    parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+                return parsed_date.isoformat()
+            except ValueError:
+                continue
+        
+        # Falls kein Format passt, gebe das aktuelle Datum zurück
+        logger.warning(f"Konnte Datum '{date_str}' nicht parsen, verwende aktuelles Datum")
+        return datetime.now().astimezone().isoformat()

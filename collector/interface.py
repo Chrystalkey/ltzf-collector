@@ -55,7 +55,11 @@ class Scraper(ABC):
         if logdir is not None:
             logger.info(f"Logging Item to {logdir}")
             try:
-                filepath = Path(logdir) / f"{self.collector_id}.json"
+                # Erstelle das Verzeichnis, falls es nicht existiert
+                logdir_path = Path(logdir)
+                logdir_path.mkdir(parents=True, exist_ok=True)
+                
+                filepath = logdir_path / f"{self.collector_id}.json"
                 with filepath.open("a", encoding="utf-8") as file:
                     file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
             except Exception as e:
