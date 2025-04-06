@@ -20,14 +20,14 @@ class ScraperCache:
     """
 
     redis_client: Optional[redis.Redis] = None
-    default_expiration_min : int = 60 * 24 * 14 # fortnite
+    default_expiration_min: int = 60 * 24 * 14  # fortnite
     disabled: bool = False
 
     def __init__(
         self,
         redis_host: str,
         redis_port: int,
-        default_expiration_min : int = None,
+        default_expiration_min: int = None,
         disabled: bool = False,
     ):
         global logger
@@ -54,7 +54,9 @@ class ScraperCache:
             logger.error(f"Unexpected error connecting to Redis: {e}")
             sys.exit(1)
 
-    def store_raw(self, key: str, value: str, typehint: str = "Raw Value", expiry: int = None):
+    def store_raw(
+        self, key: str, value: str, typehint: str = "Raw Value", expiry: int = None
+    ):
         if self.disabled:
             return True
         try:
@@ -98,7 +100,7 @@ class ScraperCache:
         ):
             logger.warning(f"Not caching document {key} due to failed processing")
             return False
-        
+
         key = f"dok:{key}"
         value = value.to_json()
         return self.store_raw(key, value, "Dokument")
