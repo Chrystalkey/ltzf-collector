@@ -1,0 +1,52 @@
+name: Testing the LTZF Project
+
+on: [push]
+
+jobs:
+  formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+      - name: Set up Black
+        run: pip install black
+
+      - name: Run Check
+        run: black --check .
+    
+  pytest:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:latest
+        ports:
+          - 6379:6379
+        env:
+          REDIS_ARGS: "--save 60 1 --loglevel warning"
+
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+          
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          
+      - name: Generate OAPI Code
+        run: sh oapigen.sh
+
+      - name: Run pytest
+        run: poetry install && poetry run pytest

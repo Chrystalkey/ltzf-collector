@@ -12,4 +12,4 @@ if (-Not (Test-Path -Path "oapi-generator" -PathType Container)) {
 }
 
 
-& java -jar "./oapi-generator/openapi-generator-cli.jar" generate -g rust-axum -i "$(Get-Location)/oapi-generator/openapi.yml" -o "$(Get-Location)/oapicode"
+& java -jar "./oapi-generator/openapi-generator-cli.jar" generate -g python -i "$(Get-Location)/oapi-generator/openapi.yml" -o "$(Get-Location)/oapicode"

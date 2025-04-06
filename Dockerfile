@@ -26,6 +26,10 @@ RUN apt-get install --no-install-recommends --yes tesseract-ocr tesseract-ocr-de
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
+RUN apt-get update && apt-get install --no-install-recommends -y tesseract-ocr pandoc \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --from=oapifile /app/oapicode-python ./oapicode
 

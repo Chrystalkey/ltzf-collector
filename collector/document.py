@@ -324,12 +324,12 @@ class Document:
 
     async def _extract_redeprotokoll_semantics(self):
         header_prompt = """Du wirst einen Auszug aus einem Dokument erhalten. Extrahiere daraus die Daten, die in folgendem JSON-Pseudo Code beschrieben werden:
-        {'titel': 'Titel des Dokuments', 'kurztitel': 'Zusammenfassung des Titels in einfacher Sprache', 'date': 'Datum auf das sich das Dokument bezieht als YYYY-MM-DD'
-        'autoren': [{'person': 'name einer person', organisation: 'name der organisation der die person angehört'}], 'institutionen': ['liste von institutionen von denen das dokument stammt']}
-        sollten sich einige Informationen nicht extrahieren lassen, füge einfach keinen Eintrag hinzu (autor/institution) oder füge 'Unbekannt' ein. Halluziniere unter keinen Umständen nicht vorhandene Informationen.
+        {"titel": "Titel des Dokuments", "kurztitel": "Zusammenfassung des Titels in einfacher Sprache", "date": "Datum auf das sich das Dokument bezieht im ISO-Format YYYY-MM-DD"
+        "autoren": [{"person": "name einer person", organisation: "name der organisation der die person angehört"}], "institutionen": ["liste von institutionen von denen das dokument stammt"]}
+        sollten sich einige Informationen nicht extrahieren lassen, füge einfach keinen Eintrag hinzu (autor/institution) oder füge "Unbekannt" ein. Halluziniere unter keinen Umständen nicht vorhandene Informationen.
         Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert.END PROMPT\n"""
         body_prompt = """Du wirst den Text eines Plenarprotokolls erhalten. Extrahiere eine Zusammenfassung der Diskussion und Schlagworte die das Besprochene beschreiben.
-        Gib dein Ergebnis in JSON aus, wie folgt: {'schlagworte': [], 'summary': '150-250 Worte'}
+        Gib dein Ergebnis in JSON aus, wie folgt: {"schlagworte": [], "summary": "150-250 Worte"}
         Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert.END PROMPT
         """
         try:
@@ -365,14 +365,16 @@ class Document:
 
     async def _extract_gesetzentwurf_semantics(self):
         header_prompt = """Extrahiere aus dem folgenden Auszug aus einem Gesetzentwurf folgende Eckdaten als JSON:
-        {'titel': 'Offizieller Titel des Dokuments', 'kurztitel': 'zusammenfassung des titels in einfacher Sprache', 'date': 'datum auf das sich das Dokument bezieht als YYYY-MM-DD',
-         'autoren': [{'person': 'name einer person', organisation: 'name der organisation der die person angehört'}], 'institutionen': ['liste von institutionen von denen das dokument stammt']}
+        {"titel": "Offizieller Titel des Dokuments", "kurztitel": "zusammenfassung des titels in einfacher Sprache", "date": "datum auf das sich das Dokument bezieht im ISO-Format YYYY-MM-DD",
+         "autoren": [{"person": "name einer person", organisation: "name der organisation der die person angehört"}], "institutionen": ["liste von institutionen von denen das dokument stammt"]}
           Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert. END PROMPT\n         
         """
         body_prompt = """Extrahiere aus dem gesamttext des folgenden Gesetzes eine Liste an schlagworten, die inhaltlich bedeutsam sind sowie eine Zusammenfassung in 150-250 Worten. 
         Gib außerdem eine "Trojanergefahr" an, also einen Wert zwischen 1 und 10, der angibt wie wahrscheinlich es ist, dass die vorgeschlagenen Änderungen einem anderen Zweck dienen als es den Anschein hat.
         Formatiere sie als JSON wie folgt:
-        {'schlagworte': [], summary: '150-250 Worte', 'troja': <int>}"""
+        {"schlagworte": [], summary: "150-250 Worte", "troja": <int>}
+          Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert. END PROMPT
+          """
 
         try:
             full_text = self.meta.full_text.strip()
@@ -411,14 +413,16 @@ class Document:
 
     async def _extract_stellungnahme_semantics(self):
         header_prompt = """Extrahiere aus dem folgenden Auszug aus einem Gesetzentwurf folgende Eckdaten als JSON:
-        {'titel': 'Offizieller Titel des Dokuments', 'kurztitel': 'zusammenfassung des titels in einfacher Sprache', 'date': 'datum auf das sich das Dokument bezieht als YYYY-MM-DD',
-         'autoren': [{'person': 'name einer person', organisation: 'name der organisation der die person angehört'}], 'institutionen': ['liste von institutionen von denen das dokument stammt']}
+        {"titel": "Offizieller Titel des Dokuments", "kurztitel": "zusammenfassung des titels in einfacher Sprache", "date": "datum auf das sich das Dokument bezieht im ISO-Format YYYY-MM-DD",
+         "autoren": [{"person": "name einer person", organisation: "name der organisation der die person angehört"}], "institutionen": ["liste von institutionen von denen das dokument stammt"]}
           Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert. END PROMPT\n         
         """
         body_prompt = """Extrahiere aus dem gesamttext des folgenden Gesetzes eine Liste an schlagworten, die inhaltlich bedeutsam sind sowie eine Zusammenfassung in 150-250 Worten. 
         Gib außerdem eine "Meinung" an als einen Wert zwischen 1(grundsätzlich ablehnend) und 5(lobend), der das Meinungsbild des Dokuments wiederspiegelt
-        Formatiere sie als JSON wie folgt: {'schlagworte': [], summary: '150-250 Worte', 'meinung': <int>}
-        Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert. END PROMPT"""
+        Formatiere sie als JSON wie folgt:
+        {"schlagworte": [], summary: "150-250 Worte", "meinung": <int>}
+          Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert. END PROMPT
+          """
 
         try:
             full_text = self.meta.full_text.strip()
@@ -442,12 +446,12 @@ class Document:
             self.meta.title = hobj["titel"]
             self.schlagworte = bobj["schlagworte"]
             self.meinung = bobj["meinung"]
-            self.zp_referenz = hobj["referenzdate"]
+            self.zp_referenz = hobj["date"]
             autoren = []
             for ap in hobj["autoren"]:
                 autoren.append(
                     models.Autor.from_dict(
-                        {"person": ap["psn"], "organisation": ap["org"]}
+                        {"person": ap["person"], "organisation": ap["organisation"]}
                     )
                 )
             for ao in hobj["institutionen"]:
@@ -461,15 +465,17 @@ class Document:
 
     async def _extract_beschlempf_semantics(self):
         header_prompt = """Extrahiere aus dem folgenden Auszug aus einem Gesetzentwurf folgende Eckdaten als JSON:
-        {'titel': 'Offizieller Titel des Dokuments', 'kurztitel': 'zusammenfassung des titels in einfacher Sprache', 'date': 'datum auf das sich das Dokument bezieht',
-         'autoren': [{'person': 'name einer person', organisation: 'name der organisation der die person angehört'}], 'institutionen': ['liste von institutionen von denen das dokument stammt']}
+        {"titel": "Offizieller Titel des Dokuments", "kurztitel": "zusammenfassung des titels in einfacher Sprache", "date": "datum auf das sich das Dokument bezieht",
+         "autoren": [{"person": "name einer person", organisation: "name der organisation der die person angehört"}], "institutionen": ["liste von institutionen von denen das dokument stammt"]}
           Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert. END PROMPT\n         
         """
         body_prompt = """Extrahiere aus dem gesamttext des folgenden Gesetzes eine Liste an schlagworten, die inhaltlich bedeutsam sind sowie eine Zusammenfassung in 150-250 Worten. 
         Gib eine "Meinung" an als einen Wert zwischen 1(grundsätzlich ablehnend) und 5(lobend), der das Meinungsbild des Dokuments wiederspiegelt
         Gib schließlich eine "Trojanergefahr" an, also einen Wert zwischen 1 und 10, der angibt wie wahrscheinlich es ist, dass die vorgeschlagenen Änderungen einem anderen Zweck dienen als es den Anschein hat.
         Formatiere sie als JSON wie folgt:
-        {'schlagworte': [], summary: '150-250 Worte', 'meinung': <int>, 'troja': <int>}"""
+        {"schlagworte": [], summary: "150-250 Worte", "meinung": <int>, "troja": <int>}
+          Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert. END PROMPT
+          """
 
         try:
             full_text = self.meta.full_text.strip()
@@ -493,12 +499,12 @@ class Document:
             self.meta.title = hobj["titel"]
             self.schlagworte = bobj["schlagworte"]
             self.meinung = bobj["meinung"]
-            self.zp_referenz = hobj["referenzdate"]
+            self.zp_referenz = hobj["date"]
             autoren = []
             for ap in hobj["autoren"]:
                 autoren.append(
                     models.Autor.from_dict(
-                        {"person": ap["psn"], "organisation": ap["org"]}
+                        {"person": ap["person"], "organisation": ap["organisation"]}
                     )
                 )
             for ao in hobj["institutionen"]:

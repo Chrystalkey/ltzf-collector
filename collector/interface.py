@@ -1,3 +1,4 @@
+import json
 import logging
 from abc import ABC, abstractmethod
 from datetime import timedelta
@@ -47,6 +48,62 @@ class Scraper(ABC):
 
     async def senditem(self, item: Any) -> Optional[Any]:
         assert False, "Abstract Base Method Called"
+
+    def log_object(self, item: models.Vorgang, override=True):
+        logdir = (
+            self.config.api_obj_log
+            if self.config.api_obj_log
+            else ("locallogs" if override else None)
+        )
+        if logdir is not None:
+            logger.info(f"Logging Item to {logdir}")
+            try:
+                filepath = Path(logdir) / f"{self.collector_id}.json"
+                if not filepath.parent.exists():
+                    logger.info(f"Creating Filepath: {filepath.parent}")
+                    filepath.parent.mkdir(parents=True)
+                with filepath.open("a", encoding="utf-8") as file:
+                    file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
+            except Exception as e:
+                logger.error(f"Failed to write to API object log: {e}")
+
+    async def senditem(self, item: models.Vorgang) -> Optional[models.Vorgang]:
+        """
+        Send a Vorgang item to the API
+
+        Args:
+            item: The Vorgang object to send
+
+        Returns:
+            The sent item on success, None on failure
+        """
+        global logger
+        logger.info(f"Sending Item with id `{item.api_id}` to Database")
+        logger.debug(f"Collector ID: {self.collector_id}")
+
+        # Save to log file if configured
+        self.log_object(item)
+        # Send to API
+        with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
+            api_instance = openapi_client.DefaultApi(api_client)
+            try:
+                # Note: Changed from gsvh_post to vorgang_put to match API spec
+                api_instance.vorgang_put(str(self.collector_id), item)
+                return item
+            except openapi_client.ApiException as e:
+                logger.error(f"API Exception: {e}")
+                if e.status == 422:
+                    logger.error(sanitize_for_serialization(item))
+                    logger.error(
+                        "Unprocessable Entity, tried to send item(see above)\n"
+                    )
+                    self.log_object(item, override=True)
+                elif e.status == 401:
+                    logger.error("Authentication failed. Check your API key.")
+                return None
+            except Exception as e:
+                logger.error(f"Unexpected error sending item to API: {e}")
+                return None
 
     async def item_processing(self, item):
         """Process an item by extracting and sending it to the API"""
