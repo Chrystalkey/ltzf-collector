@@ -21,11 +21,18 @@ jobs:
     
   pytest:
     runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:latest
+        ports:
+          - 6379:6379
+        env:
+          REDIS_ARGS: "--save 60 1 --loglevel warning"
+
     
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
       
       - name: Set up Python
         uses: actions/setup-python@v4
