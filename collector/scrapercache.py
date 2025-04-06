@@ -125,24 +125,6 @@ class ScraperCache:
         key = f"html:{key}"
         return self.get_raw(key, "Website")
 
-    def invalidate_document(self, key: str) -> bool:
-        if self.disabled:
-            return True
-        try:
-            return bool(self.redis_client.delete(f"dok:{key}"))
-        except Exception as e:
-            logger.error(f"Error invalidating document {key}: {e}")
-            return False
-
-    def invalidate_vorgang(self, key: str) -> bool:
-        if self.disabled:
-            return True
-        try:
-            return bool(self.redis_client.delete(f"vg:{key}"))
-        except Exception as e:
-            logger.error(f"Error invalidating vorgang {key}: {e}")
-            return False
-
     def clear(self):
         """Clear all cache data"""
         if self.disabled:
@@ -154,33 +136,3 @@ class ScraperCache:
         except Exception as e:
             logger.error(f"Error clearing cache: {e}")
             return False
-
-    def get_cache_stats(self) -> Dict[str, Any]:
-        """Get statistics about the cache contents"""
-        if self.disabled:
-            return {
-                "document_count": -1,
-                "vorgang_count": -1,
-                "total_keys": -1,
-                "memory_used": "unknown",
-            }
-        try:
-            # Get all keys
-            all_keys = self.redis_client.keys("*")
-
-            # Count document and vorgang keys
-            dok_count = len([k for k in all_keys if k.startswith("dok:")])
-            vg_count = len([k for k in all_keys if k.startswith("vg:")])
-
-            # Get memory info
-            memory_info = self.redis_client.info("memory")
-
-            return {
-                "document_count": dok_count,
-                "vorgang_count": vg_count,
-                "total_keys": len(all_keys),
-                "memory_used": memory_info.get("used_memory_human", "unknown"),
-            }
-        except Exception as e:
-            logger.error(f"Error getting cache stats: {e}")
-            return {"error": str(e), "document_count": -1, "vorgang_count": -1}
