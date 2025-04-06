@@ -235,6 +235,7 @@ class Scraper(ABC):
         """
         assert False, "Warn: Abstract Method Called"
 
+
 class VorgangsScraper(Scraper):
     async def senditem(self, item: models.Vorgang) -> Optional[models.Vorgang]:
         global logger
@@ -282,8 +283,11 @@ class VorgangsScraper(Scraper):
                 logger.error(f"Unexpected error sending item to API: {e}")
                 return None
 
+
 class SitzungsScraper(Scraper):
-    async def senditem(self, item: Tuple[List[models.Sitzung]]) -> Optional[Tuple[List[models.Sitzung]]]:
+    async def senditem(
+        self, item: Tuple[List[models.Sitzung]]
+    ) -> Optional[Tuple[List[models.Sitzung]]]:
         global logger
         logger.info(f"Sending Item with id `{item.api_id}` to Database")
         logger.debug(f"Collector ID: {self.collector_id}")
@@ -303,10 +307,9 @@ class SitzungsScraper(Scraper):
         with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
             api_instance = openapi_client.DefaultApi(api_client)
             try:
-                ret = api_instance.kal_date_put(parlament=models.Parlament.BY, 
-                                                datum=item[0],
-                                                sitzung=item[1]
-                                                )
+                ret = api_instance.kal_date_put(
+                    parlament=models.Parlament.BY, datum=item[0], sitzung=item[1]
+                )
                 logger.info(f"API Response: {ret}")
                 return item
             except openapi_client.ApiException as e:

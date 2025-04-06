@@ -22,6 +22,8 @@ NULL_UUID = uuid.UUID("00000000-0000-0000-0000-000000000000")
 TEST_DATE = dt_datetime.fromisoformat("1940-01-01T00:00:00+00:00")
 
 sample_url = "https://www.bayern.landtag.de/ajaxcalendar.html?week=17.03.2025&currentDate=1.4.2025&all=true&fullYear=false&contentUid=51169"
+
+
 ## Listing pages are weekly.
 ## this means a listing page gets extracted into days containing a list of sessions
 ## currently this is represented by an item being a tuple of datetime and a list of Sitzung
@@ -29,20 +31,27 @@ sample_url = "https://www.bayern.landtag.de/ajaxcalendar.html?week=17.03.2025&cu
 # scrapes from yesterday until four weeks from now
 class BYLTSitzungScraper(Scraper):
     def __init__(self, config, session: aiohttp.ClientSession):
-        start_date = datetime.datetime.now().astimezone(datetime.UTC) - datetime.timedelta(days=1)
-        start_date = start_date - datetime.timedelta(weeks=(start_date.weekday - 1)) # reset date to monday of the respective week
+        start_date = datetime.datetime.now().astimezone(
+            datetime.UTC
+        ) - datetime.timedelta(days=1)
+        start_date = start_date - datetime.timedelta(
+            weeks=(start_date.weekday - 1)
+        )  # reset date to monday of the respective week
         listing_urls = []
-        for week in range(4): # four weeks
+        for week in range(4):  # four weeks
             date = (start_date + datetime.timedelta(weeks=week)).date()
-            listing_urls.append(f"https://www.bayern.landtag.de/ajaxcalendar.html?week={date.day}.{date.month}.{date.year}&currentDate=1.{date.month}.{date.year}&all=true&fullYear=false&contentUid=51169")
+            listing_urls.append(
+                f"https://www.bayern.landtag.de/ajaxcalendar.html?week={date.day}.{date.month}.{date.year}&currentDate=1.{date.month}.{date.year}&all=true&fullYear=false&contentUid=51169"
+            )
 
         super().__init__(config, uuid.uuid4(), listing_urls, session)
         # Add headers for API key authentication
         self.session.headers.update({"api-key": config.api_key})
 
-
     # since a single url yields up to six days
-    async def listing_page_extractor(self, url) -> List[Tuple[datetime.datetime, List[models.Sitzung]]]:
+    async def listing_page_extractor(
+        self, url
+    ) -> List[Tuple[datetime.datetime, List[models.Sitzung]]]:
         async with self.session.get(url) as result:
             object = json.loads(await result.text())
             listing_soup = BeautifulSoup(object["html"], "html.parser")
@@ -59,21 +68,32 @@ class BYLTSitzungScraper(Scraper):
                     agitem = li.find("div", class_="agenda-item")
                     # this is an actual entry with a date
                     title = agitem.find("p", class_="h4").text
-                    if title.startswith("Ausschuss für") or title.startswith("Plenarsitzung"):
+                    if title.startswith("Ausschuss für") or title.startswith(
+                        "Plenarsitzung"
+                    ):
                         day_items[current_date].append(agitem)
                 else:
                     continue
-            
-            return day_items.items() # an item is a list of individual sessions grouped by day
-    
-    async def item_extractor(self, listing_item: Tuple[datetime.datetime, List[models.Sitzung]]):
+
+            return (
+                day_items.items()
+            )  # an item is a list of individual sessions grouped by day
+
+    async def item_extractor(
+        self, listing_item: Tuple[datetime.datetime, List[models.Sitzung]]
+    ):
         # a listing item is a pair of (date, [entries])
-        for (termin, sitzungen) in listing_item:
+        for termin, sitzungen in listing_item:
             for sitzung in sitzungen:
                 time = sitzung.find("div", class_="date").text.split(":")
 
-                full_termin = datetime.datetime(year=termin.year, month=termin.month,day=termin.day,
-                                                hour=int(time[0]), minute=int(time[1]))
+                full_termin = datetime.datetime(
+                    year=termin.year,
+                    month=termin.month,
+                    day=termin.day,
+                    hour=int(time[0]),
+                    minute=int(time[1]),
+                )
                 title_line = sitzung.find("p", class_="h4").text
                 title = None
                 grname = None
@@ -83,22 +103,26 @@ class BYLTSitzungScraper(Scraper):
                     grname = split[0].strip()
                 else:
                     grname = title_line
-                gremium  = models.Gremium.from_dict({
-                    "parlament": "BY",
-                    "wahlperiode": 19,
-                    "name": grname,
-                })
-                sitzung = models.Sitzung.from_dict({
-                    "titel": title,
-                    "termin": full_termin,
-                    "gremium": gremium,
-                    "nummer" : None, # can be extracted from document link
-                    "public" : True, # no idea how to extract that
-                    "link": None,    # nonexistent for bavarian sessions
-                    "tops": [],      # are the exact state of the last nachtragsTOPs
-                    "dokumente": [], # currently only the TOPs
-                    "experten": [] if "Anhörung" in title_line else None,
-                })
+                gremium = models.Gremium.from_dict(
+                    {
+                        "parlament": "BY",
+                        "wahlperiode": 19,
+                        "name": grname,
+                    }
+                )
+                sitzung = models.Sitzung.from_dict(
+                    {
+                        "titel": title,
+                        "termin": full_termin,
+                        "gremium": gremium,
+                        "nummer": None,  # can be extracted from document link
+                        "public": True,  # no idea how to extract that
+                        "link": None,  # nonexistent for bavarian sessions
+                        "tops": [],  # are the exact state of the last nachtragsTOPs
+                        "dokumente": [],  # currently only the TOPs
+                        "experten": [] if "Anhörung" in title_line else None,
+                    }
+                )
                 dok_span = sitzung.find("span", class_="agenda-docs")
                 internal_docs = []
                 for link in dok_span.find_all("a"):
@@ -124,17 +148,19 @@ class BYLTSitzungScraper(Scraper):
         Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert.END PROMPT"""
         try:
             full_text = self.meta.full_text.strip()
-            response = await self.config.llm_connector.generate(extraction_prompt, full_text)
+            response = await self.config.llm_connector.generate(
+                extraction_prompt, full_text
+            )
             object = json.loads(response)
             tops = []
             nummer = 0
             for top in object["tops"]:
                 nummer += 1
-                tops.append(models.Top.from_dict({
-                    "nummer": nummer,
-                    "titel" : top["titel"],
-                    "dokumente": []
-                }))
+                tops.append(
+                    models.Top.from_dict(
+                        {"nummer": nummer, "titel": top["titel"], "dokumente": []}
+                    )
+                )
                 for drucksnr in top["drucksachen"]:
                     split = drucksnr.split("/")
                     periode = split[0]
@@ -150,7 +176,7 @@ class BYLTSitzungScraper(Scraper):
                         self.config.cache.store_dokument(link, dokument)
                     tops.dokumente.append(dokument)
             return tops
-        
+
         except Exception as e:
             logger.error(f"Error extracting TOPS from Document: {e}")
 
@@ -168,11 +194,9 @@ def parse_natural_date(date: str, year: int) -> datetime.date:
         "september": 9,
         "october": 10,
         "november": 11,
-        "december": 12
+        "december": 12,
     }
-    split = date.split(" ") # monday,|12.|march
+    split = date.split(" ")  # monday,|12.|march
     number = int(split[1][:-1])  # 12
-    month = split[2].lower() # march
+    month = split[2].lower()  # march
     return datetime.date(year, month_dict[month], number)
-    
-    

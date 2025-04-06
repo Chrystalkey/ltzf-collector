@@ -227,11 +227,15 @@ class Document:
                 extract = await extract_file(
                     f"{self.fileid}.pdf",
                     config=ExtractionConfig(
-                        ocr_config=TesseractConfig(language="deu", psm=PSMMode.SINGLE_BLOCK)
+                        ocr_config=TesseractConfig(
+                            language="deu", psm=PSMMode.SINGLE_BLOCK
+                        )
                     ),
                 )
             except Exception as e:
-                logger.warning(f"No text extracted from PDF or extraction failed for document: {self.url}")
+                logger.warning(
+                    f"No text extracted from PDF or extraction failed for document: {self.url}"
+                )
                 logger.warning(f"Failed with Error: {e}")
                 raise
             full_text = extract.content
@@ -258,9 +262,8 @@ class Document:
 
             title = extract.metadata.get("title") or "Ohne Titel"
 
-
         except Exception as e:
-            logger.error(f"Error extracting metadata from PDF: {e}") 
+            logger.error(f"Error extracting metadata from PDF: {e}")
         finally:
             self._cleanup_tempfiles()
         # Create metadata object
