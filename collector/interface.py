@@ -56,6 +56,9 @@ class Scraper(ABC):
             logger.info(f"Logging Item to {logdir}")
             try:
                 filepath = Path(logdir) / f"{self.collector_id}.json"
+                if not filepath.parent.exists():
+                    logger.info(f"Creating Filepath: {filepath.parent}")
+                    filepath.parent.mkdir(parents = True)
                 with filepath.open("a", encoding="utf-8") as file:
                     file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
             except Exception as e:

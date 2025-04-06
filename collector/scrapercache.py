@@ -20,14 +20,14 @@ class ScraperCache:
     """
 
     redis_client: Optional[redis.Redis] = None
-    cache_expiry_minutes: int = 60 * 24 * 365  # Default 24 hours for document cache
+    default_expiration_min : int = 60 * 24 * 14 # fortnite
     disabled: bool = False
 
     def __init__(
         self,
         redis_host: str,
         redis_port: int,
-        doc_cache_expiry_minutes: int = None,
+        default_expiration_min : int = None,
         disabled: bool = False,
     ):
         global logger
@@ -37,8 +37,8 @@ class ScraperCache:
             logger.warning("Cacheing disabled")
             return
 
-        if doc_cache_expiry_minutes:
-            self.cache_expiry_minutes = doc_cache_expiry_minutes
+        if default_expiration_min:
+            self.cache_expiry_minutes = default_expiration_min
 
         try:
             self.redis_client = redis.Redis(
@@ -54,20 +54,38 @@ class ScraperCache:
             logger.error(f"Unexpected error connecting to Redis: {e}")
             sys.exit(1)
 
-    def store_vorgang(self, key: str, value: models.Vorgang):
-        """Store Vorgang data in Redis cache"""
+    def store_raw(self, key: str, value: str, typehint: str = "Raw Value", expiry: int = None):
         if self.disabled:
             return True
         try:
-            serialized = json.dumps(sanitize_for_serialization(value))
-            logger.debug(f"Storing vorgang {key} in redis")
-            self.redis_client.set(f"vg:{key}", serialized, timedelta(minutes=12))
-            return True
+            logger.debug(f"Storing raw kv-pair with key `{key}`")
+            success = self.redis_client.set(key, value)
+            if not success:
+                logger.warning(f"Storing {typehint} (key=`{key}`) failed!")
+                return False
+            return 
         except Exception as e:
-            logger.error(f"Error storing vorgang {key} in cache: {e}")
+            logger.error(f"Error storing raw value with key `{key}`")
             return False
 
-    def store_dokument(self, key: str, value: Document):
+    def get_raw(self, key: str, typehint: str = "Raw Value") -> Optional[str]:
+        if self.disabled:
+            return None
+        try:
+            success = self.redis_client.get(key)
+            if not success:
+                logger.warning(f"{typehint} (key=`{key}`) not found in cache")
+                return None
+            return success
+        except Exception as e:
+            logger.error(f"Error retrieving raw value with key `{key}`")
+
+    def store_vorgang(self, key: str, value: models.Vorgang, expiry: int = None):
+        value = json.dumps(sanitize_for_serialization(value))
+        key = f"vg:{key}"
+        return self.store_raw(key, value, "Vorgang")
+
+    def store_dokument(self, key: str, value: Document, expiry: int = None):
         """Store Document data in Redis cache
 
         Only caches documents that were successfully downloaded and processed
@@ -80,67 +98,28 @@ class ScraperCache:
         ):
             logger.warning(f"Not caching document {key} due to failed processing")
             return False
-
-        try:
-            serialized = value.to_json()
-            logger.debug(f"Storing dokument {key} in redis")
-            success = self.redis_client.set(f"dok:{key}", serialized)
-            return success
-        except Exception as e:
-            logger.error(f"Error storing document {key} in cache: {e}")
-            return False
+        
+        key = f"dok:{key}"
+        value = value.to_json()
+        return self.store_raw(key, value, "Dokument")
 
     def get_vorgang(self, key: str) -> Optional[models.Vorgang]:
-        """Get Vorgang data from cache"""
-        if self.disabled:
-            return None
-        try:
-            logger.debug(f"Getting vorgang {key} from cache")
-            result = self.redis_client.get(f"vg:{key}")
-
-            if not result:
-                logger.debug(f"Vorgang {key} not found in cache")
-                return None
-
-            return models.Vorgang.from_json(result)
-        except Exception as e:
-            logger.error(f"Error retrieving vorgang {key} from cache: {e}")
-            return None
+        key = f"vg:{key}"
+        return self.get_raw(key, "Vorgang")
 
     def get_dokument(self, key: str) -> Optional[Document]:
-        """Get Document data from cache"""
-        if self.disabled:
-            return None
-        try:
-            logger.debug(f"Getting dokument {key} from cache")
-            result = self.redis_client.get(f"dok:{key}")
+        key = f"dok:{key}"
+        return self.get_raw(key, "Dokument")
 
-            if not result:
-                logger.debug(f"Document {key} not found in cache")
-                return None
-            try:
-                doc = Document.from_json(result)
-            except Exception as e:
-                logger.error(f"Blub: doc from json failed: {e}")
+    def store_website(self, key: str, value: str, expiry: int = None):
+        key = f"site:{key}"
+        return self.store_raw(key, value, "Website")
 
-            # Verify the document was successfully processed
-            if not getattr(doc, "extraction_success", True):
-                logger.warning(
-                    f"Retrieved document {key} from cache but it was not successfully extracted"
-                )
-                return None
-
-            logger.debug(f"Document {key} retrieved from cache")
-            return doc
-        except json.JSONDecodeError as e:
-            logger.error(f"Error decoding cached document {key}: {e}")
-            return None
-        except Exception as e:
-            logger.error(f"Error retrieving document {key} from cache: {e}")
-            return None
+    def get_website(self, key: str):
+        key = f"site:{key}"
+        return self.get_raw(key, "Website")
 
     def invalidate_document(self, key: str) -> bool:
-        """Remove a specific document from the cache"""
         if self.disabled:
             return True
         try:
@@ -150,7 +129,6 @@ class ScraperCache:
             return False
 
     def invalidate_vorgang(self, key: str) -> bool:
-        """Remove a specific vorgang from the cache"""
         if self.disabled:
             return True
         try:
