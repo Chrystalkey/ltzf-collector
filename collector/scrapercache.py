@@ -63,7 +63,7 @@ class ScraperCache:
             if not success:
                 logger.warning(f"Storing {typehint} (key=`{key}`) failed!")
                 return False
-            return 
+            return True
         except Exception as e:
             logger.error(f"Error storing raw value with key `{key}`")
             return False
@@ -105,18 +105,24 @@ class ScraperCache:
 
     def get_vorgang(self, key: str) -> Optional[models.Vorgang]:
         key = f"vg:{key}"
-        return self.get_raw(key, "Vorgang")
+        ret = self.get_raw(key, "Vorgang")
+        if ret is None:
+            return None
+        return models.Vorgang.from_json(ret)
 
     def get_dokument(self, key: str) -> Optional[Document]:
         key = f"dok:{key}"
-        return self.get_raw(key, "Dokument")
+        ret = self.get_raw(key, "Dokument")
+        if ret is None:
+            return None
+        return Document.from_json(ret)
 
-    def store_website(self, key: str, value: str, expiry: int = None):
-        key = f"site:{key}"
+    def store_html(self, key: str, value: str, expiry: int = None):
+        key = f"html:{key}"
         return self.store_raw(key, value, "Website")
 
-    def get_website(self, key: str):
-        key = f"site:{key}"
+    def get_html(self, key: str):
+        key = f"html:{key}"
         return self.get_raw(key, "Website")
 
     def invalidate_document(self, key: str) -> bool:
