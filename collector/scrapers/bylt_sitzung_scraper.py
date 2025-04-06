@@ -7,6 +7,7 @@ import uuid
 import datetime  # required because of the eval() call later down the line
 from datetime import date as dt_date
 from datetime import datetime as dt_datetime
+from urllib.parse import unquote, urlparse, parse_qs
 
 import aiohttp
 from bs4 import BeautifulSoup
@@ -52,7 +53,7 @@ class BYLTSitzungScraper(Scraper):
             for li in listitems:
                 if li.get("role") == "heading":
                     # this is a heading, usually a date
-                    current_date = parse_natural_date(li.text)
+                    current_date = parse_natural_date(li.text, 2025)
                     day_items[current_date] = []
                 elif li.find("div", class_="agenda-item") != None:
                     agitem = li.find("div", class_="agenda-item")
@@ -99,25 +100,79 @@ class BYLTSitzungScraper(Scraper):
                     "experten": [] if "Anhörung" in title_line else None,
                 })
                 dok_span = sitzung.find("span", class_="agenda-docs")
+                internal_docs = []
                 for link in dok_span.find_all("a"):
-                    doc_link = link.get("href")
-                    tphint = None
-                    if link.find("sup") is None:
-                        tphint = "tops"
-                    else:
-                        tphint = "tops-ergz"
-                    # de-parse doc_link
-                    # extract query parameter "sitzungsnr"
+                    doc_link = unquote(link.get("href"))
+                    tphint = "tops"
 
+                    ## parse out session number
+                    parsed_url = urlparse(doc_link)
+                    sitzung["nummer"] = parse_qs(parsed_url.query)["sitzungsnr"][0]
+
+                    ## general document parsing
                     dok = Document(self.session, doc_link, tphint, self.config)
                     dok.run_extraction()
                     sitzung.dokumente.append(dok.package())
+                    internal_docs.append(dok)
                 ## extract TOPS from the last TOPList
+                sitzung["tops"] = self.extract_tops(internal_docs[-1])
+
+    async def extract_tops(self, doc: Document) -> List[models.Top]:
+        extraction_prompt = """Du wirst den Text von Tagesordnungspunkten für eine Sitzung erhalten.
+        Extrahiere die Tagesordnungspunkte in der Reihenfolge in der sie erscheinen, sowie die damit assoziierten Drucksachennummern.
+        Gib dein Ergebnis in JSON aus, wie folgt: {'tops': [{'titel': 'titel des TOPs', 'drucksachen': [<Liste an behandelten Drucksachennummern als string>]}]}
+        Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert.END PROMPT"""
+        try:
+            full_text = self.meta.full_text.strip()
+            response = await self.config.llm_connector.generate(extraction_prompt, full_text)
+            object = json.loads(response)
+            tops = []
+            nummer = 0
+            for top in object["tops"]:
+                nummer += 1
+                tops.append(models.Top.from_dict({
+                    "nummer": nummer,
+                    "titel" : top["titel"],
+                    "dokumente": []
+                }))
+                for drucksnr in top["drucksachen"]:
+                    split = drucksnr.split("/")
+                    periode = split[0]
+                    dsnr = split[1]
+                    link = f"https://www.bayern.landtag.de/parlament/dokumente/drucksachen/?wahlperiodeid%5b%5d={periode}&dknr={dsnr}&dokumentenart=Drucksache"
+                    dokument = None
+                    if self.config.cache.get_dokument(link):
+                        dokument = self.config.cache.get_dokument(link)
+                    else:
+                        pre_doc = Document(self.session, link, "entwurf", self.config)
+                        pre_doc.run_extraction()
+                        dokument = pre_doc.package()
+                        self.config.cache.store_dokument(link, dokument)
+                    tops.dokumente.append(dokument)
+            return tops
+        
+        except Exception as e:
+            logger.error(f"Error extracting TOPS from Document: {e}")
 
 
-
-def parse_natural_date(date) -> datetime.date:
-    split = date.split(" ")
-    number = split[0][:-1]
-    month = split[1].lower()
+def parse_natural_date(date: str, year: int) -> datetime.date:
+    month_dict = {
+        "january": 1,
+        "february": 2,
+        "march": 3,
+        "april": 4,
+        "may": 5,
+        "june": 6,
+        "july": 7,
+        "august": 8,
+        "september": 9,
+        "october": 10,
+        "november": 11,
+        "december": 12
+    }
+    split = date.split(" ") # monday,|12.|march
+    number = int(split[1][:-1])  # 12
+    month = split[2].lower() # march
+    return datetime.date(year, month_dict[month], number)
+    
     
