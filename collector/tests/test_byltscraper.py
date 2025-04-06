@@ -31,11 +31,11 @@ async def inner_bylt_listing_extract():
     ) as session:
         scraper = create_scraper(session)
 
-        # Find all JSON files in the SCRAPER_NAME subdirectory that start with "listing_"
+        # Find all JSON files in the SCRAPER_NAME subdirectory that start with "vg_listing_"
         test_data_dir = os.path.join(os.path.dirname(__file__), SCRAPER_NAME)
 
-        # Find all JSON files in the directory that start with "listing_"
-        listing_files = glob.glob(os.path.join(test_data_dir, "listing_*.json"))
+        # Find all JSON files in the directory that start with "vg_listing_"
+        listing_files = glob.glob(os.path.join(test_data_dir, "vg_listing_*.json"))
 
         # Process the first matching file found
         if listing_files:
@@ -66,8 +66,8 @@ async def inner_bylt_item_extract():
 
         test_data_dir = os.path.join(os.path.dirname(__file__), SCRAPER_NAME)
 
-        # Find all JSON files in the directory that start with "item_"
-        item_files = glob.glob(os.path.join(test_data_dir, "item_*.json"))
+        # Find all JSON files in the directory that start with "vg_item_"
+        item_files = glob.glob(os.path.join(test_data_dir, "vg_item_*.json"))
         for file in item_files:
             with open(file, "r", encoding="utf-8") as f:
                 item_scenario = json.load(f)
@@ -88,3 +88,15 @@ def test_bylt_listing_extract():
 
 def test_bylt_item_extract():
     asyncio.run(inner_bylt_item_extract())
+
+def test_bylt_session_listing():
+    asyncio.run(inner_test_bylt_session_listing())
+
+async def inner_test_bylt_session_listing():
+    pass
+
+def test_bylt_session_item_extract():
+    asyncio.run(inner_test_bylt_session_item_extract())
+
+async def inner_test_bylt_session_item_extract():
+    pass
