@@ -53,7 +53,6 @@ class ScraperCache:
         except Exception as e:
             logger.error(f"Unexpected error connecting to Redis: {e}")
             sys.exit(1)
-
     def store_raw(
         self, key: str, value: str, typehint: str = "Raw Value", expiry: int = None
     ):

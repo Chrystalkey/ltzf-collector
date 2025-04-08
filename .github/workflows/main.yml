@@ -1,4 +1,4 @@
-name: Testing the LTZF Project
+name: Testing the LTZF Collector Fleet
 
 on: [push]
 

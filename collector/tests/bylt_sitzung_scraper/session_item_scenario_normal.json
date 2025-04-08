@@ -1,5 +1,9 @@
 {
-    "url": "",
-    "dates": [],
-    "minimum": 4
+    "input_path": "filepath",
+    "output": [
+        {
+            "date": "datetime",
+            "object": [{}]
+        }
+    ]
 }

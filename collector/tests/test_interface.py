@@ -66,7 +66,7 @@ async def inner_test_log_object():
     ) as session:
         cid = uuid4()
         scraper = MockScraper(config, cid, [], session)
-        scraper.log_object(mock_vg)
+        scraper.log_item(mock_vg)
         assert os.path.exists(nonexistent_path)
         assert os.path.exists(f"{nonexistent_path}/{cid}.json")
         os.remove(f"{nonexistent_path}/{cid}.json")
