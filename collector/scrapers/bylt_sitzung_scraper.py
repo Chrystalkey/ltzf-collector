@@ -148,14 +148,63 @@ class BYLTSitzungScraper(SitzungsScraper):
                 internal_docs.append(dok)
             ## extract TOPS from the last TOPList
             sitz_dict["tops"] = await self.extract_tops(internal_docs[-1])
+            if "Anhörung" in title_line:
+                sitz_dict["experten"] = await self.extract_experts(internal_docs[-1])
             retsitz[1].append(models.Sitzung.from_dict(sitz_dict))
         return retsitz
+    async def extract_experts(self, doc: Document) -> List[models.Autor]:
+        prompt = """Du erhältst gleich die Tagesordnung einer Anhörung. Analysisere die Tagesordnung und ermittle alle Experten, die angehört wurden.
+        Erstelle einen JSON-Datensatz mit namen "autoren".
+        Bilde für jeden Experten einen JSON-Datensatz mit folgenden Parametern:
+
+        {
+        name: Name des/der Expert:in,
+        organisation: Organisation des/der Expert:in. Falls unbekannt lasse das Feld leer,
+        fachgebiet: Fachgebiet des/der Expert:in
+        }
+
+        Antworte mit nichts anderem als dem gefragen Objekt, formatiere es nicht gesondert. 
+
+        Hier ist der Text:
+"""
+        try:
+            full_text = doc.meta.full_text.strip()
+            try:
+                response = await self.config.llm_connector.generate(
+                    prompt, full_text
+                )
+                if "```json" in response:
+                    response = response[8:-3]
+                object = json.loads(response)
+            except Exception as e:
+                logger.error(f"Invalid Response from LLM: {e}, got {response}")
+                raise
+            auts = []
+            for atobj in object["autoren"]:
+                auts.append(models.Autor.from_dict({
+                    "person": atobj["name"],
+                    "organisation": atobj["organisation"],
+                    "fachgebiet": atobj["fachgebiet"],
+                }))
+            return auts
+        except Exception as e:
+            logger.error(f"Error extracting Experts from Document: {e}")
+            return []
 
     async def extract_tops(self, doc: Document) -> List[models.Top]:
-        extraction_prompt = """Du wirst den Text von Tagesordnungspunkten für eine Sitzung erhalten.
-        Extrahiere die Tagesordnungspunkte in der Reihenfolge in der sie erscheinen, sowie die damit assoziierten Drucksachennummern.
-        Gib dein Ergebnis in JSON aus, wie folgt: {"tops": [{"titel": "titel des TOPs", "drucksachen": [<Liste an behandelten Drucksachennummern als string>]}]}
-        Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert. END PROMPT"""
+        extraction_prompt = """Du erhältst gleich die Tagesordnung einer Ausschusssitzung oder Plenarsitzung. Analysiere die Tagesordnung und ermittle alle Tagesordnungspunkte über die beraten wurde und Erstelle ein JSON-Objekt mit dem Namen TOP. 
+        Bilde für jeden Gesetzentwurf einen JSON-Datensatz mit folgenden Parametern:
+
+{
+titel: Titel des Tagesordnungspunkts oder Diskussionspunkts,
+oeff: true falls der TOP öffentlich ist, sonst false,
+drucksachen: Drucksachennummern des Gesetzentwurfs als Liste, zum Beispiel 20/12345 (wenn mehrere genannt sind, nenne nur die erste, wenn keine genannt sind lasse die Liste leer), 
+anhoerung: Wenn es sich um eine Anhörung handelt, setze das Feld zu true, sonst false.}
+
+Antworte mit nichts anderem als dem gefragen Objekt, formatiere es nicht gesondert. 
+
+Hier ist der Text:"""
+
         try:
             full_text = doc.meta.full_text.strip()
             try:
@@ -170,14 +219,19 @@ class BYLTSitzungScraper(SitzungsScraper):
                 raise
             tops = []
             nummer = 0
-            for top in object["tops"]:
+            for top in object["TOP"]:
                 nummer += 1
-                tops.append(
-                    models.Top.from_dict(
-                        {"nummer": nummer, "titel": top["titel"], "dokumente": []}
-                    )
-                )
+                topdict = {"nummer": nummer, "titel": top["titel"], "dokumente": []}
                 for drucksnr in top["drucksachen"]:
+                    if "BR" in drucksnr:
+                        # bundesratsdrucksachen
+                        logger.warning("Bundesratsdrucksachbehandlung ist noch nicht implementiert")
+                        continue
+                    elif not re.fullmatch(r"(Drs. )?\d{2}/\d+", drucksnr):
+                        logger.warning(f"Unbekanntes Format für eine Drucksachennummer: {drucksnr}, skipping")
+                        continue
+                    if drucksnr.startswith("Drs. "):
+                        drucksnr = drucksnr[6:]
                     split = drucksnr.split("/")
                     periode = split[0]
                     dsnr = split[1]
@@ -185,19 +239,33 @@ class BYLTSitzungScraper(SitzungsScraper):
                     async def transform_link(link):
                         async with self.session.get(link) as link_html:
                             soup = BeautifulSoup(await link_html.text(), "html.parser")
-                            doklink = soup.select("div.row:nth-child(6) > div:nth-child(1) > h4:nth-child(1) > a:nth-child(1)")["href"]
-                            print(f"doklink: {doklink}")
+                            doklink = soup.select_one("div.row:nth-child(6) > div:nth-child(1) > h4:nth-child(1) > a:nth-child(1)")["href"]
                             return doklink
-                    link = await transform_link(link)
+                    try:
+                        link = await transform_link(link)
+                    except Exception as e:
+                        logger.warning(f"Error Extracting actual pdf link from linked drucksnr: {e} for drucksnr: {drucksnr}")
+                        raise
                     dokument = None
                     if self.config.cache.get_dokument(link):
-                        dokument = self.config.cache.get_dokument(link)
+                        pre_doc = self.config.cache.get_dokument(link)
+                        dokument = pre_doc.package()
+                        dokument = models.DokRef(dokument)
                     else:
                         pre_doc = Document(self.session, link, "entwurf", self.config)
                         await pre_doc.run_extraction()
                         dokument = pre_doc.package()
-                        self.config.cache.store_dokument(link, dokument)
-                    tops.dokumente.append(dokument)
+                        self.config.cache.store_dokument(link, pre_doc)
+                        dokument = models.DokRef(dokument)
+                    topdict["dokumente"].append(dokument)
+                try:
+                    doks = topdict["dokumente"]
+                    topdict["dokumente"] = []
+                    tops.append(models.Top.from_dict(topdict))
+                    tops[-1].dokumente = doks
+                except Exception as e:
+                    logger.error(f"Dictionary: {topdict}")
+                    logger.error(f"Error: Unable to build TOP object from dictionary: {e}")
             return tops
 
         except Exception as e:
