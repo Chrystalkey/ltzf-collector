@@ -1,0 +1,56 @@
+FROM debian:bookworm-slim AS oapifile
+
+ENV OPENAPI_GENERATOR_VERSION="7.12.0"
+RUN apt update && apt install -y --no-install-recommends maven jq curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir /app \
+    && curl "https://raw.githubusercontent.com/OpenAPITools/openapi-generator/master/bin/utils/openapi-generator-cli.sh" > /app/openapi-generator-cli \
+    && chmod u+x /app/openapi-generator-cli
+
+WORKDIR /app
+
+RUN echo 'openapi: 3.0.0\ninfo:\n  title: "spec"\n  version: "0.1.0"\npaths:\n  /none:\n    get:\n      responses:\n        "200":\n          description: "success"' > openapi.yml \
+    && ./openapi-generator-cli generate -g python -i ./openapi.yml -o /app/pytest \
+    && rm -rf pytest
+RUN curl "https://raw.githubusercontent.com/Chrystalkey/landtagszusammenfasser/refs/heads/main/docs/specs/openapi.yml" > openapi.yml
+RUN ./openapi-generator-cli generate -g python -i ./openapi.yml -o /app/oapicode-python
+
+FROM python:3.13-slim-bookworm AS builder
+
+LABEL maintainer="Benedikt Schäfer"
+LABEL description="Collector for the LTZF"
+LABEL version="0.1"
+
+RUN pip install poetry==1.4.2
+
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
+
+WORKDIR /app
+
+COPY --from=oapifile /app/oapicode-python ./oapicode
+
+COPY pyproject.toml poetry.lock ./
+
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
+
+FROM python:3.13-slim-bookworm AS runtime
+RUN apt-get install --no-install-recommends --yes tesseract-ocr tesseract-ocr-deu pandoc
+
+ENV VIRTUAL_ENV=/app/.venv \
+    PATH="/app/.venv/bin:$PATH"
+
+RUN apt-get update && apt-get install --no-install-recommends -y tesseract-ocr pandoc \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY --from=oapifile /app/oapicode-python ./oapicode
+
+COPY collector ./collector
+
+VOLUME /app/locallogs
+
+ENTRYPOINT ["python", "-m", "collector.main"]

@@ -17,6 +17,13 @@ jobs:
 
       - name: Run Check
         run: black --check .
+        
+  dockerbuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker build
+        run: docker buildx build . -f Dockerfile.deploy
     
   pytest:
     runs-on: ubuntu-latest
