@@ -1,4 +1,5 @@
 import asyncio
+from bs4 import BeautifulSoup
 import jsondiff
 from collector.scrapers.bylt_sitzung_scraper import BYLTSitzungScraper
 from collector.convert import sanitize_for_serialization
@@ -8,6 +9,7 @@ import os
 import json
 import glob
 import re
+import datetime
 import aiohttp
 from oapicode.openapi_client import models
 
@@ -41,10 +43,13 @@ async def inner_bylt_listing_extract():
         if listing_files:
             with open(listing_files[0], "r", encoding="utf-8") as f:
                 listing = json.load(f)
-                urls = await scraper.listing_page_extractor(listing.get("listing_url"))
-                assert len(urls) >= (listing.get("minimum_count") or 0)
-                for url in urls:
-                    pass
+                output = await scraper.listing_page_extractor(listing.get("url"))
+                assert len(output) == len(listing.get("output"))
+                for item in range(len(output)):
+                    li = output[item]
+                    exp = listing["output"][item]
+                    assert li[0] == exp["date"]
+                    assert len(li[1]) == exp["count"]
 
 
 def json_difference(a, b):
@@ -67,15 +72,26 @@ async def inner_bylt_item_extract():
         for file in item_files:
             with open(file, "r", encoding="utf-8") as f:
                 item_scenario = json.load(f)
-                item = models.Vorgang.from_dict(item_scenario.get("result"))
-                vg = await scraper.item_extractor(item_scenario.get("url"))
-                assert vg is not None
-                sanitized_vg = sanitize_for_serialization(vg)
-                sanitized_item = sanitize_for_serialization(item)
-                dumped = json.dumps(sanitized_vg, indent=2, ensure_ascii=False)
-                assert (
-                    sanitized_vg == sanitized_item
-                ), f"Item `{item_scenario.get('url')}` does not match expected result for scenario `{file}`.\nDifference:\n{json_difference(sanitized_vg, sanitized_item)}\nOutput:\n{dumped}"
+                input = item_scenario["input_item"]
+                item = (datetime.date.fromisoformat(input["date"]), [BeautifulSoup(ein, "html.parser") for ein in input["html"]])
+                loaded = await scraper.item_extractor(item)
+                assert loaded is not None
+                expected = item_scenario["output"]
+
+                assert len(expected) == len(loaded[1])
+                assert item[0] == loaded[0]
+                for i in range(len(expected)):
+                    exp = expected[i]
+                    li = loaded[1][i]
+                    assert datetime.datetime.fromisoformat(exp["termin"]) == li.termin
+                    gr = li.gremium
+                    assert exp["gremium"]["parlament"] == gr.parlament
+                    assert exp["gremium"]["wahlperiode"] == gr.wahlperiode
+                    assert exp["gremium"]["name"] == gr.name
+
+                    assert exp["nummer"] == li.nummer
+                    assert exp["public"] == li.public
+                    assert exp["dokumente"] == len(li.dokumente)
 
 
 def test_bylt_listing_extract():
