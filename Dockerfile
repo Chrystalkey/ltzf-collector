@@ -21,14 +21,14 @@ COPY pyproject.toml poetry.lock ./
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
 FROM python:3.13-slim-bookworm AS runtime
-RUN apt-get install --no-install-recommends --yes tesseract-ocr tesseract-ocr-deu pandoc
 
+RUN apt-get update && apt-get install --no-install-recommends -y tesseract-ocr tesseract-ocr-deu pandoc \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+    
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
-RUN apt-get update && apt-get install --no-install-recommends -y tesseract-ocr pandoc \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --from=oapifile /app/oapicode-python ./oapicode
