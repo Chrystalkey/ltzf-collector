@@ -101,7 +101,7 @@ class BYLTSitzungScraper(SitzungsScraper):
                 day=termin.day,
                 hour=int(time[0]),
                 minute=int(time[1]),
-                tzinfo=datetime.UTC
+                tzinfo=datetime.UTC,
             )
             title_line = sitzung_soup.find("p", class_="h4").text
             title = None
@@ -120,17 +120,17 @@ class BYLTSitzungScraper(SitzungsScraper):
                 }
             )
             sitz_dict = {
-                    "api_id": str(uuid.uuid4()),
-                    "titel": title,
-                    "termin": full_termin,
-                    "gremium": gremium,
-                    "nummer": None,           # is extracted from document link(s) below
-                    "public": True,        # no idea how to extract that
-                    "link": None,          # nonexistent for bavarian sessions
-                    "tops": [],            # are the exact state of the last nachtragsTOPs
-                    "dokumente": [],       # currently only the TOPs
-                    "experten": [] if "Anhörung" in title_line else None,
-                }
+                "api_id": str(uuid.uuid4()),
+                "titel": title,
+                "termin": full_termin,
+                "gremium": gremium,
+                "nummer": None,  # is extracted from document link(s) below
+                "public": True,  # no idea how to extract that
+                "link": None,  # nonexistent for bavarian sessions
+                "tops": [],  # are the exact state of the last nachtragsTOPs
+                "dokumente": [],  # currently only the TOPs
+                "experten": [] if "Anhörung" in title_line else None,
+            }
             dok_span = sitzung_soup.find("span", class_="agenda-docs")
             internal_docs = []
             for link in dok_span.find_all("a"):
@@ -152,6 +152,7 @@ class BYLTSitzungScraper(SitzungsScraper):
                 sitz_dict["experten"] = await self.extract_experts(internal_docs[-1])
             retsitz[1].append(models.Sitzung.from_dict(sitz_dict))
         return retsitz
+
     async def extract_experts(self, doc: Document) -> List[models.Autor]:
         prompt = """Du erhältst gleich die Tagesordnung einer Anhörung. Analysisere die Tagesordnung und ermittle alle Experten, die angehört wurden.
         Erstelle einen JSON-Datensatz mit namen "autoren".
@@ -170,9 +171,7 @@ class BYLTSitzungScraper(SitzungsScraper):
         try:
             full_text = doc.meta.full_text.strip()
             try:
-                response = await self.config.llm_connector.generate(
-                    prompt, full_text
-                )
+                response = await self.config.llm_connector.generate(prompt, full_text)
                 if "```json" in response:
                     response = response[8:-3]
                 object = json.loads(response)
@@ -181,11 +180,15 @@ class BYLTSitzungScraper(SitzungsScraper):
                 raise
             auts = []
             for atobj in object["autoren"]:
-                auts.append(models.Autor.from_dict({
-                    "person": atobj["name"],
-                    "organisation": atobj["organisation"],
-                    "fachgebiet": atobj["fachgebiet"],
-                }))
+                auts.append(
+                    models.Autor.from_dict(
+                        {
+                            "person": atobj["name"],
+                            "organisation": atobj["organisation"],
+                            "fachgebiet": atobj["fachgebiet"],
+                        }
+                    )
+                )
             return auts
         except Exception as e:
             logger.error(f"Error extracting Experts from Document: {e}")
@@ -225,10 +228,14 @@ Hier ist der Text:"""
                 for drucksnr in top["drucksachen"]:
                     if "BR" in drucksnr:
                         # bundesratsdrucksachen
-                        logger.warning("Bundesratsdrucksachbehandlung ist noch nicht implementiert")
+                        logger.warning(
+                            "Bundesratsdrucksachbehandlung ist noch nicht implementiert"
+                        )
                         continue
                     elif not re.fullmatch(r"(Drs. )?\d{2}/\d+", drucksnr):
-                        logger.warning(f"Unbekanntes Format für eine Drucksachennummer: {drucksnr}, skipping")
+                        logger.warning(
+                            f"Unbekanntes Format für eine Drucksachennummer: {drucksnr}, skipping"
+                        )
                         continue
                     if drucksnr.startswith("Drs. "):
                         drucksnr = drucksnr[6:]
@@ -236,15 +243,21 @@ Hier ist der Text:"""
                     periode = split[0]
                     dsnr = split[1]
                     link = f"https://www.bayern.landtag.de/parlament/dokumente/drucksachen/?wahlperiodeid%5b%5d={periode}&dknr={dsnr}&dokumentenart=Drucksache"
+
                     async def transform_link(link):
                         async with self.session.get(link) as link_html:
                             soup = BeautifulSoup(await link_html.text(), "html.parser")
-                            doklink = soup.select_one("div.row:nth-child(6) > div:nth-child(1) > h4:nth-child(1) > a:nth-child(1)")["href"]
+                            doklink = soup.select_one(
+                                "div.row:nth-child(6) > div:nth-child(1) > h4:nth-child(1) > a:nth-child(1)"
+                            )["href"]
                             return doklink
+
                     try:
                         link = await transform_link(link)
                     except Exception as e:
-                        logger.warning(f"Error Extracting actual pdf link from linked drucksnr: {e} for drucksnr: {drucksnr}")
+                        logger.warning(
+                            f"Error Extracting actual pdf link from linked drucksnr: {e} for drucksnr: {drucksnr}"
+                        )
                         raise
                     dokument = None
                     if self.config.cache.get_dokument(link):
@@ -265,7 +278,9 @@ Hier ist der Text:"""
                     tops[-1].dokumente = doks
                 except Exception as e:
                     logger.error(f"Dictionary: {topdict}")
-                    logger.error(f"Error: Unable to build TOP object from dictionary: {e}")
+                    logger.error(
+                        f"Error: Unable to build TOP object from dictionary: {e}"
+                    )
             return tops
 
         except Exception as e:
@@ -290,8 +305,8 @@ def parse_natural_date(date: str, year: int) -> datetime.date:
     }
     try:
         split = date.split(" ")  # monday,|12.|march
-        while ''  in split:
-            split.remove('')
+        while "" in split:
+            split.remove("")
         number = int(split[1][:-1])  # 12
         month = split[2].lower()  # march
         return datetime.date(year, month_dict[month], number)

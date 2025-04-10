@@ -47,13 +47,14 @@ class Scraper(ABC):
             f"Initialized {self.__class__.__name__} with {len(self.listing_urls)} listing urls"
         )
         logger.info(f"Set Collector ID to {self.collector_id}")
-    
+
     @abstractmethod
     def log_item(self, item: models.Vorgang, override=True):
         assert False, "Abstract Base Method Called"
 
     async def senditem(self, item: Any) -> Optional[Any]:
         assert False, "Abstract Base Method Called"
+
     @abstractmethod
     async def run(self):
         assert False, "Abstract Base Method Called"
@@ -115,7 +116,7 @@ class VorgangsScraper(Scraper):
                     file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
             except Exception as e:
                 logger.error(f"Failed to write to API object log: {e}")
-    
+
     async def senditem(self, item: models.Vorgang) -> Optional[models.Vorgang]:
         global logger
         logger.info(f"Sending Item with id `{item.api_id}` to Database")
@@ -145,6 +146,7 @@ class VorgangsScraper(Scraper):
             except Exception as e:
                 logger.error(f"Unexpected error sending item to API: {e}")
                 return None
+
     async def run(self):
         """
         Main method to run the scraper:
@@ -256,7 +258,7 @@ class SitzungsScraper(Scraper):
                     file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
             except Exception as e:
                 logger.error(f"Failed to write to API object log: {e}")
-    
+
     async def senditem(
         self, item: Tuple[datetime.datetime, List[models.Sitzung]]
     ) -> Optional[Tuple[datetime.datetime, List[models.Sitzung]]]:

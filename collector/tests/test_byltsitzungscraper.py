@@ -73,7 +73,10 @@ async def inner_bylt_item_extract():
             with open(file, "r", encoding="utf-8") as f:
                 item_scenario = json.load(f)
                 input = item_scenario["input_item"]
-                item = (datetime.date.fromisoformat(input["date"]), [BeautifulSoup(ein, "html.parser") for ein in input["html"]])
+                item = (
+                    datetime.date.fromisoformat(input["date"]),
+                    [BeautifulSoup(ein, "html.parser") for ein in input["html"]],
+                )
                 loaded = await scraper.item_extractor(item)
                 assert loaded is not None
                 expected = item_scenario["output"]

@@ -1,4 +1,4 @@
-from collector.interface import Scraper,VorgangsScraper,SitzungsScraper
+from collector.interface import Scraper, VorgangsScraper, SitzungsScraper
 from collector.config import CollectorConfiguration, Configuration
 from oapicode.openapi_client import models
 import os
@@ -14,12 +14,15 @@ class MockSitzungsScraper(SitzungsScraper):
 
     async def item_extractor(self, listing_item):
         return "Nothing"
+
+
 class MockVorgangsScraper(VorgangsScraper):
     async def listing_page_extractor(self, url):
         return []
 
     async def item_extractor(self, listing_item):
         return "Nothing"
+
 
 def test_log_object():
     asyncio.run(inner_test_log_object())
@@ -74,7 +77,7 @@ async def inner_test_log_object():
         assert os.path.exists(f"{nonexistent_path}/{cid}.json")
         os.remove(f"{nonexistent_path}/{cid}.json")
         os.removedirs(nonexistent_path)
-        
+
         cid = uuid4()
         scraper = MockVorgangsScraper(config, cid, [], session)
         scraper.log_item(mock_vg)
