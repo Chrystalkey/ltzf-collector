@@ -1,4 +1,4 @@
-from collector.interface import Scraper
+from collector.interface import Scraper, VorgangsScraper, SitzungsScraper
 from collector.config import CollectorConfiguration, Configuration
 from oapicode.openapi_client import models
 import os
@@ -8,9 +8,15 @@ import asyncio
 from uuid import uuid4
 
 
-class MockScraper(Scraper):
-    pass
+class MockSitzungsScraper(SitzungsScraper):
+    async def listing_page_extractor(self, url):
+        return []
 
+    async def item_extractor(self, listing_item):
+        return "Nothing"
+
+
+class MockVorgangsScraper(VorgangsScraper):
     async def listing_page_extractor(self, url):
         return []
 
@@ -65,8 +71,16 @@ async def inner_test_log_object():
         connector=aiohttp.TCPConnector(limit_per_host=1)
     ) as session:
         cid = uuid4()
-        scraper = MockScraper(config, cid, [], session)
-        scraper.log_object(mock_vg)
+        scraper = MockSitzungsScraper(config, cid, [], session)
+        scraper.log_item(mock_vg)
+        assert os.path.exists(nonexistent_path)
+        assert os.path.exists(f"{nonexistent_path}/{cid}.json")
+        os.remove(f"{nonexistent_path}/{cid}.json")
+        os.removedirs(nonexistent_path)
+
+        cid = uuid4()
+        scraper = MockVorgangsScraper(config, cid, [], session)
+        scraper.log_item(mock_vg)
         assert os.path.exists(nonexistent_path)
         assert os.path.exists(f"{nonexistent_path}/{cid}.json")
         os.remove(f"{nonexistent_path}/{cid}.json")

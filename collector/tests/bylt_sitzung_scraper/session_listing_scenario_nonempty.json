@@ -1,0 +1,13 @@
+{
+    "url": "https://www.bayern.landtag.de/ajaxcalendar.html?week=31.03.2025&currentDate=1.4.2025&all=true&fullYear=false",
+    "output": [{
+        "date": "2025-04-01",
+        "count": 1
+    },{
+        "date": "2025-04-02",
+        "count": 4
+    },{
+        "date": "2025-04-03",
+        "count": 4
+    }]
+}

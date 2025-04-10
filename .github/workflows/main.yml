@@ -1,4 +1,4 @@
-name: Testing the LTZF Project
+name: Testing the LTZF Collector Fleet
 
 on: [push]
 
@@ -7,8 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -18,6 +17,13 @@ jobs:
 
       - name: Run Check
         run: black --check .
+        
+  dockerbuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker build
+        run: docker buildx build . -f Dockerfile.deploy
     
   pytest:
     runs-on: ubuntu-latest

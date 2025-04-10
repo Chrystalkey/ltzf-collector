@@ -1,4 +1,3 @@
-import hashlib
 import logging
 import os
 import re
@@ -11,7 +10,7 @@ import aiohttp
 from bs4 import BeautifulSoup
 
 import openapi_client.models as models
-from collector.interface import Scraper
+from collector.interface import VorgangsScraper
 from collector.document import Document
 import toml
 
@@ -20,7 +19,7 @@ NULL_UUID = uuid.UUID("00000000-0000-0000-0000-000000000000")
 TEST_DATE = dt_datetime.fromisoformat("1940-01-01T00:00:00+00:00")
 
 
-class BYLTScraper(Scraper):
+class BYLTScraper(VorgangsScraper):
     def __init__(self, config, session: aiohttp.ClientSession):
         CURRENT_WP = 19
         RESULT_COUNT = 200

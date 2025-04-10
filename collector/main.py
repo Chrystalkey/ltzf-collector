@@ -9,7 +9,7 @@ from openapi_client import Configuration
 from dotenv import load_dotenv
 
 from collector.config import CollectorConfiguration
-from collector.interface import Scraper
+from collector.interface import Scraper, VorgangsScraper, SitzungsScraper
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -49,8 +49,13 @@ def load_scrapers(config, session):
                 cls = getattr(module, attr)
                 if (
                     isinstance(cls, type)
-                    and issubclass(cls, Scraper)
+                    and (
+                        issubclass(cls, VorgangsScraper)
+                        or issubclass(cls, SitzungsScraper)
+                    )
                     and cls is not Scraper
+                    and cls is not VorgangsScraper
+                    and cls is not SitzungsScraper
                     and not isinstance(cls, module.__class__)
                 ):
                     logger.info(f"Found scraper: {cls.__name__}")

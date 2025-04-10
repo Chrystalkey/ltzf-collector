@@ -1,0 +1,19 @@
+{
+    "input_item": {
+        "date": "2025-04-09",
+        "html": ["<li class=\"expired\">\n                    <div class=\"agenda-item\">\n                        <div class=\"date\">\n                            <span>13:00<\/span>\n                        <\/div>\n                        <div class=\"info\">\n                            \n                                    <p class=\"h4\">Plenarsitzung<\/p>\n                                \n                            <p class=\"location\">\n                                <span>Plenarsaal<\/span>\n                                <span class=\"agenda-docs\">\n                                    \n                                            \n                                                \n                                                    <a href=\"https:\/\/www.bayern.landtag.de\/webangebot3\/views\/tagesordnungdirektanzeige\/tagesordnungdirektanzeige.xhtml?gremium=PL&amp;sitzungsdatum=09.04.2025&amp;sitzungsnr=48&amp;nachtragsnr=0&amp;typ=pdf\" title=\"PL_20250409_048.pdf\" target=\"_blank\">\n                                                        \n                                                                <span class=\"icon-Icon_PDF\"><\/span>\n                                                            \n                                                    <\/a>\n                                                \n                                            \n                                        \n                                <\/span>\n                            <\/p>\n                        <\/div>\n                    <\/div>\n                <\/li>"]
+    },
+    "output": [
+                {
+                    "termin": "2025-04-09T13:00:00+00:00",
+                    "gremium": {
+                        "parlament": "BY",
+                        "wahlperiode": 19,
+                        "name": "Plenarsitzung"
+                    },
+                    "nummer": 48,
+                    "public": true,
+                    "dokumente": 1
+                }
+            ]
+}
