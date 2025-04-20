@@ -225,6 +225,8 @@ class VorgangsScraper(Scraper):
                 self.result_objects.append(obj)
                 self.config.cache.store_vorgang(str(item), obj)
                 success_count += 1
+            elif not result or not result[0]:
+                continue
             else:
                 error_count += 1
                 if isinstance(result, Exception):

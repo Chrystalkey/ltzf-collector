@@ -147,6 +147,9 @@ class BYLTSitzungScraper(SitzungsScraper):
                 sitz_dict["dokumente"].append(dok.package())
                 internal_docs.append(dok)
             ## extract TOPS from the last TOPList
+            if len(internal_docs) == 0:
+                logger.warning("Sitzung was found without available number or TOP File")
+                continue
             sitz_dict["tops"] = await self.extract_tops(internal_docs[-1])
             if "Anhörung" in title_line:
                 sitz_dict["experten"] = await self.extract_experts(internal_docs[-1])
