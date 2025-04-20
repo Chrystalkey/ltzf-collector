@@ -36,7 +36,7 @@ FROM python:3.13-slim-bookworm AS runtime
 
 LABEL maintainer="Benedikt Schäfer"
 LABEL description="Collector for the LTZF"
-LABEL version="0.2.0"
+LABEL version="0.2.1"
 
 RUN apt-get update && apt-get install --no-install-recommends -y tesseract-ocr tesseract-ocr-deu pandoc \
     && apt-get clean \
