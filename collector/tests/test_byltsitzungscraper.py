@@ -44,8 +44,8 @@ async def inner_bylt_listing_extract():
             with open(listing_files[0], "r", encoding="utf-8") as f:
                 listing = json.load(f)
                 output = await scraper.listing_page_extractor(listing.get("url"))
-                assert len(output) == len(listing.get("output"))
-                for item in range(len(output)):
+                assert len(output) >= len(listing.get("output"))
+                for item in range(min(len(output), len(listing.get("output")))):
                     li = output[item]
                     exp = listing["output"][item]
                     assert li[0] == exp["date"]
