@@ -5,6 +5,8 @@ import uuid
 import aiohttp
 import json
 import re
+import os
+import sys
 import openapi_client.models as models
 from collector.interface import VorgangsScraper as Scraper
 from collector.document import Document
@@ -15,7 +17,11 @@ logger = logging.getLogger(__name__)
 
 class BundestagAPIScraper(Scraper):
     CURRENT_WP = 21
-    BT_API_KEY = "I9FKdCn.hbfefNWCY336dL6x62vfwNKpoN2RZ1gp21"
+    BT_API_KEY = os.getenv("BT_API_KEY")
+
+    if not BT_API_KEY:
+        logger.error("BT_API_KEY is not set")
+        sys.exit(1)
 
     def __init__(self, config, session: aiohttp.ClientSession):
         listing_urls = ["https://search.dip.bundestag.de/api/v1"]
@@ -29,7 +35,7 @@ class BundestagAPIScraper(Scraper):
         """
         Holt Gesetzesvorhaben von der Bundestags-API
         """
-        tage = 5
+        tage = 9
         if self.config.testing_mode:
             startdatum = datetime(2025, 2, 3)
         else:
@@ -197,6 +203,7 @@ class BundestagAPIScraper(Scraper):
         """Erstellt eine Station aus einer Vorgangsaktivität"""
         station_mapping = {
             "Gesetzentwurf": models.Stationstyp.PARL_MINUS_INITIATIV,
+            "Gesetzesantrag": models.Stationstyp.PARL_MINUS_INITIATIV,
             "1. Beratung": models.Stationstyp.PARL_MINUS_AUSSCHBER,
             "1. Durchgang": models.Stationstyp.PARL_MINUS_AUSSCHBER,
             "Beschlussempfehlung und Bericht": models.Stationstyp.PARL_MINUS_BERABGESCHL,
@@ -239,7 +246,10 @@ class BundestagAPIScraper(Scraper):
             typ = models.Stationstyp.SONSTIG
 
         # Ermittle die zugehörigen Dokumente
-        dokumente = await self._extract_dokumente(position, typ)
+        if typ != models.Stationstyp.SONSTIG:
+            dokumente = await self._extract_dokumente(position, typ)
+        else:
+            dokumente = []
 
         # Stelle sicher, dass das Datum korrekt gesetzt wird
         datum = position.get("datum")
@@ -291,7 +301,12 @@ class BundestagAPIScraper(Scraper):
         async with self.session.get(endpoint, params=params) as response:
             if response.status == 200:
                 data = await response.json()
-                volltext = data.get("documents", [{}])[0].get("text", "")
+                documents = data.get("documents", [])
+                if documents:
+                    volltext = documents[0].get("text", "")
+                else:
+                    logger.warning(f"Kein Volltext gefunden für {drsnr}")
+                    volltext = ""
             else:
                 volltext = ""
 
