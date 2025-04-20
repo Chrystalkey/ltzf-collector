@@ -64,7 +64,8 @@ class BundestagAPIScraper(Scraper):
                 )
                 documents = data.get("documents", [])
                 for doc in documents:
-                    self.vorgaenge[str(doc.get("id"))] = doc
+                    key = f"{doc.get('id')}:{doc.get('aktualisiert')}"
+                    self.vorgaenge[key] = doc
                 return list(self.vorgaenge.keys())
             else:
                 logger.debug(
@@ -81,7 +82,8 @@ class BundestagAPIScraper(Scraper):
             return None
 
         vorgang = self.vorgaenge[vorgang_id]
-        positionen = await self._get_vorgangspositionen(vorgang_id)
+        lastmodified = vorgang.get("aktualisiert")
+        positionen = await self._get_vorgangspositionen(vorgang_id, lastmodified)
 
         # Basis-Gesetzesvorhaben erstellen
         gsvh = models.Vorgang.from_dict(
@@ -115,7 +117,9 @@ class BundestagAPIScraper(Scraper):
         # logger.info(gsvh.to_dict()) #Kann weg, wenn's läuft
         return gsvh
 
-    async def _get_vorgangspositionen(self, vorgang_id: str) -> List[Dict]:
+    async def _get_vorgangspositionen(
+        self, vorgang_id: str, lastmodified: str
+    ) -> List[Dict]:
         """
         Holt die Vorgangspositionen zum Vorgang
         """
@@ -124,6 +128,9 @@ class BundestagAPIScraper(Scraper):
             "apikey": self.BT_API_KEY,
             "f.vorgang": vorgang_id,
             "f.wahlperiode": self.CURRENT_WP,
+            "f.datum.start": datetime.strptime(
+                lastmodified, "%Y-%m-%dT%H:%M:%S%z"
+            ).strftime("%Y-%m-%d"),
         }
 
         async with self.session.get(endpoint, params=params) as response:
@@ -288,6 +295,7 @@ class BundestagAPIScraper(Scraper):
 
         btapi_doctyp = position.get("fundstelle", {}).get("drucksachetyp", "")
         drsnr = position.get("fundstelle", {}).get("dokumentnummer", "")
+        datum = position.get("fundstelle", {}).get("datum", "")
 
         # Hole Volltext aus API
         endpoint = f"{self.listing_urls[0]}/drucksache-text"
@@ -304,11 +312,21 @@ class BundestagAPIScraper(Scraper):
                 documents = data.get("documents", [])
                 if documents:
                     volltext = documents[0].get("text", "")
+                    pdf_hash = documents[0].get("pdf_hash", "")
                 else:
                     logger.warning(f"Kein Volltext gefunden für {drsnr}")
                     volltext = ""
+                    pdf_hash = ""
             else:
                 volltext = ""
+                pdf_hash = ""
+
+        # Prüfe zuerst den Cache mit dem PDF-Hash
+        if pdf_hash:
+            cached_doc = self.config.cache.get_dokument(pdf_hash)
+            if cached_doc is not None:
+                logger.debug(f"Dokument mit Hash {pdf_hash} im Cache gefunden")
+                return [cached_doc.to_dict()]
 
         if volltext != "":
             zusammenfassung = await self._get_zusammenfassung(volltext)
@@ -321,23 +339,38 @@ class BundestagAPIScraper(Scraper):
         )
 
         # Erzeuge ein serialisierbares Dictionary für das Dokument
-        return [
-            {
-                "titel": position.get("titel", ""),
-                "zp_modifiziert": self._parse_date(datetime.now().isoformat()),
-                "zp_referenz": self._parse_date(
-                    position.get("fundstelle", {}).get("datum", "")
-                ),
-                "link": position.get("fundstelle", {}).get("pdf_url", ""),
-                "hash": "",  # Muss noch implementiert werden
-                "typ": dokument_typ,
-                "zusammenfassung": zusammenfassung,
-                "schlagworte": [],
-                "drucksnr": drsnr,
-                "volltext": volltext,
-                "autoren": self._extract_autoren(position),
-            }
-        ]
+        doc_dict = {
+            "titel": position.get("titel", ""),
+            "zp_modifiziert": self._parse_date(datetime.now().isoformat()),
+            "zp_referenz": self._parse_date(datum),
+            "link": position.get("fundstelle", {}).get("pdf_url", ""),
+            "hash": pdf_hash,
+            "typ": dokument_typ,
+            "zusammenfassung": zusammenfassung,
+            "schlagworte": [],
+            "drucksnr": drsnr,
+            "volltext": volltext,
+            "autoren": self._extract_autoren(position),
+        }
+
+        # Erstelle Document-Objekt für Cache
+        doc = Document(None, doc_dict["link"], doc_dict["typ"], self.config)
+        doc.download_success = True
+        doc.extraction_success = True
+        doc.meta.title = doc_dict["titel"]
+        doc.meta.modified = doc_dict["zp_modifiziert"]
+        doc.meta.created = doc_dict["zp_referenz"]
+        doc.meta.full_text = doc_dict["volltext"]
+        doc.autoren = doc_dict["autoren"]
+        doc.schlagworte = doc_dict["schlagworte"]
+        doc.zusammenfassung = doc_dict["zusammenfassung"]
+        doc.drucksnr = doc_dict["drucksnr"]
+
+        # Speichere im Cache mit dem PDF-Hash als Schlüssel
+        if pdf_hash:
+            self.config.cache.store_dokument(pdf_hash, doc)
+
+        return [doc_dict]
 
     async def _get_zusammenfassung(self, volltext: str) -> str:
         """Holt Zusammenfassung von OpenAI"""
