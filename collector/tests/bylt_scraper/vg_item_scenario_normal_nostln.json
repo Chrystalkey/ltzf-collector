@@ -1,6 +1,6 @@
 {
   "url": "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=157573",
-  "result":{
+  "result": {
     "api_id": "00000000-0000-0000-0000-000000000000",
     "titel": "Gesetzentwurf der Staatsregierung zur Änderung des Bayerischen Kinderbildungs- und -betreuungsgesetzes",
     "kurztitel": "Gesetzentwurf der Staatsregierung zur Änderung des Bayerischen Kinderbildungs- und -betreuungsgesetzes",
@@ -84,7 +84,7 @@
           }
         ],
         "additional_links": [
-          "#"
+          "https://www1.bayern.landtag.de/player/index.html?playlist=https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_604/meta_vod_48323.json&startId=1"
         ],
         "stellungnahmen": []
       },

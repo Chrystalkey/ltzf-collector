@@ -528,7 +528,9 @@ def extract_plenproto(cellsoup: BeautifulSoup) -> str:
     cellsoup_ptr = cellsoup.find_all("a")
     for link in cellsoup_ptr:
         if link.text == "Video zum TOP":
-            video_link = link["href"]
+            playlist_link = link["onclick"][23:-7]
+            num = int(link["onclick"].split("'")[3])
+            video_link = f"https://www1.bayern.landtag.de/player/index.html?playlist={playlist_link}&startId={num}"
     return {"pprotoaz": proto_link, "video": video_link}
 
 
