@@ -82,8 +82,20 @@ class BundestagAPIScraper(Scraper):
             return None
 
         vorgang = self.vorgaenge[vorgang_id]
+        btapi_id = vorgang.get("id")
         lastmodified = vorgang.get("aktualisiert")
-        positionen = await self._get_vorgangspositionen(vorgang_id, lastmodified)
+        positionen = await self._get_vorgangspositionen(btapi_id, lastmodified)
+
+        if positionen:
+            stationen = await self._extract_stationen(positionen)
+            initdrucks = self._get_initdrucks_nummer(positionen)
+        else:
+            stationen = []
+            initdrucks = ""
+
+        if not stationen or not initdrucks:
+            logger.info(f"Keine relevanten Positionen gefunden für Vorgang {btapi_id}")
+            return None
 
         # Basis-Gesetzesvorhaben erstellen
         gsvh = models.Vorgang.from_dict(
@@ -103,14 +115,14 @@ class BundestagAPIScraper(Scraper):
                     models.VgIdent.from_dict(
                         {
                             "typ": "initdrucks",
-                            "id": self._get_initdrucks_nummer(positionen),
+                            "id": initdrucks,
                         }
                     ),
                 ],
                 "links": [
                     self._create_dip_url(vorgang.get("id"), vorgang.get("titel"))
                 ],
-                "stationen": await self._extract_stationen(positionen),
+                "stationen": stationen,
             }
         )
 
@@ -252,6 +264,7 @@ class BundestagAPIScraper(Scraper):
         if not typ:
             typ = models.Stationstyp.SONSTIG
 
+        logger.debug(f"Stationtyp: {typ}, Position: {position.get('titel', '')}")
         # Ermittle die zugehörigen Dokumente
         if typ != models.Stationstyp.SONSTIG:
             dokumente = await self._extract_dokumente(position, typ)
@@ -297,6 +310,7 @@ class BundestagAPIScraper(Scraper):
         drsnr = position.get("fundstelle", {}).get("dokumentnummer", "")
         datum = position.get("fundstelle", {}).get("datum", "")
 
+        logger.debug(f"Dokumenttyp: {dokument_typ}, DRSNR: {drsnr}, Datum: {datum}")
         # Hole Volltext aus API
         endpoint = f"{self.listing_urls[0]}/drucksache-text"
         params = {
