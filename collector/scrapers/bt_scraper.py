@@ -6,7 +6,7 @@ import aiohttp
 import json
 import re
 import openapi_client.models as models
-from collector.interface import Scraper
+from collector.interface import VorgangsScraper as Scraper
 from collector.document import Document
 
 
