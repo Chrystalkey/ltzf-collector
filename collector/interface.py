@@ -4,7 +4,7 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from datetime import timedelta
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Set, Tuple
 from uuid import UUID
 from pathlib import Path
 
@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 class Scraper(ABC):
     listing_urls: List[str] = []
-    result_objects: List[models.Vorgang] = []
     collector_id: UUID = None
 
     config: CollectorConfiguration = None
@@ -39,7 +38,6 @@ class Scraper(ABC):
         self.collector_id = collector_id
         self.listing_urls = listing_urls
         self.config = config
-        self.result_objects = []
         self.session = session
         self.session_headers = {}
         global logger
@@ -48,26 +46,162 @@ class Scraper(ABC):
         )
         logger.info(f"Set Collector ID to {self.collector_id}")
 
-    @abstractmethod
-    def log_item(self, item: models.Vorgang, override=True):
-        assert False, "Abstract Base Method Called"
-
-    async def senditem(self, item: Any) -> Optional[Any]:
-        assert False, "Abstract Base Method Called"
-
-    @abstractmethod
-    async def run(self):
-        assert False, "Abstract Base Method Called"
-
-    async def item_processing(self, item):
-        """Process an item by extracting and sending it to the API"""
+    # Process Listing Page URLs
+    # This takes in a list of listing page urls and outputs
+    # a deduplicated, cleaned set of extracted items
+    async def process_lpurls(self, lpurls: List[str]) -> Set[Any]:
+        global logger
+        tasks = []
         try:
-            extracted_item = await self.item_extractor(item)
-            sent_item = await self.senditem(extracted_item)
-            return [sent_item, item]
+            for lpage in self.listing_urls:
+                tasks.append(self.listing_page_extractor(lpage))
+
+            # Wait for all listing page extractor tasks to complete
+            item_list = await asyncio.gather(*tasks, return_exceptions=True)
+
+            # Handle any exceptions from listing page extractors
+            for i, result in enumerate(item_list):
+                if isinstance(result, Exception):
+                    logger.error(
+                        f"{self.__class__.__name__}: Error extracting listing page {self.listing_urls[i]}: {result}"
+                    )
+                    item_list[i] = []  # Replace exception with empty list
+
+            # Flatten the list of lists into a set to eliminate duplicates
+            iset = set(x for xs in item_list if isinstance(xs, list) for x in xs)
+            return iset
         except Exception as e:
-            logger.error(f"Error processing item {item}: {e}", exc_info=True)
-            raise
+            logger.error(
+                f"{self.__class__.__name__}: Error gathering listing page extraction: {e}",
+                exc_info=True,
+            )
+
+    # This is a helper to gather-await extracting and sending in one go instead of
+    # first gathering then sending in bulk. Returns a None if the extraction failed or
+    # returned no result, and a tuple containing ({input item}, {extracted and sent item}) and the extracted item
+    # for comparison
+    async def helper_extract_send_item(self, item):
+        """Process an item by extracting and sending it to the API"""
+        extracted_item = await self.item_extractor(item)
+        if extracted_item:
+            sent_item = await self.send_result(extracted_item)
+            return (sent_item, item)
+        else:
+            return None
+
+    # Process Items
+    # Takes in a set of items, outputs an extracted + sent set of results
+    async def process_items(self, items: Set[Any]) -> List[Any]:
+        tasks = []
+        processed_count = 0
+        skipped_count = 0
+
+        for item in items:
+            # Check if item is already in cache
+            key = self.make_cache_key(item)
+            cached = await self.get_cached_result(key)
+            if cached is not None:
+                logger.debug(f"{key} found in cache, skipping...")
+                skipped_count += 1
+                continue
+
+            tasks.append(self.helper_extract_send_item(item))
+            processed_count += 1
+
+        logger.info(
+            f"{self.__class__.__name__}: Processing {processed_count} items, skipping {skipped_count} cached items"
+        )
+        temp_res = []
+        try:
+            temp_res = await asyncio.gather(*tasks, return_exceptions=True)
+        except Exception as e:
+            logger.error(
+                f"{self.__class__.__name__}: Error during item extraction gathering: {e}",
+                exc_info=True,
+            )
+
+        return temp_res
+
+    # Process Results
+    # Takes in a set of results (=extracted+sent items) and does some cleanup and
+    # error handling.
+    # The input is in the format [(extracted_item, input_item), ...]
+    async def process_results(self, results: List[Any]) -> Tuple[int, int, int]:
+        output = []
+        success_count = 0
+        error_count = 0
+        ignored_count = 0
+        for result in results:
+            if result and not isinstance(result, Exception) and result[0]:
+                extracted_item = result[0]
+                input_item = result[1]
+                output.append(extracted_item)
+
+                key = self.make_cache_key(input_item)
+                await self.store_extracted_result(key, extracted_item)
+
+                success_count += 1
+            elif not result or (not isinstance(result, Exception) and not result[0]):
+                ignored_count += 1
+                continue
+            else:
+                error_count += 1
+                if isinstance(result, Exception):
+                    logger.error(
+                        f"{self.__class__.__name__}: Item extraction failed with exception: {result}",
+                        exc_info=True,
+                    )
+                else:
+                    logger.error(
+                        f"{self.__class__.__name__}: Item extraction failed with result: {result}"
+                    )
+        logger.info(
+            f"Extractor {self.__class__.__name__} completed: {success_count} successes, {error_count} errors"
+        )
+        return (success_count, ignored_count, error_count)
+
+    async def run(self):
+        global logger
+        # Extract all listing pages
+        iset = await self.process_lpurls(self.listing_urls)
+
+        # Process + send all items them
+        rset = await self.process_items(iset)
+
+        # send all items to the backend
+        await self.process_results(rset)
+
+    # abstract method to be implemented below. Taking in an item,
+    # this method's job is to look up wether this item was already processed
+    # (= is being found in cache by means of make_cache_key)
+    # and return it if that is the case. Returns none otherwise.
+    @abstractmethod
+    async def get_cached_result(self, item_key: str) -> Optional[Any]:
+        assert False, "Abstract Base Method Called"
+
+    @abstractmethod
+    async def store_extracted_result(self, item_key: str, result: Any) -> Optional[Any]:
+        assert False, "Abstract Base Method Called"
+
+    # this method is used for logging purposes and is encouraged to be used in get_cached_result
+    # as key. The idea is to transform the item to the key used in the database to extract whatever result.
+    @abstractmethod
+    async def make_cache_key(self, item: Any) -> Optional[str]:
+        assert False, "Abstract Base Method Called"
+
+    # function to log an item to a predetermined location on error or on debug mode (config.api_obj_log is not None)
+    # @item: the item to be logged
+    # @override: if set, log to default directory, regardless of wether config.api_obj_log has been set
+    @abstractmethod
+    def log_item(self, item: Any, override=True):
+        assert False, "Abstract Base Method Called"
+
+    # function to take an item and send it. Should a recoverable error occurr, (meaning if sending again later might work)
+    # the method must return None. On success, return the item that was put in
+    # otherwise, raise an exception
+    @abstractmethod
+    async def send_result(self, item: Any) -> Optional[Any]:
+        assert False, "Abstract Base Method Called"
 
     # extracts the listing page that is behind self.listing_url into the urls of individual pages
     @abstractmethod
@@ -117,7 +251,7 @@ class VorgangsScraper(Scraper):
             except Exception as e:
                 logger.error(f"Failed to write to API object log: {e}")
 
-    async def senditem(self, item: models.Vorgang) -> Optional[models.Vorgang]:
+    async def send_result(self, item: models.Vorgang) -> Optional[models.Vorgang]:
         global logger
         logger.info(f"Sending Item with id `{item.api_id}` to Database")
         logger.debug(f"Collector ID: {self.collector_id}")
@@ -147,99 +281,14 @@ class VorgangsScraper(Scraper):
                 logger.error(f"Unexpected error sending item to API: {e}")
                 return None
 
-    async def run(self):
-        """
-        Main method to run the scraper:
-        1. Extract all listing pages
-        2. Extract individual items
-        3. Send items to API
-        4. Store in cache
-        """
-        global logger
-        item_list = []
-        tasks = []
-        logger.debug(f"{self.__class__.__name__}::extract")
+    async def make_cache_key(self, item):
+        return str(item)  # item is just a url in this case. easy!
 
-        # Extract all listing pages
-        try:
-            for lpage in self.listing_urls:
-                logger.debug(f"Initializing listing page extractor for {lpage}")
-                tasks.append(self.listing_page_extractor(lpage))
+    async def get_cached_result(self, item_key):
+        return self.config.cache.get_vorgang(item_key)
 
-            # Wait for all listing page extractor tasks to complete
-            item_list = await asyncio.gather(*tasks, return_exceptions=True)
-
-            # Handle any exceptions from listing page extractors
-            for i, result in enumerate(item_list):
-                if isinstance(result, Exception):
-                    logger.error(
-                        f"Error extracting listing page {self.listing_urls[i]}: {result}"
-                    )
-                    item_list[i] = []  # Replace exception with empty list
-
-            # Flatten the list of lists into a set to eliminate duplicates
-            iset = set(x for xs in item_list if isinstance(xs, list) for x in xs)
-        except Exception as e:
-            logger.error(f"Error extracting listing pages: {e}", exc_info=True)
-            return
-
-        # Process all items
-        tasks = []
-        processed_count = 0
-        skipped_count = 0
-
-        for item in iset:
-            # Check if item is already in cache
-            cached = self.config.cache.get_vorgang(str(item))
-            if cached is not None:
-                logger.debug(f"URL {item} found in cache, skipping...")
-                skipped_count += 1
-                continue
-
-            logger.debug(f"Initializing item extractor for {item}")
-            tasks.append(self.item_processing(item))
-            processed_count += 1
-
-        logger.info(
-            f"Processing {processed_count} items, skipped {skipped_count} cached items"
-        )
-
-        # Process all items
-        temp_res = []
-        if tasks:
-            try:
-                # for task in tasks:
-                #     await task
-                temp_res = await asyncio.gather(*tasks, return_exceptions=True)
-            except Exception as e:
-                logger.error(f"Error during item extraction: {e}", exc_info=True)
-
-        # Process results and store in cache
-        success_count = 0
-        error_count = 0
-
-        for result in temp_res:
-            if not isinstance(result, Exception) and result and result[0]:
-                obj = result[0]
-                item = result[1]
-                self.result_objects.append(obj)
-                self.config.cache.store_vorgang(str(item), obj)
-                success_count += 1
-            elif not result or not result[0]:
-                continue
-            else:
-                error_count += 1
-                if isinstance(result, Exception):
-                    logger.error(
-                        f"Item extraction failed with exception: {result}",
-                        exc_info=True,
-                    )
-                else:
-                    logger.error(f"Item extraction failed with result: {result}")
-
-        logger.info(
-            f"Extractor {self.__class__.__name__} completed: {success_count} successes, {error_count} errors"
-        )
+    async def store_extracted_result(self, item_key, result):
+        self.config.cache.store_vorgang(item_key, result)
 
 
 class SitzungsScraper(Scraper):
@@ -261,7 +310,10 @@ class SitzungsScraper(Scraper):
             except Exception as e:
                 logger.error(f"Failed to write to API object log: {e}")
 
-    async def senditem(
+    async def store_extracted_result(self, item_key, result):
+        self.config.cache.store_raw(item_key, str(result))
+
+    async def send_result(
         self, item: Tuple[datetime.datetime, List[models.Sitzung]]
     ) -> Optional[Tuple[datetime.datetime, List[models.Sitzung]]]:
         global logger
@@ -295,96 +347,8 @@ class SitzungsScraper(Scraper):
                 logger.error(f"Unexpected error sending item to API: {e}")
                 return None
 
-    async def run(self):
-        """
-        Main method to run the scraper:
-        1. Extract all listing pages
-        2. Extract individual items
-        3. Send items to API
-        4. Store in cache
-        """
-        global logger
-        item_list = []
-        tasks = []
-        logger.debug(f"{self.__class__.__name__}::extract")
+    async def get_cached_result(self, item_key):
+        return self.config.cache.get_raw(item_key)
 
-        # Extract all listing pages
-        try:
-            for lpage in self.listing_urls:
-                logger.debug(f"Initializing listing page extractor for {lpage}")
-                tasks.append(self.listing_page_extractor(lpage))
-
-            # Wait for all listing page extractor tasks to complete
-            item_list = await asyncio.gather(*tasks, return_exceptions=True)
-
-            # Handle any exceptions from listing page extractors
-            for i, result in enumerate(item_list):
-                if isinstance(result, Exception):
-                    logger.error(
-                        f"Error extracting listing page {self.listing_urls[i]}: {result}"
-                    )
-                    item_list[i] = []  # Replace exception with empty list
-
-            # Flatten the list of lists into a set to eliminate duplicates
-            iset = set(x for xs in item_list if isinstance(xs, list) for x in xs)
-        except Exception as e:
-            logger.error(f"Error extracting listing pages: {e}", exc_info=True)
-            return
-
-        # Process all items
-        tasks = []
-        processed_count = 0
-        skipped_count = 0
-
-        for item in iset:
-            # Check if item is already in cache
-            item_hash = f"sz:{str(sha256(str(item).encode()))}"
-            cached = self.config.cache.get_raw(item_hash)
-            if cached is not None:
-                logger.debug(f"URL {item} found in cache, skipping...")
-                skipped_count += 1
-                continue
-
-            logger.debug(f"Initializing item extractor for {item}")
-            tasks.append(self.item_processing(item))
-            processed_count += 1
-
-        logger.info(
-            f"Processing {processed_count} items, skipped {skipped_count} cached items"
-        )
-
-        # Process all items
-        temp_res = []
-        if tasks:
-            try:
-                # for task in tasks:
-                #     await task
-                temp_res = await asyncio.gather(*tasks, return_exceptions=True)
-            except Exception as e:
-                logger.error(f"Error during item extraction: {e}", exc_info=True)
-
-        # Process results and store in cache
-        success_count = 0
-        error_count = 0
-
-        for result in temp_res:
-            if not isinstance(result, Exception) and result and result[0]:
-                obj = result[0]
-                item = result[1]
-                self.result_objects.append(obj)
-                item_hash = f"sz:{str(sha256(str(item).encode()))}"
-                self.config.cache.store_raw(item_hash, str(obj))
-                success_count += 1
-            else:
-                error_count += 1
-                if isinstance(result, Exception):
-                    logger.error(
-                        f"Item extraction failed with exception: {result}",
-                        exc_info=True,
-                    )
-                else:
-                    logger.error(f"Item extraction failed with result: {result}")
-
-        logger.info(
-            f"Extractor {self.__class__.__name__} completed: {success_count} successes, {error_count} errors"
-        )
+    async def make_cache_key(self, item):
+        return f"sz:{str(sha256(str(item).encode()))}"
