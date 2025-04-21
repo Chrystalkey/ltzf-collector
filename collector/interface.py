@@ -63,8 +63,11 @@ class Scraper(ABC):
         """Process an item by extracting and sending it to the API"""
         try:
             extracted_item = await self.item_extractor(item)
-            sent_item = await self.senditem(extracted_item)
-            return [sent_item, item]
+            if extracted_item:
+                sent_item = await self.senditem(extracted_item)
+                return [sent_item, item]
+            else:
+                return None
         except Exception as e:
             logger.error(f"Error processing item {item}: {e}", exc_info=True)
             raise
@@ -375,6 +378,8 @@ class SitzungsScraper(Scraper):
                 item_hash = f"sz:{str(sha256(str(item).encode()))}"
                 self.config.cache.store_raw(item_hash, str(obj))
                 success_count += 1
+            elif not result or not result[0]:
+                continue
             else:
                 error_count += 1
                 if isinstance(result, Exception):
