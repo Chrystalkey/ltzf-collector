@@ -126,22 +126,22 @@ class Scraper(ABC):
     # Takes in a set of results (=extracted+sent items) and does some cleanup and
     # error handling.
     # The input is in the format [(extracted_item, input_item), ...]
-    async def process_results(self, results: List[Any]):
+    async def process_results(self, results: List[Any]) -> Tuple[int, int, int]:
         output = []
         success_count = 0
         error_count = 0
         ignored_count = 0
         for result in results:
-            if not isinstance(result, Exception) and result and result[0]:
+            if result and not isinstance(result, Exception) and result[0]:
                 extracted_item = result[0]
                 input_item = result[1]
                 output.append(extracted_item)
 
                 key = self.make_cache_key(input_item)
-                self.store_extracted_result(key, extracted_item)
+                await self.store_extracted_result(key, extracted_item)
 
                 success_count += 1
-            elif not result or not result[0]:
+            elif not result or (not isinstance(result, Exception) and not result[0]):
                 ignored_count += 1
                 continue
             else:
@@ -155,10 +155,10 @@ class Scraper(ABC):
                     logger.error(
                         f"{self.__class__.__name__}: Item extraction failed with result: {result}"
                     )
-
         logger.info(
             f"Extractor {self.__class__.__name__} completed: {success_count} successes, {error_count} errors"
         )
+        return (success_count, ignored_count, error_count)
 
     async def run(self):
         global logger

@@ -95,6 +95,34 @@ def test_test_process_items():
     asyncio.run(inner_test_process_items())
 
 
+async def inner_test_process_results():
+    config = CollectorConfiguration(
+        api_key="test", openai_api_key="test", testing_mode=True
+    )
+    config.testing_mode = True
+    config.oapiconfig = Configuration(host="http://localhost")
+    async with aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(limit_per_host=1)
+    ) as session:
+        cid = uuid4()
+        scraper = MockBaseScraperSuccess(config, cid, [], session)
+        ret = await scraper.process_results(
+            [
+                None,
+                None,
+                [None, "abc123"],
+                [None, "abaölsdkfja0"],
+                ["x", "y"],
+                Exception("abv123"),
+            ]
+        )
+        assert ret == (1, 4, 1)
+
+
+def test_test_process_results():
+    asyncio.run(inner_test_process_results())
+
+
 async def inner_test_log_object():
     config = CollectorConfiguration(
         api_key="test", openai_api_key="test", testing_mode=True
