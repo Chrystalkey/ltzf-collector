@@ -24,8 +24,103 @@ class MockVorgangsScraper(VorgangsScraper):
         return "Nothing"
 
 
-def test_log_object():
-    asyncio.run(inner_test_log_object())
+class MockBaseScraperSuccess(Scraper):
+    async def get_cached_result(self, item_key):
+        return None
+
+    async def make_cache_key(self, item):
+        return "Liebe, Harry. Liebe."
+
+    async def log_item(self, item, override=True):
+        return
+
+    async def send_result(self, item):
+        return item
+
+    async def listing_page_extractor(self, url):
+        return [url, url]
+
+    async def item_extractor(self, listing_item):
+        if listing_item == "None":
+            return None
+        return f"processed:{listing_item}"
+
+    async def store_extracted_result(self, item_key, result):
+        return
+
+
+async def inner_test_process_lpurl():
+    config = CollectorConfiguration(
+        api_key="test", openai_api_key="test", testing_mode=True
+    )
+    config.testing_mode = True
+    config.oapiconfig = Configuration(host="http://localhost")
+    async with aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(limit_per_host=1)
+    ) as session:
+        cid = uuid4()
+        lpu = ["a", "b"]
+        scraper = MockBaseScraperSuccess(config, cid, lpu, session)
+        ret = await scraper.process_lpurls(scraper.listing_urls)
+        assert set(ret) == set(lpu)
+
+        scraper = MockBaseScraperSuccess(config, cid, [], session)
+        ret = await scraper.process_lpurls(scraper.listing_urls)
+        assert set(ret) == set()
+
+
+def test_test_process_lpurl():
+    asyncio.run(inner_test_process_lpurl())
+
+
+async def inner_test_process_items():
+    config = CollectorConfiguration(
+        api_key="test", openai_api_key="test", testing_mode=True
+    )
+    config.testing_mode = True
+    config.oapiconfig = Configuration(host="http://localhost")
+    async with aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(limit_per_host=1)
+    ) as session:
+        cid = uuid4()
+        lpu = ["a", "b"]
+        scraper = MockBaseScraperSuccess(config, cid, lpu, session)
+        results = await scraper.process_items(["item1", "item2", "None"])
+        assert set(results) == set(
+            [("processed:item1", "item1"), ("processed:item2", "item2"), None]
+        )
+
+
+def test_test_process_items():
+    asyncio.run(inner_test_process_items())
+
+
+async def inner_test_process_results():
+    config = CollectorConfiguration(
+        api_key="test", openai_api_key="test", testing_mode=True
+    )
+    config.testing_mode = True
+    config.oapiconfig = Configuration(host="http://localhost")
+    async with aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(limit_per_host=1)
+    ) as session:
+        cid = uuid4()
+        scraper = MockBaseScraperSuccess(config, cid, [], session)
+        ret = await scraper.process_results(
+            [
+                None,
+                None,
+                [None, "abc123"],
+                [None, "abaölsdkfja0"],
+                ["x", "y"],
+                Exception("abv123"),
+            ]
+        )
+        assert ret == (1, 4, 1)
+
+
+def test_test_process_results():
+    asyncio.run(inner_test_process_results())
 
 
 async def inner_test_log_object():
@@ -85,3 +180,7 @@ async def inner_test_log_object():
         assert os.path.exists(f"{nonexistent_path}/{cid}.json")
         os.remove(f"{nonexistent_path}/{cid}.json")
         os.removedirs(nonexistent_path)
+
+
+def test_log_object():
+    asyncio.run(inner_test_log_object())
