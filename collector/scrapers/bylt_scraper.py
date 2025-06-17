@@ -9,7 +9,16 @@ from datetime import datetime as dt_datetime
 import aiohttp
 from bs4 import BeautifulSoup
 
-import openapi_client.models as models
+from openapi_client.models.dokument import Dokument
+from openapi_client.models.gremium import Gremium
+from openapi_client.models.vorgang import Vorgang
+from openapi_client.models.autor import Autor
+from openapi_client.models.station import Station
+from openapi_client.models.vg_ident import VgIdent
+from openapi_client.models.doktyp import Doktyp
+from openapi_client.models.stationstyp import Stationstyp
+from openapi_client.models.station_dokumente_inner import StationDokumenteInner
+
 from collector.interface import VorgangsScraper
 from collector.document import Document
 import toml
@@ -49,7 +58,7 @@ class BYLTScraper(VorgangsScraper):
             assert len(vgpage_urls) != 0, "Error: No Entry extracted from listing page"
             return vgpage_urls
 
-    async def item_extractor(self, listing_item) -> models.Vorgang:
+    async def item_extractor(self, listing_item) -> Vorgang:
         global logger, NULL_UUID, TEST_DATE
         async with self.session.get(listing_item) as get_result:
             soup = BeautifulSoup(await get_result.text(), "html.parser")
@@ -68,7 +77,7 @@ class BYLTScraper(VorgangsScraper):
                 .replace("\r", " ")
                 .strip()
             )
-            vg = models.Vorgang.from_dict(
+            vg = Vorgang.from_dict(
                 {
                     "api_id": (
                         str(uuid.uuid4())
@@ -82,9 +91,7 @@ class BYLTScraper(VorgangsScraper):
                     "trojaner": False,
                     "initiatoren": [],
                     "typ": "gg-land-parl",
-                    "ids": [
-                        models.VgIdent.from_dict({"typ": "initdrucks", "id": str(inds)})
-                    ],
+                    "ids": [VgIdent.from_dict({"typ": "initdrucks", "id": str(inds)})],
                     "links": [listing_item],
                     "stationen": [],
                 }
@@ -98,7 +105,7 @@ class BYLTScraper(VorgangsScraper):
             for ini in initiat_lis:
                 if "(" not in ini.text:
                     initiatoren.append(
-                        models.Autor.from_dict(
+                        Autor.from_dict(
                             {"organisation": sanitize_orga(ini.text.strip())}
                         )
                     )
@@ -107,7 +114,7 @@ class BYLTScraper(VorgangsScraper):
                     org = split[-1][:-1].strip()
                     psn = "(".join(split[:-1]).strip()
                     initiatoren.append(
-                        models.Autor.from_dict(
+                        Autor.from_dict(
                             {"person": psn, "organisation": sanitize_orga(org)}
                         )
                     )
@@ -174,7 +181,7 @@ class BYLTScraper(VorgangsScraper):
                     timestamp = TEST_DATE
 
                 ### Initialize Station scaffold
-                stat = models.Station.from_dict(
+                stat = Station.from_dict(
                     {
                         "zp_start": timestamp,
                         "dokumente": [],
@@ -196,13 +203,13 @@ class BYLTScraper(VorgangsScraper):
                     link = extract_singlelink(cells[1])
                     vg.links.append(link)
                     stat.typ = "parl-initiativ"
-                    stat.gremium = models.Gremium.from_dict(
+                    stat.gremium = Gremium.from_dict(
                         {"name": "plenum", "parlament": "BY", "wahlperiode": 19}
                     )
 
-                    dok = await self.create_document(link, models.Doktyp.ENTWURF)
+                    dok = await self.create_document(link, Doktyp.ENTWURF)
                     dok.drucksnr = str(inds)
-                    stat.dokumente = [models.DokRef(dok.package())]
+                    stat.dokumente = [StationDokumenteInner(dok.package())]
                     stat.trojanergefahr = max(dok.trojanergefahr, 1)
                 elif cellclass == "unknown":
                     logger.warning(
@@ -220,18 +227,18 @@ class BYLTScraper(VorgangsScraper):
                     ), "Error: Stellungnahme ohne Vorhergehenden Gesetzestext"
                     stln_urls = extract_schrstellung(cells[1])
                     dok = await self.create_document(
-                        stln_urls["stellungnahme"], models.Doktyp.STELLUNGNAHME
+                        stln_urls["stellungnahme"], Doktyp.STELLUNGNAHME
                     )
                     if stln_urls["autor"] is not None:
                         if dok.autoren is None:
                             dok.autoren = [
-                                models.Autor.from_dict(
+                                Autor.from_dict(
                                     {"organisation": sanitize_orga(stln_urls["autor"])}
                                 )
                             ]
                         else:
                             dok.autoren.append(
-                                models.Autor.from_dict(
+                                Autor.from_dict(
                                     {"organisation": sanitize_orga(stln_urls["autor"])}
                                 )
                             )
@@ -249,11 +256,11 @@ class BYLTScraper(VorgangsScraper):
                 ## neue station oder merge
                 elif cellclass.startswith("plenum-proto"):
                     pproto = extract_plenproto(cells[1])
-                    gremium = models.Gremium.from_dict(
+                    gremium = Gremium.from_dict(
                         {"name": "plenum", "parlament": "BY", "wahlperiode": 19}
                     )
                     dok = await self.create_document(
-                        pproto["pprotoaz"], models.Doktyp.REDEPROTOKOLL
+                        pproto["pprotoaz"], Doktyp.REDEPROTOKOLL
                     )
                     typ = None
                     video_link = pproto.get("video")
@@ -267,14 +274,16 @@ class BYLTScraper(VorgangsScraper):
                         typ = "parl-zurueckgz"
                     if len(vg.stationen) > 0 and vg.stationen[-1].typ == typ:
                         vg.stationen[-1].typ = typ
-                        vg.stationen[-1].dokumente.append(models.DokRef(dok.package()))
+                        vg.stationen[-1].dokumente.append(
+                            StationDokumenteInner(dok.package())
+                        )
                         vg.stationen[-1].gremium = gremium
                         if video_link:
                             vg.stationen[-1].additional_links.append(video_link)
                         continue
                     else:
                         stat.typ = typ
-                        stat.dokumente = [models.DokRef(dok.package())]
+                        stat.dokumente = [StationDokumenteInner(dok.package())]
                         stat.gremium = gremium
                         if video_link:
                             stat.additional_links.append(video_link)
@@ -283,33 +292,35 @@ class BYLTScraper(VorgangsScraper):
                 ## Ein Link
                 elif cellclass == "rueckzug":
                     dok = await self.create_document(
-                        extract_singlelink(cells[1]), models.Doktyp.MITTEILUNG
+                        extract_singlelink(cells[1]), Doktyp.MITTEILUNG
                     )
                     dok.drucksnr = extract_drucksnr(cells[1])
-                    typ = models.Stationstyp.PARL_MINUS_ZURUECKGZ
-                    gremium = models.Gremium.from_dict(
+                    typ = Stationstyp.PARL_MINUS_ZURUECKGZ
+                    gremium = Gremium.from_dict(
                         {"name": "plenum", "parlament": "BY", "wahlperiode": 19}
                     )
                     if len(vg.stationen) > 0 and vg.stationen[-1].typ == typ:
                         vg.stationen[-1].typ = typ
-                        vg.stationen[-1].dokumente.append(models.DokRef(dok.package()))
+                        vg.stationen[-1].dokumente.append(
+                            StationDokumenteInner(dok.package())
+                        )
                         vg.stationen[-1].gremium = gremium
                         continue
                     else:
                         stat.typ = typ
-                        stat.dokumente = [models.DokRef(dok.package())]
+                        stat.dokumente = [StationDokumenteInner(dok.package())]
                         stat.gremium = gremium
 
                 ## Plenumsentscheidung
                 ## hat einen Dokumentenlink
                 elif cellclass.startswith("plenum-beschluss"):
                     dok = await self.create_document(
-                        extract_singlelink(cells[1]), models.Doktyp.ENTWURF
+                        extract_singlelink(cells[1]), Doktyp.ENTWURF
                     )
                     dok.drucksnr = extract_drucksnr(cells[1])
                     typ = None
                     trojanergefahr = max(dok.trojanergefahr, 1)
-                    gremium = models.Gremium.from_dict(
+                    gremium = Gremium.from_dict(
                         {"name": "plenum", "parlament": "BY", "wahlperiode": 19}
                     )
                     if cellclass.endswith("zustm"):
@@ -318,13 +329,15 @@ class BYLTScraper(VorgangsScraper):
                         typ = "parl-ablehnung"
                     if len(vg.stationen) > 0 and vg.stationen[-1].typ == typ:
                         vg.stationen[-1].typ = typ
-                        vg.stationen[-1].dokumente.append(models.DokRef(dok.package()))
+                        vg.stationen[-1].dokumente.append(
+                            StationDokumenteInner(dok.package())
+                        )
                         vg.stationen[-1].gremium = gremium
                         vg.stationen[-1].trojanergefahr = trojanergefahr
                         continue
                     else:
                         stat.typ = typ
-                        stat.dokumente = [models.DokRef(dok.package())]
+                        stat.dokumente = [StationDokumenteInner(dok.package())]
                         stat.gremium = gremium
                         stat.trojanergefahr = trojanergefahr
                 ## Ausschussberichterstattung
@@ -332,7 +345,7 @@ class BYLTScraper(VorgangsScraper):
                 ## doppelt sich manchmal aus unbekannten Gründen
                 elif cellclass == "ausschuss-bse":
                     dok = await self.create_document(
-                        extract_singlelink(cells[1]), models.Doktyp.BESCHLUSSEMPF
+                        extract_singlelink(cells[1]), Doktyp.BESCHLUSSEMPF
                     )
                     dok.drucksnr = extract_drucksnr(cells[1])
                     soup: BeautifulSoup = cells[1]
@@ -357,25 +370,25 @@ class BYLTScraper(VorgangsScraper):
                     else:
                         # Create new committee station
                         stat.typ = "parl-ausschber"
-                        stat.gremium = models.Gremium.from_dict(
+                        stat.gremium = Gremium.from_dict(
                             {
                                 "name": ausschuss_name,
                                 "parlament": "BY",
                                 "wahlperiode": 19,
                             }
                         )
-                        stat.dokumente = [models.DokRef(dok.package())]
+                        stat.dokumente = [StationDokumenteInner(dok.package())]
                         stat.trojanergefahr = max(dok.trojanergefahr, 1)
                 ## Gesetzblatt. Zwei Links, einer davon
                 elif cellclass == "gsblatt":
-                    stat.gremium = models.Gremium.from_dict(
+                    stat.gremium = Gremium.from_dict(
                         {"name": "gesetzesblatt", "parlament": "BY", "wahlperiode": 19}
                     )
                     stat.typ = "postparl-gsblt"
                     dok = await self.create_document(
-                        extract_singlelink(cells[1]), models.Doktyp.SONSTIG
+                        extract_singlelink(cells[1]), Doktyp.SONSTIG
                     )
-                    stat.dokumente = [models.DokRef(dok.package())]
+                    stat.dokumente = [StationDokumenteInner(dok.package())]
                 else:
                     logger.error(
                         f"Reached an unreachable state with cellclass: {cellclass}. Discarded."
@@ -388,7 +401,7 @@ class BYLTScraper(VorgangsScraper):
                 vg.stationen.append(stat)
             return vg
 
-    async def create_document(self, url: str, type_hint: models.Doktyp) -> Document:
+    async def create_document(self, url: str, type_hint: Doktyp) -> Document:
         global logger
         logger.debug(f"Creating document from url: {url}")
         document = self.config.cache.get_dokument(url)
@@ -398,7 +411,7 @@ class BYLTScraper(VorgangsScraper):
             await document.run_extraction()
             if document.autoren:
                 document.autoren = [
-                    models.Autor.from_dict(
+                    Autor.from_dict(
                         {
                             "organisation": sanitize_orga(aut.organisation),
                             "person": aut.person,
@@ -466,7 +479,7 @@ class BYLTScraper(VorgangsScraper):
         return "unknown"
 
 
-def dedup_drucks(doks: list[models.DokRef]) -> list[models.Dokument]:
+def dedup_drucks(doks: list[StationDokumenteInner]) -> list[Dokument]:
     unique_doks = []
     for d in doks:
         if d.actual_instance.drucksnr:
