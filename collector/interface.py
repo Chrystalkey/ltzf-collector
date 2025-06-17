@@ -98,7 +98,7 @@ class Scraper(ABC):
 
         for item in items:
             # Check if item is already in cache
-            key = self.make_cache_key(item)
+            key = await self.make_cache_key(item)
             cached = await self.get_cached_result(key)
             if cached is not None:
                 logger.debug(f"{key} found in cache, skipping...")
@@ -137,7 +137,7 @@ class Scraper(ABC):
                 input_item = result[1]
                 output.append(extracted_item)
 
-                key = self.make_cache_key(input_item)
+                key = await self.make_cache_key(input_item)
                 await self.store_extracted_result(key, extracted_item)
 
                 success_count += 1
