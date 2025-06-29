@@ -9,15 +9,7 @@ from datetime import datetime as dt_datetime
 import aiohttp
 from bs4 import BeautifulSoup
 
-from openapi_client.models.dokument import Dokument
-from openapi_client.models.gremium import Gremium
-from openapi_client.models.vorgang import Vorgang
-from openapi_client.models.autor import Autor
-from openapi_client.models.station import Station
-from openapi_client.models.vg_ident import VgIdent
-from openapi_client.models.doktyp import Doktyp
-from openapi_client.models.stationstyp import Stationstyp
-from openapi_client.models.station_dokumente_inner import StationDokumenteInner
+from openapi_client.models import *
 
 from collector.interface import VorgangsScraper
 from collector.document import Document
