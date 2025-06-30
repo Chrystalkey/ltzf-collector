@@ -2,228 +2,357 @@
   "url": "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=159519",
   "result": {
     "api_id": "00000000-0000-0000-0000-000000000000",
-    "titel": "Gesetzentwurf zur Änderung des Bayerischen Katastrophenschutzgesetzes   hier: Helfergleichstellung in Bayern",
-    "kurztitel": "Gesetzentwurf zur Änderung des Bayerischen Katastrophenschutzgesetzes   hier: Helfergleichstellung in Bayern",
-    "wahlperiode": 19,
-    "verfassungsaendernd": false,
-    "typ": "gg-land-parl",
     "ids": [
-      {
-        "id": "19/5774",
-        "typ": "initdrucks"
-      }
-    ],
-    "links": [
-      "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=159519",
-      "https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Drucksachen/Basisdrucksachen/0000005000/0000005302.pdf"
+        {
+            "id": "19/5774",
+            "typ": "initdrucks"
+        }
     ],
     "initiatoren": [
-      {
-        "person": "Katharina Schulze",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Johannes Becher",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Florian Siekmann",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Ludwig Hartmann",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Dipl.-Betriebswirtin (FH) Claudia Köhler",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Jürgen Mistol",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Verena Osgyan",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Tim Pargent",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Stephanie Schuhknecht",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Benjamin Adjei",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Andreas Birzele",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Cemal Bozoğlu",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Max Deisenhofer",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Gülseren Demirel",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "person": "Toni Schuberl",
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      },
-      {
-        "organisation": "Bündnis 90/Die Grünen (Grüne)"
-      }
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Katharina Schulze"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Johannes Becher"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Florian Siekmann"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Ludwig Hartmann"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Dipl.-Betriebswirtin (FH) Claudia Köhler"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Jürgen Mistol"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Verena Osgyan"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Tim Pargent"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Stephanie Schuhknecht"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Benjamin Adjei"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Andreas Birzele"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Cemal Bozoğlu"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Max Deisenhofer"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Gülseren Demirel"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)",
+            "person": "Toni Schuberl"
+        },
+        {
+            "organisation": "Bündnis 90/Die Grünen (Grüne)"
+        }
+    ],
+    "kurztitel": "Gesetzentwurf zur Änderung des Bayerischen Katastrophenschutzgesetzes   hier: Helfergleichstellung in Bayern",
+    "links": [
+        "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=159519",
+        "https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Drucksachen/Basisdrucksachen/0000005000/0000005302.pdf"
     ],
     "stationen": [
-      {
-        "zp_start": "1940-01-01T00:00:00+00:00",
-        "gremium": {
-          "parlament": "BY",
-          "wahlperiode": 19,
-          "name": "plenum"
+        {
+            "additional_links": [
+            ],
+            "dokumente": [
+                {
+                    "autoren": [
+                    ],
+                    "drucksnr": "19/5774",
+                    "hash": "testhash",
+                    "link": "https://www.example.com",
+                    "schlagworte": [
+                        "test"
+                    ],
+                    "titel": "Testtitel",
+                    "typ": "entwurf",
+                    "volltext": "test",
+                    "zp_erstellt": "1940-01-01T00:00:00+00:00",
+                    "zp_modifiziert": "1940-01-01T00:00:00+00:00",
+                    "zp_referenz": "1940-01-01T00:00:00+00:00",
+                    "zusammenfassung": "test"
+                }
+            ],
+            "gremium": {
+                "name": "plenum",
+                "parlament": "BY",
+                "wahlperiode": 19
+            },
+            "link": "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=159519",
+            "parlament": "BY",
+            "schlagworte": [
+            ],
+            "stellungnahmen": [
+                {
+                    "autoren": [
+                    ],
+                    "drucksnr": "example",
+                    "hash": "testhash",
+                    "link": "https://www.example.com",
+                    "schlagworte": [
+                        "test"
+                    ],
+                    "titel": "Testtitel",
+                    "typ": "entwurf",
+                    "volltext": "test",
+                    "zp_erstellt": "1940-01-01T00:00:00+00:00",
+                    "zp_modifiziert": "1940-01-01T00:00:00+00:00",
+                    "zp_referenz": "1940-01-01T00:00:00+00:00",
+                    "zusammenfassung": "test"
+                },
+                {
+                    "autoren": [
+                    ],
+                    "drucksnr": "example",
+                    "hash": "testhash",
+                    "link": "https://www.example.com",
+                    "schlagworte": [
+                        "test"
+                    ],
+                    "titel": "Testtitel",
+                    "typ": "entwurf",
+                    "volltext": "test",
+                    "zp_erstellt": "1940-01-01T00:00:00+00:00",
+                    "zp_modifiziert": "1940-01-01T00:00:00+00:00",
+                    "zp_referenz": "1940-01-01T00:00:00+00:00",
+                    "zusammenfassung": "test"
+                },
+                {
+                    "autoren": [
+                    ],
+                    "drucksnr": "example",
+                    "hash": "testhash",
+                    "link": "https://www.example.com",
+                    "schlagworte": [
+                        "test"
+                    ],
+                    "titel": "Testtitel",
+                    "typ": "entwurf",
+                    "volltext": "test",
+                    "zp_erstellt": "1940-01-01T00:00:00+00:00",
+                    "zp_modifiziert": "1940-01-01T00:00:00+00:00",
+                    "zp_referenz": "1940-01-01T00:00:00+00:00",
+                    "zusammenfassung": "test"
+                },
+                {
+                    "autoren": [
+                    ],
+                    "drucksnr": "example",
+                    "hash": "testhash",
+                    "link": "https://www.example.com",
+                    "schlagworte": [
+                        "test"
+                    ],
+                    "titel": "Testtitel",
+                    "typ": "entwurf",
+                    "volltext": "test",
+                    "zp_erstellt": "1940-01-01T00:00:00+00:00",
+                    "zp_modifiziert": "1940-01-01T00:00:00+00:00",
+                    "zp_referenz": "1940-01-01T00:00:00+00:00",
+                    "zusammenfassung": "test"
+                },
+                {
+                    "autoren": [
+                    ],
+                    "drucksnr": "example",
+                    "hash": "testhash",
+                    "link": "https://www.example.com",
+                    "schlagworte": [
+                        "test"
+                    ],
+                    "titel": "Testtitel",
+                    "typ": "entwurf",
+                    "volltext": "test",
+                    "zp_erstellt": "1940-01-01T00:00:00+00:00",
+                    "zp_modifiziert": "1940-01-01T00:00:00+00:00",
+                    "zp_referenz": "1940-01-01T00:00:00+00:00",
+                    "zusammenfassung": "test"
+                }
+            ],
+            "trojanergefahr": 1,
+            "typ": "parl-initiativ",
+            "zp_start": "1940-01-01T00:00:00+00:00"
         },
-        "link": "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=159519",
-        "parlament": "BY",
-        "typ": "parl-initiativ",
-        "trojanergefahr": 1,
-        "schlagworte": [],
-        "dokumente": [
-          {
-            "drucksnr": "19/5774",
-            "typ": "entwurf",
-            "titel": "Testtitel",
-            "volltext": "test",
-            "zusammenfassung": "test",
-            "zp_modifiziert": "1940-01-01T00:00:00+00:00",
-            "zp_referenz": "1940-01-01T00:00:00+00:00",
-            "link": "https://www.example.com",
-            "hash": "testhash",
-            "schlagworte": [
-              "test"
+        {
+            "additional_links": [
+                "https://www1.bayern.landtag.de/player/index.html?playlist=https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_617/meta_vod_49417.json&startId=1"
             ],
-            "autoren": []
-          }
-        ],
-        "additional_links": [],
-        "stellungnahmen": [
-          {
-            "drucksnr": "example",
-            "typ": "entwurf",
-            "titel": "Testtitel",
-            "volltext": "test",
-            "zusammenfassung": "test",
-            "zp_modifiziert": "1940-01-01T00:00:00+00:00",
-            "zp_referenz": "1940-01-01T00:00:00+00:00",
-            "link": "https://www.example.com",
-            "hash": "testhash",
-            "schlagworte": [
-              "test"
+            "dokumente": [
+                {
+                    "autoren": [
+                    ],
+                    "drucksnr": "example",
+                    "hash": "testhash",
+                    "link": "https://www.example.com",
+                    "schlagworte": [
+                        "test"
+                    ],
+                    "titel": "Testtitel",
+                    "typ": "entwurf",
+                    "volltext": "test",
+                    "zp_erstellt": "1940-01-01T00:00:00+00:00",
+                    "zp_modifiziert": "1940-01-01T00:00:00+00:00",
+                    "zp_referenz": "1940-01-01T00:00:00+00:00",
+                    "zusammenfassung": "test"
+                }
             ],
-            "autoren": []
-          },
-          {
-            "drucksnr": "example",
-            "typ": "entwurf",
-            "titel": "Testtitel",
-            "volltext": "test",
-            "zusammenfassung": "test",
-            "zp_modifiziert": "1940-01-01T00:00:00+00:00",
-            "zp_referenz": "1940-01-01T00:00:00+00:00",
-            "link": "https://www.example.com",
-            "hash": "testhash",
+            "gremium": {
+                "name": "plenum",
+                "parlament": "BY",
+                "wahlperiode": 19
+            },
+            "link": "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=159519",
+            "parlament": "BY",
             "schlagworte": [
-              "test"
             ],
-            "autoren": []
-          },
-          {
-            "drucksnr": "example",
-            "typ": "entwurf",
-            "titel": "Testtitel",
-            "volltext": "test",
-            "zusammenfassung": "test",
-            "zp_modifiziert": "1940-01-01T00:00:00+00:00",
-            "zp_referenz": "1940-01-01T00:00:00+00:00",
-            "link": "https://www.example.com",
-            "hash": "testhash",
-            "schlagworte": [
-              "test"
+            "stellungnahmen": [
             ],
-            "autoren": []
-          },
-          {
-            "drucksnr": "example",
-            "typ": "entwurf",
-            "titel": "Testtitel",
-            "volltext": "test",
-            "zusammenfassung": "test",
-            "zp_modifiziert": "1940-01-01T00:00:00+00:00",
-            "zp_referenz": "1940-01-01T00:00:00+00:00",
-            "link": "https://www.example.com",
-            "hash": "testhash",
-            "schlagworte": [
-              "test"
-            ],
-            "autoren": []
-          },
-          {
-            "drucksnr": "example",
-            "typ": "entwurf",
-            "titel": "Testtitel",
-            "volltext": "test",
-            "zusammenfassung": "test",
-            "zp_modifiziert": "1940-01-01T00:00:00+00:00",
-            "zp_referenz": "1940-01-01T00:00:00+00:00",
-            "link": "https://www.example.com",
-            "hash": "testhash",
-            "schlagworte": [
-              "test"
-            ],
-            "autoren": []
-          }
-        ]
-      },
-      {
-        "zp_start": "1940-01-01T00:00:00+00:00",
-        "gremium": {
-          "parlament": "BY",
-          "wahlperiode": 19,
-          "name": "plenum"
+            "typ": "parl-vollvlsgn",
+            "zp_start": "1940-01-01T00:00:00+00:00"
         },
-        "link": "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=159519",
-        "parlament": "BY",
-        "typ": "parl-vollvlsgn",
-        "schlagworte": [],
-        "dokumente": [
-          {
-            "drucksnr": "example",
-            "typ": "entwurf",
-            "titel": "Testtitel",
-            "volltext": "test",
-            "zusammenfassung": "test",
-            "zp_modifiziert": "1940-01-01T00:00:00+00:00",
-            "zp_referenz": "1940-01-01T00:00:00+00:00",
-            "link": "https://www.example.com",
-            "hash": "testhash",
-            "schlagworte": [
-              "test"
+        {
+            "additional_links": [
             ],
-            "autoren": []
-          }
-        ],
-        "additional_links": [
-          "https://www1.bayern.landtag.de/player/index.html?playlist=https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_617/meta_vod_49417.json&startId=1"
-        ],
-        "stellungnahmen": []
-      }
-    ]
-  }
+            "dokumente": [
+                {
+                    "autoren": [
+                    ],
+                    "drucksnr": "19/7219",
+                    "hash": "testhash",
+                    "link": "https://www.example.com",
+                    "schlagworte": [
+                        "test"
+                    ],
+                    "titel": "Testtitel",
+                    "typ": "entwurf",
+                    "volltext": "test",
+                    "zp_erstellt": "1940-01-01T00:00:00+00:00",
+                    "zp_modifiziert": "1940-01-01T00:00:00+00:00",
+                    "zp_referenz": "1940-01-01T00:00:00+00:00",
+                    "zusammenfassung": "test"
+                }
+            ],
+            "gremium": {
+                "name": "Ausschuss für Kommunale Fragen, Innere Sicherheit und Sport",
+                "parlament": "BY",
+                "wahlperiode": 19
+            },
+            "link": "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=159519",
+            "parlament": "BY",
+            "schlagworte": [
+            ],
+            "stellungnahmen": [
+            ],
+            "trojanergefahr": 1,
+            "typ": "parl-ausschber",
+            "zp_start": "1940-01-01T00:00:00+00:00"
+        },
+        {
+            "additional_links": [
+            ],
+            "dokumente": [
+                {
+                    "autoren": [
+                    ],
+                    "drucksnr": "19/7219",
+                    "hash": "testhash",
+                    "link": "https://www.example.com",
+                    "schlagworte": [
+                        "test"
+                    ],
+                    "titel": "Testtitel",
+                    "typ": "entwurf",
+                    "volltext": "test",
+                    "zp_erstellt": "1940-01-01T00:00:00+00:00",
+                    "zp_modifiziert": "1940-01-01T00:00:00+00:00",
+                    "zp_referenz": "1940-01-01T00:00:00+00:00",
+                    "zusammenfassung": "test"
+                }
+            ],
+            "gremium": {
+                "name": "Ausschuss für Staatshaushalt und Finanzfragen",
+                "parlament": "BY",
+                "wahlperiode": 19
+            },
+            "link": "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=159519",
+            "parlament": "BY",
+            "schlagworte": [
+            ],
+            "stellungnahmen": [
+            ],
+            "trojanergefahr": 1,
+            "typ": "parl-ausschber",
+            "zp_start": "1940-01-01T00:00:00+00:00"
+        },
+        {
+            "additional_links": [
+            ],
+            "dokumente": [
+                {
+                    "autoren": [
+                    ],
+                    "drucksnr": "19/7219",
+                    "hash": "testhash",
+                    "link": "https://www.example.com",
+                    "schlagworte": [
+                        "test"
+                    ],
+                    "titel": "Testtitel",
+                    "typ": "entwurf",
+                    "volltext": "test",
+                    "zp_erstellt": "1940-01-01T00:00:00+00:00",
+                    "zp_modifiziert": "1940-01-01T00:00:00+00:00",
+                    "zp_referenz": "1940-01-01T00:00:00+00:00",
+                    "zusammenfassung": "test"
+                }
+            ],
+            "gremium": {
+                "name": "Ausschuss für Verfassung, Recht, Parlamentsfragen und Integration",
+                "parlament": "BY",
+                "wahlperiode": 19
+            },
+            "link": "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=159519",
+            "parlament": "BY",
+            "schlagworte": [
+            ],
+            "stellungnahmen": [
+            ],
+            "trojanergefahr": 1,
+            "typ": "parl-ausschber",
+            "zp_start": "1940-01-01T00:00:00+00:00"
+        }
+    ],
+    "titel": "Gesetzentwurf zur Änderung des Bayerischen Katastrophenschutzgesetzes   hier: Helfergleichstellung in Bayern",
+    "typ": "gg-land-parl",
+    "verfassungsaendernd": false,
+    "wahlperiode": 19
+}
 }
