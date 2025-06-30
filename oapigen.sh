@@ -1,4 +1,4 @@
-export OPENAPI_GENERATOR_VERSION="7.13.0"
+export OPENAPI_GENERATOR_VERSION="7.14.0"
 DIRECTORY="oapi-generator"
 
 echo "Checking for openapi-generator-cli"
@@ -11,7 +11,7 @@ else
     cd "$DIRECTORY"
     curl https://raw.githubusercontent.com/OpenAPITools/openapi-generator/master/bin/utils/openapi-generator-cli.sh > openapi-generator-cli
     chmod u+x openapi-generator-cli
-    curl raw.githubusercontent.com/Chrystalkey/landtagszusammenfasser/refs/heads/dev-specchange/docs/specs/openapi.yml > openapi.yml
+    curl https://raw.githubusercontent.com/Chrystalkey/landtagszusammenfasser/refs/heads/dev-specchange/docs/specs/openapi.yml > openapi.yml
     cd ..
 fi
 
