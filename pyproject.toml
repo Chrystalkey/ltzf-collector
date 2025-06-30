@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "collector"
-version = "0.2.1"
+version = "0.2.2"
 description = "Collector bundle with a sample Scraper that is forkable and meant to be forked"
 authors = ["Benedikt Schäfer", "Noah Lokocz", "Liv Märtens"]
 readme = "README.md"
