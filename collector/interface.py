@@ -250,7 +250,7 @@ class VorgangsScraper(Scraper):
                     logger.info(f"Creating Filepath: {filepath.parent}")
                     filepath.parent.mkdir(parents=True)
                 with filepath.open("a", encoding="utf-8") as file:
-                    file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
+                    file.write(json.dumps(sanitize_for_serialization(item)) + "\n")
             except Exception as e:
                 logger.error(f"Failed to write to API object log: {e}")
 
@@ -264,7 +264,9 @@ class VorgangsScraper(Scraper):
 
         # Send to API
         with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
-            api_instance = openapi_client.api.collector_schnittstellen_api.CollectorSchnittstellenApi(api_client)
+            api_instance = openapi_client.api.collector_schnittstellen_api.CollectorSchnittstellenApi(
+                api_client
+            )
             try:
                 ret = api_instance.vorgang_put(str(self.scraper_id), item)
                 logger.info(f"API Response: {ret}")
@@ -309,7 +311,7 @@ class SitzungsScraper(Scraper):
                     logger.info(f"Creating Filepath: {filepath.parent}")
                     filepath.parent.mkdir(parents=True)
                 with filepath.open("a", encoding="utf-8") as file:
-                    file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
+                    file.write(json.dumps(sanitize_for_serialization(item)) + "\n")
             except Exception as e:
                 logger.error(f"Failed to write to API object log: {e}")
 
@@ -328,11 +330,15 @@ class SitzungsScraper(Scraper):
 
         # Send to API
         with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
-            api_instance = openapi_client.api.collector_schnittstellen_api.CollectorSchnittstellenApi(api_client)
+            api_instance = openapi_client.api.collector_schnittstellen_api.CollectorSchnittstellenApi(
+                api_client
+            )
             try:
                 ret = api_instance.kal_date_put(
-                    str(x_scraper_id=self.scraper_id),
-                    parlament=models.Parlament.BY, datum=item[0], sitzung=item[1]
+                    x_scraper_id=str(self.scraper_id),
+                    parlament=models.Parlament.BY,
+                    datum=item[0],
+                    sitzung=item[1],
                 )
                 logger.info(f"API Response: {ret}")
                 return item

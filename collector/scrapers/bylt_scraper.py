@@ -211,7 +211,7 @@ class BYLTScraper(VorgangsScraper):
                 elif cellclass == "ignored":
                     continue
                 ## stellungnahme
-                ## is added to the exactly preceding station
+                ## is added to the immediately preceding station
                 ## has: one doklink, name des/der stellungnehmenden (=autor)
                 elif cellclass == "stellungnahme":
                     assert (

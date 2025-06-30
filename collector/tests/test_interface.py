@@ -169,16 +169,16 @@ async def inner_test_log_object():
         scraper = MockSitzungsScraper(config, cid, [], session)
         scraper.log_item(mock_vg)
         assert os.path.exists(nonexistent_path)
-        assert os.path.exists(f"{nonexistent_path}/{cid}.json")
-        os.remove(f"{nonexistent_path}/{cid}.json")
+        assert os.path.exists(f"{nonexistent_path}/{cid}.jsonl")
+        os.remove(f"{nonexistent_path}/{cid}.jsonl")
         os.removedirs(nonexistent_path)
 
         cid = uuid4()
         scraper = MockVorgangsScraper(config, cid, [], session)
         scraper.log_item(mock_vg)
         assert os.path.exists(nonexistent_path)
-        assert os.path.exists(f"{nonexistent_path}/{cid}.json")
-        os.remove(f"{nonexistent_path}/{cid}.json")
+        assert os.path.exists(f"{nonexistent_path}/{cid}.jsonl")
+        os.remove(f"{nonexistent_path}/{cid}.jsonl")
         os.removedirs(nonexistent_path)
 
 

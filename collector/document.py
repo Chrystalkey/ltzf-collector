@@ -17,6 +17,8 @@ class DocumentMeta:
     def __init__(self):
         self.link = None
         self.title = None
+        self.kurztitel = None
+        self.vorwort = None
         self.created = None
         self.modified = None
         self.full_text = None
@@ -28,6 +30,8 @@ class DocumentMeta:
         instance = cls()
         instance.link = dic["link"]
         instance.title = dic["title"]
+        instance.kurztitel = dic["kurztitel"]
+        instance.vorwort = dic["vorwort"]
         instance.created = dic["created"]
         instance.modified = dic["modified"]
         instance.full_text = dic["full_text"]
@@ -39,6 +43,8 @@ class DocumentMeta:
         return {
             "link": self.link,
             "title": self.title,
+            "kurztitel": self.kurztitel,
+            "vorwort": self.vorwort,
             "created": self.created,
             "modified": self.modified,
             "full_text": self.full_text,
@@ -272,6 +278,8 @@ class Document:
                 "link": self.url,
                 "title": title,
                 "modified": modified,
+                "kurztitel": None,
+                "vorwort": None,  # TODO: find out where the vorwort is and extract it
                 "full_text": full_text,
                 "created": created,
                 "hash": doc_hash,
@@ -402,12 +410,13 @@ class Document:
             for ao in hobj["institutionen"]:
                 autoren.append(models.Autor.from_dict({"organisation": ao}))
             self.meta.title = hobj["titel"]
+            self.meta.kurztitel = hobj["kurztitel"]
             self.autoren = autoren
             self.zp_referenz = hobj["date"]
             self.schlagworte = bobj["schlagworte"]
             self.trojanergefahr = bobj["troja"]
             self.zusammenfassung = bobj["summary"]
-            logger.warning(f"gesent response: {self.zusammenfassung}")
+            # logger.warning(f"gesent response: {self.zusammenfassung}")
 
         except Exception as e:
             logger.error(f"Error extracting gesetzentwurf semantics: {e}")
@@ -450,6 +459,7 @@ class Document:
             self.schlagworte = bobj["schlagworte"]
             self.meinung = bobj["meinung"]
             self.zp_referenz = hobj["date"]
+            assert self.meinung is not None
             autoren = []
             for ap in hobj["autoren"]:
                 autoren.append(
@@ -500,6 +510,7 @@ class Document:
                 return
 
             self.meta.title = hobj["titel"]
+            self.meta.kurztitel = hobj["kurztitel"]
             self.schlagworte = bobj["schlagworte"]
             self.meinung = bobj["meinung"]
             self.zp_referenz = hobj["date"]
@@ -572,19 +583,17 @@ class Document:
         # Ensure all required fields are present
         return models.Dokument.from_dict(
             {
-                "titel": self.meta.title or "Ohne Titel",
                 "drucksnr": self.drucksnr,
+                "typ": self.typehint + "",
+                "titel": self.meta.title or "Ohne Titel",
+                "kurztitel": self.meta.kurztitel,
+                "vorwort": self.meta.vorwort,
                 "volltext": self.meta.full_text.strip(),
-                "autoren": self.autoren if self.autoren else [],
-                "schlagworte": deduplicate(
-                    self.schlagworte if self.schlagworte else []
+                "zusammenfassung": (
+                    self.zusammenfassung.strip() if self.zusammenfassung else None
                 ),
-                "hash": self.meta.hash,
                 "zp_modifiziert": datetime.datetime.fromisoformat(
                     self.meta.modified
-                ).astimezone(tz=datetime.UTC),
-                "zp_created": datetime.datetime.fromisoformat(
-                    self.meta.created
                 ).astimezone(tz=datetime.UTC),
                 "zp_referenz": (
                     datetime.datetime.fromisoformat(self.zp_referenz).astimezone(
@@ -593,11 +602,20 @@ class Document:
                     if self.zp_referenz
                     else datetime.datetime.fromisoformat(self.meta.created)
                 ),
+                "zp_erstellt": datetime.datetime.fromisoformat(
+                    self.meta.created
+                ).astimezone(tz=datetime.UTC),
                 "link": self.url,
-                "typ": self.typehint + "",
-                "zusammenfassung": (
-                    self.zusammenfassung.strip() if self.zusammenfassung else None
+                "hash": self.meta.hash,
+                "meinung": (
+                    self.meinung
+                    if self.typehint == models.Doktyp.STELLUNGNAHME
+                    else None
                 ),
+                "schlagworte": deduplicate(
+                    self.schlagworte if self.schlagworte else []
+                ),
+                "autoren": self.autoren if self.autoren else [],
             }
         )
 
