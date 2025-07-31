@@ -178,9 +178,11 @@ class BYLTScraper(VorgangsScraper):
                         "zp_start": timestamp,
                         "dokumente": [],
                         "link": listing_item,
-                        "parlament": "BY",
                         "schlagworte": [],
                         "stellungnahmen": [],
+                        "gremium": Gremium.from_dict(
+                        {"name": "plenum", "parlament": "BY", "wahlperiode": 19}
+                        ),
                         "typ": "postparl-kraft",
                         "trojaner": False,
                         "additional_links": [],
@@ -195,9 +197,6 @@ class BYLTScraper(VorgangsScraper):
                     link = extract_singlelink(cells[1])
                     vg.links.append(link)
                     stat.typ = "parl-initiativ"
-                    stat.gremium = Gremium.from_dict(
-                        {"name": "plenum", "parlament": "BY", "wahlperiode": 19}
-                    )
 
                     dok = await self.create_document(link, Doktyp.ENTWURF)
                     dok.drucksnr = str(inds)
@@ -248,9 +247,6 @@ class BYLTScraper(VorgangsScraper):
                 ## neue station oder merge
                 elif cellclass.startswith("plenum-proto"):
                     pproto = extract_plenproto(cells[1])
-                    gremium = Gremium.from_dict(
-                        {"name": "plenum", "parlament": "BY", "wahlperiode": 19}
-                    )
                     dok = await self.create_document(
                         pproto["pprotoaz"], Doktyp.REDEPROTOKOLL
                     )
@@ -288,9 +284,6 @@ class BYLTScraper(VorgangsScraper):
                     )
                     dok.drucksnr = extract_drucksnr(cells[1])
                     typ = Stationstyp.PARL_MINUS_ZURUECKGZ
-                    gremium = Gremium.from_dict(
-                        {"name": "plenum", "parlament": "BY", "wahlperiode": 19}
-                    )
                     if len(vg.stationen) > 0 and vg.stationen[-1].typ == typ:
                         vg.stationen[-1].typ = typ
                         vg.stationen[-1].dokumente.append(
@@ -312,9 +305,6 @@ class BYLTScraper(VorgangsScraper):
                     dok.drucksnr = extract_drucksnr(cells[1])
                     typ = None
                     trojanergefahr = max(dok.trojanergefahr, 1)
-                    gremium = Gremium.from_dict(
-                        {"name": "plenum", "parlament": "BY", "wahlperiode": 19}
-                    )
                     if cellclass.endswith("zustm"):
                         typ = "parl-akzeptanz"
                     elif cellclass.endswith("ablng"):
@@ -324,13 +314,11 @@ class BYLTScraper(VorgangsScraper):
                         vg.stationen[-1].dokumente.append(
                             StationDokumenteInner(dok.package())
                         )
-                        vg.stationen[-1].gremium = gremium
                         vg.stationen[-1].trojanergefahr = trojanergefahr
                         continue
                     else:
                         stat.typ = typ
                         stat.dokumente = [StationDokumenteInner(dok.package())]
-                        stat.gremium = gremium
                         stat.trojanergefahr = trojanergefahr
                 ## Ausschussberichterstattung
                 ## hat 1 Link: Beschlussempfehlung
