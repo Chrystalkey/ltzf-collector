@@ -1,5 +1,5 @@
 echo "Checking for openapi-generator-cli"
-$VERSION="7.14.0"
+$VERSION="7.13.0"
 
 if (-Not (Test-Path -Path "oapi-generator" -PathType Container)) {
     Write-Host "Creating oapi-generator directory"
