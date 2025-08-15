@@ -265,14 +265,12 @@ class BYLTScraper(VorgangsScraper):
                         vg.stationen[-1].dokumente.append(
                             StationDokumenteInner(dok.package())
                         )
-                        vg.stationen[-1].gremium = gremium
                         if video_link:
                             vg.stationen[-1].additional_links.append(video_link)
                         continue
                     else:
                         stat.typ = typ
                         stat.dokumente = [StationDokumenteInner(dok.package())]
-                        stat.gremium = gremium
                         if video_link:
                             stat.additional_links.append(video_link)
 
@@ -289,12 +287,10 @@ class BYLTScraper(VorgangsScraper):
                         vg.stationen[-1].dokumente.append(
                             StationDokumenteInner(dok.package())
                         )
-                        vg.stationen[-1].gremium = gremium
                         continue
                     else:
                         stat.typ = typ
                         stat.dokumente = [StationDokumenteInner(dok.package())]
-                        stat.gremium = gremium
 
                 ## Plenumsentscheidung
                 ## hat einen Dokumentenlink
