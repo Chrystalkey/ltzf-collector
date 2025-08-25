@@ -1,5 +1,6 @@
 echo "Checking for openapi-generator-cli"
-$VERSION="7.13.0"
+$VERSION="7.14.0"
+$SPEC_PATH="raw.githubusercontent.com/Chrystalkey/landtagszusammenfasser/refs/heads/main/docs/specs/openapi.yml"
 
 if (-Not (Test-Path -Path "oapi-generator" -PathType Container)) {
     Write-Host "Creating oapi-generator directory"
@@ -7,7 +8,7 @@ if (-Not (Test-Path -Path "oapi-generator" -PathType Container)) {
     Set-Location -Path "oapi-generator"
     
     & Invoke-WebRequest -OutFile openapi-generator-cli.jar https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/$VERSION/openapi-generator-cli-$VERSION.jar
-    & Invoke-WebRequest -OutFile openapi.yml raw.githubusercontent.com/Chrystalkey/landtagszusammenfasser/refs/heads/dev-specchange/docs/specs/openapi.yml
+    & Invoke-WebRequest -OutFile openapi.yml $SPEC_PATH
     Set-Location -Path ".."
 }
 if (-Not (Test-Path -Path "oapi-generator/openapi-generator-cli.jar" -PathType Leaf)) {
@@ -19,7 +20,7 @@ if (-Not (Test-Path -Path "oapi-generator/openapi-generator-cli.jar" -PathType L
 if (-Not (Test-Path -Path "oapi-generator/openapi.yml" -PathType Leaf)) {
     Write-Host "Downloading OApi Spec"
     Set-Location -Path "oapi-generator"
-    & Invoke-WebRequest -OutFile openapi.yml raw.githubusercontent.com/Chrystalkey/landtagszusammenfasser/refs/heads/dev-specchange/docs/specs/openapi.yml
+    & Invoke-WebRequest -OutFile openapi.yml $SPEC_PATH
     Set-Location -Path ".."
 }
 
