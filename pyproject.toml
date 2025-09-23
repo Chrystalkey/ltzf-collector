@@ -13,7 +13,7 @@ requests = "^2.32.3"
 pydantic = "^2.9.2"
 aiohttp = "^3.11.10"
 redis = "^5.2.1"
-litellm = "^1.57.4"
+litellm = "^1.67"
 pytest-asyncio = "^0.25.2"
 pypdf = "^5.1.0"
 openapi-client = {path = "oapicode"}
@@ -21,6 +21,7 @@ jsondiff = "^2.2.1"
 kreuzberg = "^3.0.1"
 toml = "^0.10.2"
 dotenv = "^0.9.9"
+jsonschema = "^4.25.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"

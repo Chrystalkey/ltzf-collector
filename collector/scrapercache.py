@@ -2,7 +2,7 @@ from datetime import timedelta
 import json
 from openapi_client import models
 from collector.convert import sanitize_for_serialization
-from collector.document import Document
+from collector.document_builder import *
 from pathlib import Path
 from typing import Optional, Dict, Any
 import logging
@@ -87,7 +87,7 @@ class ScraperCache:
         key = f"vg:{key}"
         return self.store_raw(key, value, "Vorgang")
 
-    def store_dokument(self, key: str, value: Document, expiry: int = None):
+    def store_dokument(self, key: str, value: DocumentBuilder, expiry: int = None):
         """Store Document data in Redis cache
 
         Only caches documents that were successfully downloaded and processed
@@ -112,12 +112,12 @@ class ScraperCache:
             return None
         return models.Vorgang.from_json(ret)
 
-    def get_dokument(self, key: str) -> Optional[Document]:
+    def get_dokument(self, key: str) -> Optional[DocumentBuilder]:
         key = f"dok:{key}"
         ret = self.get_raw(key, "Dokument")
         if ret is None:
             return None
-        return Document.from_json(ret)
+        return DocumentBuilder.from_json(ret)
 
     def store_html(self, key: str, value: str, expiry: int = None):
         key = f"html:{key}"
