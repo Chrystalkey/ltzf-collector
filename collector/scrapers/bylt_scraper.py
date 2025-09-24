@@ -12,8 +12,8 @@ from bs4 import BeautifulSoup
 import openapi_client.models as models
 from collector.interface import VorgangsScraper
 
-# from collector.document import Document
-from by_dok import *
+
+from collector.scrapers.by_dok import *
 import toml
 
 logger = logging.getLogger(__name__)

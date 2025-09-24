@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 
 import openapi_client.models as models
 from collector.interface import SitzungsScraper
-from collector.document import Document
+from collector.scrapers.by_dok import ByTagesordnung
 import toml
 
 logger = logging.getLogger(__name__)
@@ -142,9 +142,10 @@ class BYLTSitzungScraper(SitzungsScraper):
                 sitz_dict["nummer"] = int(parse_qs(parsed_url.query)["sitzungsnr"][0])
 
                 ## general document parsing
-                dok = Document(self.session, doc_link, tphint, self.config)
-                await dok.run_extraction()
-                sitz_dict["dokumente"].append(dok.package())
+                dok = await ByTagesordnung(
+                    tphint, doc_link, self.session, self.config
+                ).build()
+                sitz_dict["dokumente"].append(dok)
                 internal_docs.append(dok)
             ## extract TOPS from the last TOPList
             if len(internal_docs) == 0:
@@ -197,7 +198,7 @@ class BYLTSitzungScraper(SitzungsScraper):
             logger.error(f"Error extracting Experts from Document: {e}")
             return []
 
-    async def extract_tops(self, doc: Document) -> List[models.Top]:
+    async def extract_tops(self, doc: ByTagesordnung) -> List[models.Top]:
         extraction_prompt = """Du erhältst gleich die Tagesordnung einer Ausschusssitzung oder Plenarsitzung. Analysiere die Tagesordnung und ermittle alle Tagesordnungspunkte über die beraten wurde und Erstelle ein JSON-Objekt mit dem Namen TOP. 
         Bilde für jeden Gesetzentwurf einen JSON-Datensatz mit folgenden Parametern:
 

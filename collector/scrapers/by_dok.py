@@ -1,4 +1,4 @@
-from document_builder import *
+from collector.document_builder import *
 import logging
 import datetime
 import hashlib
@@ -24,8 +24,10 @@ class BayernDokument(DocumentBuilder):
         self.zp_erstellt = None
         self.zp_modifiziert = None
         self.fileid = uuid4()
+        self.trojanergefahr = None
+        self.tops = None
         super().__init__(typehint, url, session, config)
-    
+
     async def extract_metadata(self):
         try:
             doc_hash = None
@@ -95,6 +97,19 @@ class BayernDokument(DocumentBuilder):
                 f"Failed to remove temporary PDF file. Exception ignored: {e}"
             )
 
+    def to_dict(self) -> dict:
+        dic = super().to_dict()
+        dic.update({"trojanergefahr": self.trojanergefahr, "tops": self.tops})
+        return dic
+
+    @classmethod
+    def from_dict(cls, dic):
+        inst = super().from_dict(dic)
+        inst.trojanergefahr = dic["trojanergefahr"]
+        inst.tops = dic["tops"]
+        return inst
+
+
 HEADER_PROMPT = """Extrahiere aus dem folgenden Auszug aus einem Gesetzentwurf folgende Eckdaten als JSON:
         {"titel": "Offizieller Titel des Dokuments", "kurztitel": "zusammenfassung des titels in einfacher Sprache", "date": "datum auf das sich das Dokument bezieht im ISO-Format YYYY-mm-DDTHH:MM:SSZ und Zeitzone UTC",
          "autoren": [{"person": "name einer person", organisation: "name der organisation der die person angehört"}], "institutionen": ["liste von institutionen von denen das dokument stammt"]}
@@ -125,6 +140,7 @@ HEADER_SCHEMA = {
     },
     "required": ["titel", "kurztitel", "date", "autoren", "institutionen"],
 }
+
 
 class ByGesetzentwurf(BayernDokument):
     def __init__(self, typehint, url, drucksnr, session, config):
@@ -355,7 +371,6 @@ class ByBeschlussempfehlung(BayernDokument):
 
 class ByRedeprotokoll(BayernDokument):
     def __init__(self, typehint, url, session, config):
-        self.trojanergefahr = None
         return super()._init_(typehint, url, session, config)
 
     async def extract_semantics(self):
@@ -497,9 +512,7 @@ class ByMitteilung(BayernDokument):
 
 
 class ByTagesordnung(BayernDokument):
-    def __init__(self, typehint, url, drucksnr, session, config):
-        self.drucksnr = drucksnr
-        self.trojanergefahr = None
+    def __init__(self, typehint, url, session, config):
         return super()._init_(typehint, url, session, config)
 
     async def extract_semantics(self):
@@ -532,7 +545,7 @@ class ByTagesordnung(BayernDokument):
                 },
                 "institutionen": {"type": "array", "items": {"type": "string"}},
                 "nummer": {"type": "integer"},
-                "public": {"type": "boolean"}
+                "public": {"type": "boolean"},
             },
             "required": ["titel", "kurztitel", "date", "autoren", "institutionen"],
         }
@@ -548,14 +561,20 @@ class ByTagesordnung(BayernDokument):
             "properties": {
                 "schlagworte": {"type": "array", "items": {"type": "string"}},
                 "summary": {"type": "string"},
-                "tops": {"type": "array", "items": {
-                    "type": "object",
-                    "properties": {
-                        "titel": {"type": "string"},
-                        "drucksachen": {"type": "array", "items": {"type": "string"}}
+                "tops": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "titel": {"type": "string"},
+                            "drucksachen": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                            },
+                        },
+                        "required": ["schlagworte, summary", "tops"],
                     },
-                    "required": ["schlagworte, summary", "tops"]
-                }}
+                },
             },
             "required": ["schlagworte", "summary", "tops"],
         }
@@ -585,12 +604,10 @@ class ByTagesordnung(BayernDokument):
             zp_referenz = datetime.fromisoformat(hdr["date"]).astimezone(
                 tz=datetime.UTC
             )
-            raise "TODO"
             self.tops = bdy["tops"]
             self.output = models.Dokument.from_dict(
                 {
                     "typ": self.typehint,
-                    "drucksnr": self.drucksnr,
                     "titel": hdr["titel"],
                     "volltext": self.full_text,
                     "autoren": autoren,

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class DocumentBuilder(ABC):
-    def __init__(self, typehint: models.Doktyp, url, session,  config):
+    def __init__(self, typehint: models.Doktyp, url, session, config):
         self.output = None
         self.config = config
         self.corrupted = False
@@ -18,14 +18,14 @@ class DocumentBuilder(ABC):
         self.output = None
 
     def to_dict(self) -> dict:
-        return {
-            "output": self.output.to_dict()
-        }        
+        return {"output": self.output.to_dict()}
 
     @classmethod
     def from_dict(cls, dic):
         inst = cls(None, None, None, None)
-        inst.output = models.Dokument.from_dict(dic["output"]) if dic["output"] else None
+        inst.output = (
+            models.Dokument.from_dict(dic["output"]) if dic["output"] else None
+        )
         return inst
 
     async def download(self) -> Path:
@@ -68,7 +68,9 @@ class DocumentBuilder(ABC):
         logger.info(f"Extracting {self.fileid}.pdf / {self.url}")
         await self.extract()
         if self.corrupted:
-            logger.warning(f"Document with URL {self.url} was corrupted during extraction")
+            logger.warning(
+                f"Document with URL {self.url} was corrupted during extraction"
+            )
             self.output = None
         logger.info(f"Storing {self.url} in cache")
         self.config.cache.store_dokument(self.url, self)
