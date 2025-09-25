@@ -53,4 +53,4 @@ COPY collector ./collector
 
 VOLUME /app/locallogs
 
-ENTRYPOINT ["python", "-m", "collector.main"]
+ENTRYPOINT ["python", "-m", "collector"]

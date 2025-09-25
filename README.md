@@ -7,7 +7,7 @@ The project uses the dotenv module and .env files are in the .gitignore, so that
 
 Required for an actual run are the `LTZF_API_KEY` and the `OPENAI_API_KEY` variables, without which the collector will not start.
 
-- To execute the collector in the correct environment, run `poetry run python -m collector.main`
+- To execute the collector in the correct environment, run `poetry run python -m collector`
 - To format the code (please do before committing), run `poetry run black .`
 - To test your code you might want to run `poetry run pytest`
 
