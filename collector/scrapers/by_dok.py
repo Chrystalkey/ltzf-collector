@@ -1,10 +1,12 @@
+import re
 from collector.document_builder import *
 import logging
 import datetime
 import hashlib
 import os
-from uuid import uuid4
+import uuid
 from kreuzberg import ExtractionConfig, extract_file, TesseractConfig, PSMMode
+import toml
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +16,68 @@ def schlagwort_format(x: list[str]) -> list:
 
 
 def dedup(x: list) -> list:
-    return list(set(x))
+    out = []
+    for val in x:
+        if not val in out:
+            out.append(val)
+    return out
+
+
+def pretransform_standard():
+    input_dictionary = toml.load(
+        os.path.join(os.path.dirname(__file__), "bylt_standardization.toml")
+    )
+    matches = {}
+    for matchentry in input_dictionary["org"]["match"]:
+        for match in matchentry["match"]:
+            matches[match] = matchentry["replace_with"]
+    output = {
+        "org": {"regex": input_dictionary["org"]["regex"], "match": matches},
+    }
+    return output
+
+
+standard_dictionary = pretransform_standard()
+
+
+def sanitize_orga(word: str) -> str:
+    global standard_dictionary
+
+    torgs = standard_dictionary["org"]
+    regex = torgs["regex"]
+    mrep = torgs["match"]
+
+    replaced = word.strip()
+    modified = False
+    for rx in regex:
+        if rx.get("partial"):
+            if re.search(rx["partial"], replaced):
+                modified = True
+                replaced = re.sub(rx["partial"], rx["replace_with"], replaced)
+        elif rx.get("full"):
+            if re.fullmatch(rx["full"], replaced):
+                modified = True
+                replaced = rx["replace_with"]
+        else:
+            raise Exception(
+                "Expected one of `partial`,`full` in regex entry of standardization dictionary"
+            )
+    if modified:
+        word = replaced
+    replmatch_prep = word.lower().strip()
+    if replmatch_prep in mrep.keys():
+        return mrep[replmatch_prep]
+    else:
+        return word
+
+
+def sanitize_author(a: models.Autor) -> models.Autor:
+    a.organisation = sanitize_orga(a.organisation)
+    return a
+
+
+def sanitize_authors(l: list) -> list:
+    return dedup([sanitize_author(a) for a in l])
 
 
 class BayernDokument(DocumentBuilder):
@@ -23,7 +86,7 @@ class BayernDokument(DocumentBuilder):
         self.hash = None
         self.zp_erstellt = None
         self.zp_modifiziert = None
-        self.fileid = uuid4()
+        self.fileid = uuid.uuid4()
         self.trojanergefahr = None
         self.tops = None
         super().__init__(typehint, url, session, config)
@@ -55,7 +118,7 @@ class BayernDokument(DocumentBuilder):
             created = (
                 extract.metadata.get("created_at")
                 if extract.metadata.get("created_at")
-                else datetime.datetime.now().astimezone(datetime.UTC).isoformat()
+                else datetime.datetime.now(datetime.UTC).isoformat()
             )
             if created.startswith("D:"):
                 if created[17:19] != "":
@@ -65,7 +128,7 @@ class BayernDokument(DocumentBuilder):
             modified = (
                 extract.metadata.get("modified_at")
                 if extract.metadata.get("modified_at")
-                else datetime.datetime.now().astimezone(datetime.UTC).isoformat()
+                else datetime.datetime.now(datetime.UTC).isoformat()
             )
             if modified.startswith("D:"):
                 if modified[17:19] != "":
@@ -101,7 +164,7 @@ class BayernDokument(DocumentBuilder):
         dic = super().to_dict()
         dic.update(
             {
-                "fileid": self.fileid,
+                "fileid": str(self.fileid),
                 "trojanergefahr": self.trojanergefahr,
                 "tops": self.tops,
             }
@@ -111,16 +174,18 @@ class BayernDokument(DocumentBuilder):
     @classmethod
     def from_dict(cls, dic):
         inst = super().from_dict(dic)
-        inst.fileid = dic["fileid"]
+        inst.fileid = uuid.UUID(dic["fileid"])
         inst.trojanergefahr = dic["trojanergefahr"]
         inst.tops = dic["tops"]
         return inst
 
 
 HEADER_PROMPT = """Extrahiere aus dem folgenden Auszug aus einem Gesetzentwurf folgende Eckdaten als JSON:
-        {"titel": "Offizieller Titel des Dokuments", "kurztitel": "zusammenfassung des titels in einfacher Sprache", "date": "datum auf das sich das Dokument bezieht im ISO-Format YYYY-mm-DDTHH:MM:SSZ und Zeitzone UTC",
-         "autoren": [{"person": "name einer person", organisation: "name der organisation der die person angehört"}], "institutionen": ["liste von institutionen von denen das dokument stammt"]}
-         Sollten sich einige Informationen nicht extrahieren lassen, füge einfach keinen Eintrag hinzu (autor/institution) oder füge "Unbekannt" ein. Halluziniere unter keinen Umständen nicht vorhandene Informationen.
+        {"titel": "Offizieller Titel des Dokuments", "kurztitel": "zusammenfassung des titels in einfacher Sprache", 
+        "date": "datum auf das sich das Dokument bezieht im ISO-Format YYYY-mm-DDTHH:MM:SSZ und Zeitzone UTC",
+         "autoren": [{"person": "name einer person", organisation: "name der organisation der die person angehört"}], 
+         "institutionen": ["liste von institutionen von denen das dokument stammt"]}
+         Sollten sich einige Informationen nicht extrahieren lassen, füge einfach standardwerte (autor/institution = leere Liste) oder füge "Unbekannt" ein. Halluziniere unter keinen Umständen nicht vorhandene Informationen.
           Antworte mit nichts anderem als den gefragen Informationen, formatiere sie nicht gesondert. END PROMPT\n
         """
 HEADER_SCHEMA = {
@@ -153,7 +218,7 @@ class ByGesetzentwurf(BayernDokument):
     def __init__(self, typehint, url, drucksnr, session, config):
         self.drucksnr = drucksnr
         self.trojanergefahr = None
-        return super()._init_(typehint, url, session, config)
+        return super().__init__(typehint, url, session, config)
 
     async def extract_semantics(self):
         global HEADER_PROMPT, HEADER_SCHEMA
@@ -174,31 +239,37 @@ class ByGesetzentwurf(BayernDokument):
         }
 
         try:
-            hdr = self.config.llm_connector.extract_info(
+            hdr = await self.config.llm_connector.extract_info(
                 self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_PROMPT,
                 HEADER_SCHEMA,
+                f"hdr-entwurf:{self.url}",
+                self.config.cache,
             )
-            bdy = self.config.llm_connector.extract_info(
-                self.full_text, body_prompt, body_schema
+            bdy = await self.config.llm_connector.extract_info(
+                self.full_text,
+                body_prompt,
+                body_schema,
+                f"bdy-entwurf:{self.url}",
+                self.config.cache,
             )
-            autoren = dedup(
-                [
-                    models.Autor.from_dict(
-                        {"person": a["person"], "organisation": a["organisation"]}
-                    )
-                    for a in hdr["autoren"]
-                ].extend(
-                    [
-                        models.Autor.from_dict({"organisation": a})
-                        for a in hdr["institutionen"]
-                    ]
+            autoren = [
+                models.Autor.from_dict(
+                    {"person": a["person"], "organisation": a["organisation"]}
                 )
+                for a in hdr["autoren"]
+            ]
+            autoren.extend(
+                [
+                    models.Autor.from_dict({"organisation": a})
+                    for a in hdr["institutionen"]
+                ]
             )
-            zp_referenz = datetime.fromisoformat(hdr["date"]).astimezone(
+            autoren = sanitize_authors(autoren)
+
+            zp_referenz = datetime.datetime.fromisoformat(hdr["date"]).astimezone(
                 tz=datetime.UTC
             )
-
             self.trojanergefahr = int(bdy["troja"])
             self.output = models.Dokument.from_dict(
                 {
@@ -222,12 +293,13 @@ class ByGesetzentwurf(BayernDokument):
                 f"LLM Response was inadequate or contained ill-formatted fields even after retry"
             )
             self.corrupted = True
+            raise
 
 
 class ByStellungnahme(BayernDokument):
     def __init__(self, typehint, url, session, config):
         self.trojanergefahr = None
-        return super()._init_(typehint, url, session, config)
+        return super().__init__(typehint, url, session, config)
 
     async def extract_semantics(self):
         global HEADER_SCHEMA, HEADER_PROMPT
@@ -249,28 +321,34 @@ class ByStellungnahme(BayernDokument):
         }
 
         try:
-            hdr = self.config.llm_connector.extract_info(
+            hdr = await self.config.llm_connector.extract_info(
                 self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_PROMPT,
                 HEADER_SCHEMA,
+                f"hdr-stln:{self.url}",
+                self.config.cache,
             )
-            bdy = self.config.llm_connector.extract_info(
-                self.full_text, body_prompt, body_schema
+            bdy = await self.config.llm_connector.extract_info(
+                self.full_text,
+                body_prompt,
+                body_schema,
+                f"bdy-stln:{self.url}",
+                self.config.cache,
             )
-            autoren = dedup(
-                [
-                    models.Autor.from_dict(
-                        {"person": a["person"], "organisation": a["organisation"]}
-                    )
-                    for a in hdr["autoren"]
-                ].extend(
-                    [
-                        models.Autor.from_dict({"organisation": a})
-                        for a in hdr["institutionen"]
-                    ]
+            autoren = [
+                models.Autor.from_dict(
+                    {"person": a["person"], "organisation": a["organisation"]}
                 )
+                for a in hdr["autoren"]
+            ]
+            autoren.extend(
+                [
+                    models.Autor.from_dict({"organisation": a})
+                    for a in hdr["institutionen"]
+                ]
             )
-            zp_referenz = datetime.fromisoformat(hdr["date"]).astimezone(
+            autoren = sanitize_authors(autoren)
+            zp_referenz = datetime.datetime.fromisoformat(hdr["date"]).astimezone(
                 tz=datetime.UTC
             )
             self.output = models.Dokument.from_dict(
@@ -295,13 +373,14 @@ class ByStellungnahme(BayernDokument):
                 f"LLM Response was inadequate or contained ill-formatted fields even after retry"
             )
             self.corrupted = True
+            raise
 
 
 class ByBeschlussempfehlung(BayernDokument):
     def __init__(self, typehint, url, drucksnr, session, config):
         self.drucksnr = drucksnr
         self.trojanergefahr = None
-        return super()._init_(typehint, url, session, config)
+        return super().__init__(typehint, url, session, config)
 
     async def extract_semantics(self):
         global HEADER_SCHEMA, HEADER_PROMPT
@@ -325,31 +404,37 @@ class ByBeschlussempfehlung(BayernDokument):
         }
 
         try:
-            hdr = self.config.llm_connector.extract_info(
+            hdr = await self.config.llm_connector.extract_info(
                 self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_PROMPT,
                 HEADER_SCHEMA,
+                f"hdr-beschlempf:{self.url}",
+                self.config.cache,
             )
-            bdy = self.config.llm_connector.extract_info(
-                self.full_text, body_prompt, body_schema
+            bdy = await self.config.llm_connector.extract_info(
+                self.full_text,
+                body_prompt,
+                body_schema,
+                f"bdy-beschlempf:{self.url}",
+                self.config.cache,
             )
-            autoren = dedup(
-                [
-                    models.Autor.from_dict(
-                        {"person": a["person"], "organisation": a["organisation"]}
-                    )
-                    for a in hdr["autoren"]
-                ].extend(
-                    [
-                        models.Autor.from_dict({"organisation": a})
-                        for a in hdr["institutionen"]
-                    ]
+            autoren = [
+                models.Autor.from_dict(
+                    {"person": a["person"], "organisation": a["organisation"]}
                 )
+                for a in hdr["autoren"]
+            ]
+            autoren.extend(
+                [
+                    models.Autor.from_dict({"organisation": a})
+                    for a in hdr["institutionen"]
+                ]
             )
-            zp_referenz = datetime.fromisoformat(hdr["date"]).astimezone(
+            autoren = sanitize_authors(autoren)
+            zp_referenz = datetime.datetime.fromisoformat(hdr["date"]).astimezone(
                 tz=datetime.UTC
             )
-
+            logger.error(f"Body Object: {bdy}")
             self.trojanergefahr = int(bdy["troja"])
             self.output = models.Dokument.from_dict(
                 {
@@ -374,11 +459,12 @@ class ByBeschlussempfehlung(BayernDokument):
                 f"LLM Response was inadequate or contained ill-formatted fields even after retry"
             )
             self.corrupted = True
+            raise
 
 
 class ByRedeprotokoll(BayernDokument):
     def __init__(self, typehint, url, session, config):
-        return super()._init_(typehint, url, session, config)
+        return super().__init__(typehint, url, session, config)
 
     async def extract_semantics(self):
         global HEADER_SCHEMA, HEADER_PROMPT
@@ -397,28 +483,34 @@ class ByRedeprotokoll(BayernDokument):
         }
 
         try:
-            hdr = self.config.llm_connector.extract_info(
+            hdr = await self.config.llm_connector.extract_info(
                 self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_PROMPT,
                 HEADER_SCHEMA,
+                f"hdr-rproto:{self.url}",
+                self.config.cache,
             )
-            bdy = self.config.llm_connector.extract_info(
-                self.full_text, body_prompt, body_schema
+            bdy = await self.config.llm_connector.extract_info(
+                self.full_text,
+                body_prompt,
+                body_schema,
+                f"bdy-rproto:{self.url}",
+                self.config.cache,
             )
-            autoren = dedup(
-                [
-                    models.Autor.from_dict(
-                        {"person": a["person"], "organisation": a["organisation"]}
-                    )
-                    for a in hdr["autoren"]
-                ].extend(
-                    [
-                        models.Autor.from_dict({"organisation": a})
-                        for a in hdr["institutionen"]
-                    ]
+            autoren = [
+                models.Autor.from_dict(
+                    {"person": a["person"], "organisation": a["organisation"]}
                 )
+                for a in hdr["autoren"]
+            ]
+            autoren.extend(
+                [
+                    models.Autor.from_dict({"organisation": a})
+                    for a in hdr["institutionen"]
+                ]
             )
-            zp_referenz = datetime.fromisoformat(hdr["date"]).astimezone(
+            autoren = sanitize_authors(autoren)
+            zp_referenz = datetime.datetime.fromisoformat(hdr["date"]).astimezone(
                 tz=datetime.UTC
             )
 
@@ -443,13 +535,14 @@ class ByRedeprotokoll(BayernDokument):
                 f"LLM Response was inadequate or contained ill-formatted fields even after retry"
             )
             self.corrupted = True
+            raise
 
 
 class ByMitteilung(BayernDokument):
     def __init__(self, typehint, url, drucksnr: str, session, config):
         self.trojanergefahr = None
         self.drucksnr = drucksnr
-        return super()._init_(typehint, url, session, config)
+        return super().__init__(typehint, url, session, config)
 
     async def extract_semantics(self):
         global HEADER_SCHEMA, HEADER_PROMPT
@@ -469,28 +562,34 @@ class ByMitteilung(BayernDokument):
         }
 
         try:
-            hdr = self.config.llm_connector.extract_info(
+            hdr = await self.config.llm_connector.extract_info(
                 self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_PROMPT,
                 HEADER_SCHEMA,
+                f"hdr-mitt:{self.url}",
+                self.config.cache,
             )
-            bdy = self.config.llm_connector.extract_info(
-                self.full_text, body_prompt, body_schema
+            bdy = await self.config.llm_connector.extract_info(
+                self.full_text,
+                body_prompt,
+                body_schema,
+                f"bdy-mitt:{self.url}",
+                self.config.cache,
             )
-            autoren = dedup(
-                [
-                    models.Autor.from_dict(
-                        {"person": a["person"], "organisation": a["organisation"]}
-                    )
-                    for a in hdr["autoren"]
-                ].extend(
-                    [
-                        models.Autor.from_dict({"organisation": a})
-                        for a in hdr["institutionen"]
-                    ]
+            autoren = [
+                models.Autor.from_dict(
+                    {"person": a["person"], "organisation": a["organisation"]}
                 )
+                for a in hdr["autoren"]
+            ]
+            autoren.extend(
+                [
+                    models.Autor.from_dict({"organisation": a})
+                    for a in hdr["institutionen"]
+                ]
             )
-            zp_referenz = datetime.fromisoformat(hdr["date"]).astimezone(
+            autoren = sanitize_authors(autoren)
+            zp_referenz = datetime.datetime.fromisoformat(hdr["date"]).astimezone(
                 tz=datetime.UTC
             )
 
@@ -516,11 +615,12 @@ class ByMitteilung(BayernDokument):
                 f"LLM Response was inadequate or contained ill-formatted fields even after retry"
             )
             self.corrupted = True
+            raise
 
 
 class ByTagesordnung(BayernDokument):
     def __init__(self, typehint, url, session, config):
-        return super()._init_(typehint, url, session, config)
+        return super().__init__(typehint, url, session, config)
 
     async def extract_semantics(self):
         header_prompt = """Du wirst einen Auszug aus einer Ankündigung einer Sitzung erhalten. Extrahiere daraus die Daten, die in folgendem JSON-Pseudo Code beschrieben werden:
@@ -587,28 +687,34 @@ class ByTagesordnung(BayernDokument):
         }
 
         try:
-            hdr = self.config.llm_connector.extract_info(
+            hdr = await self.config.llm_connector.extract_info(
                 self.full_text[0 : min(3000, len(self.full_text))],
                 header_prompt,
                 header_schema,
+                f"hdr-tops:{self.url}",
+                self.config.cache,
             )
-            bdy = self.config.llm_connector.extract_info(
-                self.full_text, body_prompt, body_schema
+            bdy = await self.config.llm_connector.extract_info(
+                self.full_text,
+                body_prompt,
+                body_schema,
+                f"bdy-tops:{self.url}",
+                self.config.cache,
             )
-            autoren = dedup(
-                [
-                    models.Autor.from_dict(
-                        {"person": a["person"], "organisation": a["organisation"]}
-                    )
-                    for a in hdr["autoren"]
-                ].extend(
-                    [
-                        models.Autor.from_dict({"organisation": a})
-                        for a in hdr["institutionen"]
-                    ]
+            autoren = [
+                models.Autor.from_dict(
+                    {"person": a["person"], "organisation": a["organisation"]}
                 )
+                for a in hdr["autoren"]
+            ]
+            autoren.extend(
+                [
+                    models.Autor.from_dict({"organisation": a})
+                    for a in hdr["institutionen"]
+                ]
             )
-            zp_referenz = datetime.fromisoformat(hdr["date"]).astimezone(
+            autoren = sanitize_authors(autoren)
+            zp_referenz = datetime.datetime.fromisoformat(hdr["date"]).astimezone(
                 tz=datetime.UTC
             )
             self.tops = bdy["tops"]
@@ -633,3 +739,4 @@ class ByTagesordnung(BayernDokument):
                 f"LLM Response was inadequate or contained ill-formatted fields even after retry"
             )
             self.corrupted = True
+            raise

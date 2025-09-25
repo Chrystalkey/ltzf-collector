@@ -2,6 +2,7 @@ import importlib.util
 import logging
 import os
 import time
+import uuid
 
 import aiohttp
 import asyncio
@@ -38,6 +39,8 @@ async def main(config: CollectorConfiguration):
 
 def load_scrapers(config, session):
     scrapers = []
+    coll_id = uuid.UUID(config.collector_id)
+    logger.info(f"Set Collector ID to {coll_id}")
     for filename in os.listdir(config.scrapers_dir):
         if filename.endswith("_scraper.py"):
             module_name = filename[:-3]
@@ -59,14 +62,14 @@ def load_scrapers(config, session):
                     and not isinstance(cls, module.__class__)
                 ):
                     logger.info(f"Found scraper: {cls.__name__}")
-                    scrapers.append(cls(config, session))
+                    scrapers.append(cls(coll_id, config, session))
     return scrapers
 
 
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s | %(levelname)s: \t%(filename)s: \t\t%(message)s",
+        format="%(asctime)s | %(levelname)-8s: %(filename)-20s: %(message)s",
     )
     logger.info("Starting collector manager.")
     config = CollectorConfiguration(None, None, False)

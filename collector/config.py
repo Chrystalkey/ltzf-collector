@@ -21,6 +21,7 @@ class CollectorConfiguration:
     trojan_threshold: int = None
     cache: ScraperCache = None
     testing_mode: int = None
+    collector_id: str = None
 
     def __init__(self, api_key, openai_api_key, testing_mode=False):
         global logger
@@ -46,6 +47,7 @@ class CollectorConfiguration:
         )
         # Thresholds and optionals
         self.api_obj_log = os.getenv("API_OBJ_LOG")
+        self.collector_id = os.getenv("COLLECTOR_ID")
 
         # OpenAPI Configuration
         self.oapiconfig = Configuration(host=self.database_url)

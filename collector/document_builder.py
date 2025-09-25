@@ -15,10 +15,10 @@ class DocumentBuilder(ABC):
         self.url = url
         self.session = session
         self.typehint = typehint
-        self.output = None
+        self.output: models.Dokument = None
 
     def to_dict(self) -> dict:
-        return {"output": self.output.to_dict()}
+        return {"output": self.output.to_dict() if self.output else None}
 
     @classmethod
     def from_dict(cls, dic):
@@ -41,11 +41,9 @@ class DocumentBuilder(ABC):
         if not out.exists() or out.stat().st_size == 0:
             raise Exception("Downloaded file is empty or doesn't exist")
 
-    @abstractmethod
     async def extract_metadata(self):
         assert False, "Abstract Method Called"
 
-    @abstractmethod
     async def extract_semantics(self):
         assert False, "Abstract Method Called"
 
@@ -77,7 +75,7 @@ class DocumentBuilder(ABC):
         return self.output
 
     def to_json(self) -> dict:
-        return json.dumps(self.to_dict())
+        return json.dumps(self.to_dict(), default=str)
 
     @classmethod
     def from_json(cls, jstr: str):

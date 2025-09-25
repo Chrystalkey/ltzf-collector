@@ -15,6 +15,7 @@ from collector.config import CollectorConfiguration
 
 import openapi_client
 from openapi_client import models
+from openapi_client.api import vorgang_api
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,6 @@ class Scraper(ABC):
         logger.info(
             f"Initialized {self.__class__.__name__} with {len(self.listing_urls)} listing urls"
         )
-        logger.info(f"Set Collector ID to {self.collector_id}")
 
     # Process Listing Page URLs
     # This takes in a list of listing page urls and outputs
@@ -83,6 +83,7 @@ class Scraper(ABC):
     async def helper_extract_send_item(self, item):
         """Process an item by extracting and sending it to the API"""
         extracted_item = await self.item_extractor(item)
+        logger.info(f"Extracted Item {item}")
         if extracted_item:
             sent_item = await self.send_result(extracted_item)
             return (sent_item, item)
@@ -113,7 +114,9 @@ class Scraper(ABC):
         )
         temp_res = []
         try:
-            temp_res = await asyncio.gather(*tasks, return_exceptions=True)
+            # temp_res = await asyncio.gather(*tasks, return_exceptions=True)
+            for task in tasks:
+                temp_res.append(await task)
         except Exception as e:
             logger.error(
                 f"{self.__class__.__name__}: Error during item extraction gathering: {e}",
@@ -247,7 +250,7 @@ class VorgangsScraper(Scraper):
                     logger.info(f"Creating Filepath: {filepath.parent}")
                     filepath.parent.mkdir(parents=True)
                 with filepath.open("a", encoding="utf-8") as file:
-                    file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
+                    file.write(json.dumps(item, default=str) + ",\n")
             except Exception as e:
                 logger.error(f"Failed to write to API object log: {e}")
 
@@ -261,7 +264,7 @@ class VorgangsScraper(Scraper):
 
         # Send to API
         with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
-            api_instance = openapi_client.DefaultApi(api_client)
+            api_instance = vorgang_api.VorgangApi(api_client)
             try:
                 ret = api_instance.vorgang_put(str(self.collector_id), item)
                 logger.info(f"API Response: {ret}")
@@ -306,7 +309,7 @@ class SitzungsScraper(Scraper):
                     logger.info(f"Creating Filepath: {filepath.parent}")
                     filepath.parent.mkdir(parents=True)
                 with filepath.open("a", encoding="utf-8") as file:
-                    file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
+                    file.write(json.dumps(item, default=str) + ",\n")
             except Exception as e:
                 logger.error(f"Failed to write to API object log: {e}")
 
