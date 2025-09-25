@@ -99,12 +99,19 @@ class BayernDokument(DocumentBuilder):
 
     def to_dict(self) -> dict:
         dic = super().to_dict()
-        dic.update({"trojanergefahr": self.trojanergefahr, "tops": self.tops})
+        dic.update(
+            {
+                "fileid": self.fileid,
+                "trojanergefahr": self.trojanergefahr,
+                "tops": self.tops,
+            }
+        )
         return dic
 
     @classmethod
     def from_dict(cls, dic):
         inst = super().from_dict(dic)
+        inst.fileid = dic["fileid"]
         inst.trojanergefahr = dic["trojanergefahr"]
         inst.tops = dic["tops"]
         return inst
