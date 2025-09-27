@@ -4,6 +4,7 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from datetime import timedelta
+import sys
 from typing import Any, List, Optional, Set, Tuple
 from uuid import UUID
 from pathlib import Path
@@ -85,7 +86,11 @@ class Scraper(ABC):
         extracted_item = await self.item_extractor(item)
         logger.info(f"Extracted Item {item}")
         if extracted_item:
+            ## because: If sent_item is None something went wrong
             sent_item = await self.send_result(extracted_item)
+            ## cache the shit out of the items
+            key = await self.make_cache_key(item)
+            await self.store_extracted_result(key, extracted_item)
             return (sent_item, item)
         else:
             return None
@@ -137,11 +142,7 @@ class Scraper(ABC):
         for result in results:
             if result and not isinstance(result, Exception) and result[0]:
                 extracted_item = result[0]
-                input_item = result[1]
                 output.append(extracted_item)
-
-                key = await self.make_cache_key(input_item)
-                await self.store_extracted_result(key, extracted_item)
 
                 success_count += 1
             elif not result or (not isinstance(result, Exception) and not result[0]):
@@ -171,7 +172,7 @@ class Scraper(ABC):
         # Process + send all items them
         rset = await self.process_items(iset)
 
-        # send all items to the backend
+        # do cleanup and logging, post-action
         await self.process_results(rset)
 
     # abstract method to be implemented below. Taking in an item,
@@ -266,8 +267,8 @@ class VorgangsScraper(Scraper):
         with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
             api_instance = vorgang_api.VorgangApi(api_client)
             try:
-                ret = api_instance.vorgang_put(str(self.collector_id), item)
-                logger.info(f"API Response: {ret}")
+                api_instance.vorgang_put(str(self.collector_id), item)
+                logger.info("Object sent successfully")
                 return item
             except openapi_client.ApiException as e:
                 logger.error(f"API Exception: {e}")
@@ -278,7 +279,8 @@ class VorgangsScraper(Scraper):
                     )
                     self.log_item(item, True)
                 elif e.status == 401:
-                    logger.error("Authentication failed. Check your API key.")
+                    logger.critical("Authentication failed. Check your API key.")
+                    sys.exit(1)
                 return None
             except Exception as e:
                 logger.error(f"Unexpected error sending item to API: {e}")
@@ -344,7 +346,8 @@ class SitzungsScraper(Scraper):
                     )
                     self.log_item(item, True)
                 elif e.status == 401:
-                    logger.error("Authentication failed. Check your API key.")
+                    logger.critical("Authentication failed. Check your API key.")
+                    sys.exit(1)
                 return None
             except Exception as e:
                 logger.error(f"Unexpected error sending item to API: {e}")

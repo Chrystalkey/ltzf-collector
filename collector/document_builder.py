@@ -15,18 +15,15 @@ class DocumentBuilder(ABC):
         self.url = url
         self.session = session
         self.typehint = typehint
-        self.output: models.Dokument = None
 
+    @abstractmethod
     def to_dict(self) -> dict:
-        return {"output": self.output.to_dict() if self.output else None}
+        assert False, "Abstract Method Called"
 
     @classmethod
+    @abstractmethod
     def from_dict(cls, dic):
-        inst = cls(None, None, None, None)
-        inst.output = (
-            models.Dokument.from_dict(dic["output"]) if dic["output"] else None
-        )
-        return inst
+        assert False, "Abstract Method Called"
 
     async def download(self) -> Path:
         async with self.session.get(self.url) as response:
@@ -41,9 +38,11 @@ class DocumentBuilder(ABC):
         if not out.exists() or out.stat().st_size == 0:
             raise Exception("Downloaded file is empty or doesn't exist")
 
+    @abstractmethod
     async def extract_metadata(self):
         assert False, "Abstract Method Called"
 
+    @abstractmethod
     async def extract_semantics(self):
         assert False, "Abstract Method Called"
 
@@ -51,16 +50,24 @@ class DocumentBuilder(ABC):
         await self.extract_metadata()
         await self.extract_semantics()
 
-    async def build(self) -> models.Dokument:
+    ## downloads, extracts and packages things into .output (=models.Dokument)
+    ## or fetches it from cache if applicable
+    async def build(self):
         logger.debug(f"Building document from url: {self.url}")
         cached = self.config.cache.get_dokument(self.url)
-        if cached and cached.output.typ == self.typehint:
-            logger.info(f"Document with URL {self.url} was found in cache, serving...")
-            return cached.output
-        elif cached and cached.typ != self.typehint:
-            logger.info(f"Document with URL {self.url} was found in cache, serving...")
-            cached.output.typ = self.typehint
-            return cached.output
+        if cached:
+            cached = self.from_json(cached)
+            if cached.output.typ == self.typehint:
+                logger.info(
+                    f"Document with URL {self.url} was found in cache, serving..."
+                )
+                return cached
+            elif cached.typ != self.typehint:
+                logger.info(
+                    f"Document with URL {self.url} was found in cache with another type {cached.typ} vs. {self.typehint}, serving..."
+                )
+                cached.output.typ = self.typehint
+                return cached
         logger.info(f"Downloading from {self.url}")
         await self.download()
         logger.info(f"Extracting {self.fileid}.pdf / {self.url}")
@@ -70,9 +77,10 @@ class DocumentBuilder(ABC):
                 f"Document with URL {self.url} was corrupted during extraction"
             )
             self.output = None
+            return self
         logger.info(f"Storing {self.url} in cache")
         self.config.cache.store_dokument(self.url, self)
-        return self.output
+        return self
 
     def to_json(self) -> dict:
         return json.dumps(self.to_dict(), default=str)

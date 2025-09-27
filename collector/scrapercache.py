@@ -83,7 +83,7 @@ class ScraperCache:
             logger.error(f"Error retrieving raw value with key `{key}`")
 
     def store_vorgang(self, key: str, value: models.Vorgang, expiry: int = None):
-        value = json.dumps(sanitize_for_serialization(value))
+        value = json.dumps(value, default=str)
         key = f"vg:{key}"
         return self.store_raw(key, value, "Vorgang")
 
@@ -112,12 +112,14 @@ class ScraperCache:
             return None
         return models.Vorgang.from_json(ret)
 
-    def get_dokument(self, key: str) -> Optional[DocumentBuilder]:
+    # returns the document as json string, the caller must know the exact type
+    # since DocumentBuilder is Abstract
+    def get_dokument(self, key: str) -> Optional[str]:
         key = f"dok:{key}"
         ret = self.get_raw(key, "Dokument")
         if ret is None:
             return None
-        return DocumentBuilder.from_json(ret)
+        return ret
 
     def store_html(self, key: str, value: str, expiry: int = None):
         key = f"html:{key}"

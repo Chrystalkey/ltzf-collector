@@ -61,7 +61,7 @@ class CollectorConfiguration:
         else:
             unset_keys.append("OPENAI_API_KEY")
         if len(unset_keys) > 0:
-            logger.error(
+            logger.critical(
                 f"The following environment variables are not set: {', '.join(unset_keys)}"
             )
             sys.exit(1)

@@ -1,4 +1,5 @@
 from litellm import acompletion
+import litellm
 import logging
 from typing import Optional
 import json
@@ -7,6 +8,37 @@ from collector.scrapercache import ScraperCache
 
 logger = logging.getLogger(__name__)
 MIN_TEXT_LEN = 20
+MAX_TRIES = 10
+
+import datetime
+import asyncio
+
+RATE_COUNT = 2
+RATE_INTERVAL = datetime.timedelta(seconds=1.0)
+
+lock = asyncio.Lock()
+used = 0
+last_tick = datetime.datetime.now()
+
+
+async def guard_llm_rate():
+    global RATE_COUNT, RATE_INTERVAL
+    global lock, used, last_tick
+
+    while True:
+        await asyncio.sleep(1)
+        async with lock:
+            now = datetime.datetime.now()
+            if now - last_tick > RATE_INTERVAL:
+                last_tick = now
+                used = 1
+                return
+            elif used < RATE_COUNT:
+                used += 1
+                return
+
+
+litellm.suppress_debug_info = True
 
 
 class LLMConnector:
@@ -26,6 +58,7 @@ class LLMConnector:
 
     async def generate(self, prompt: str, text: str) -> str:
         try:
+            await guard_llm_rate()
             response = await acompletion(
                 model=self.model_name,
                 messages=[
@@ -47,8 +80,7 @@ class LLMConnector:
     async def extract_info(
         self, text: str, prompt: str, schema: dict, key: str, cache: ScraperCache
     ) -> dict:
-        global MIN_TEXT_LEN
-        MAX_TRIES = 10
+        global MIN_TEXT_LEN, MAX_TRIES
         effective_key = f"llm-response:{key}"
         cached = cache.get_raw(effective_key, "LLM Response")
         if cached:
@@ -73,6 +105,7 @@ class LLMConnector:
                 if tries == MAX_TRIES:
                     raise Exception("Error: Unable to bring the llm to reason")
                 tries += 1
+                logger.warning(f"Retrying... (Try {tries}/{MAX_TRIES})")
                 effective_prompt = (
                     f"Try again ({tries}/{MAX_TRIES}), make sure to adhere to the given structure:\n"
                     + prompt

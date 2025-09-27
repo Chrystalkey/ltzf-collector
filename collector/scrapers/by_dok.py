@@ -82,14 +82,20 @@ def sanitize_authors(l: list) -> list:
 
 class BayernDokument(DocumentBuilder):
     def __init__(self, typehint: models.Doktyp, url, session, config):
+        self.output: models.Dokument = None
         self.full_text = None
         self.hash = None
         self.zp_erstellt = None
         self.zp_modifiziert = None
         self.fileid = uuid.uuid4()
         self.trojanergefahr = None
+        self.drucksnr = None
         self.tops = None
         super().__init__(typehint, url, session, config)
+
+    def with_drucksnr(self, dn: str):
+        self.drucksnr = dn
+        return self
 
     async def extract_metadata(self):
         try:
@@ -100,15 +106,35 @@ class BayernDokument(DocumentBuilder):
                 doc_hash = hashlib.file_digest(f, "sha256").hexdigest()
 
             # Extract text from all pages
+            run_successful = False
             try:
-                extract = await extract_file(
-                    f"{self.fileid}.pdf",
-                    config=ExtractionConfig(
-                        ocr_config=TesseractConfig(
-                            language="deu", psm=PSMMode.SINGLE_BLOCK
-                        )
-                    ),
-                )
+                try:
+                    extract = await extract_file(
+                        f"{self.fileid}.pdf",
+                        config=ExtractionConfig(
+                            force_ocr=False,
+                            ocr_backend="tesseract",
+                            ocr_config=TesseractConfig(
+                                language="deu", psm=PSMMode.SINGLE_BLOCK
+                            ),
+                        ),
+                    )
+                    run_successful = extract.content is not None
+                except Exception as e:
+                    logger.warning(
+                        f"Normal extraction failed. Retrying with force_ocr = True"
+                    )
+                if not run_successful:
+                    extract = await extract_file(
+                        f"{self.fileid}.pdf",
+                        config=ExtractionConfig(
+                            force_ocr=True,
+                            ocr_backend="tesseract",
+                            ocr_config=TesseractConfig(
+                                language="deu", psm=PSMMode.SINGLE_BLOCK
+                            ),
+                        ),
+                    )
             except Exception as e:
                 logger.warning(
                     f"No text extracted from PDF or extraction failed for document: {self.url}"
@@ -161,21 +187,24 @@ class BayernDokument(DocumentBuilder):
             )
 
     def to_dict(self) -> dict:
-        dic = super().to_dict()
-        dic.update(
-            {
-                "fileid": str(self.fileid),
-                "trojanergefahr": self.trojanergefahr,
-                "tops": self.tops,
-            }
-        )
-        return dic
+        return {
+            "output": self.output.to_dict() if self.output else None,
+            "fileid": str(self.fileid),
+            "trojanergefahr": self.trojanergefahr,
+            "tops": self.tops,
+            "typehint": self.typehint,
+            "url": self.url,
+        }
 
     @classmethod
     def from_dict(cls, dic):
-        inst = super().from_dict(dic)
+        logger.debug(f"called BayernDokument@from_dict with {dic}")
+        inst = cls(dic["typehint"], dic["url"], None, None)
+        inst.output = models.Dokument.from_dict(dic["output"])
         inst.fileid = uuid.UUID(dic["fileid"])
-        inst.trojanergefahr = dic["trojanergefahr"]
+        inst.trojanergefahr = (
+            int(dic["trojanergefahr"]) if dic["trojanergefahr"] else None
+        )
         inst.tops = dic["tops"]
         return inst
 
@@ -215,11 +244,6 @@ HEADER_SCHEMA = {
 
 
 class ByGesetzentwurf(BayernDokument):
-    def __init__(self, typehint, url, drucksnr, session, config):
-        self.drucksnr = drucksnr
-        self.trojanergefahr = None
-        return super().__init__(typehint, url, session, config)
-
     async def extract_semantics(self):
         global HEADER_PROMPT, HEADER_SCHEMA
         body_prompt = """Extrahiere aus dem gesamttext des folgenden Gesetzes eine Liste an schlagworten, die inhaltlich bedeutsam sind sowie eine Zusammenfassung in 150-250 Worten. 
@@ -274,6 +298,7 @@ class ByGesetzentwurf(BayernDokument):
             self.output = models.Dokument.from_dict(
                 {
                     "typ": self.typehint,
+                    "drucksnr": self.drucksnr,
                     "titel": hdr["titel"],
                     "drucksnr": self.drucksnr,
                     "volltext": self.full_text,
@@ -297,12 +322,32 @@ class ByGesetzentwurf(BayernDokument):
 
 
 class ByStellungnahme(BayernDokument):
-    def __init__(self, typehint, url, session, config):
-        self.trojanergefahr = None
-        return super().__init__(typehint, url, session, config)
-
     async def extract_semantics(self):
-        global HEADER_SCHEMA, HEADER_PROMPT
+        global HEADER_SCHEMA
+        header_schema = {
+            "type": "object",
+            "properties": {
+                "titel": {"type": "string"},
+                "kurztitel": {"type": "string"},
+                "date": {
+                    "type": "string",
+                    "pattern": r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d*)?(Z|([+-]\d{2}:\d{2}))|Unbekannt",
+                },
+                "autoren": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "person": {"type": "string"},
+                            "organisation": {"type": "string"},
+                        },
+                        "required": ["person", "organisation"],
+                    },
+                },
+                "institutionen": {"type": "array", "items": {"type": "string"}},
+            },
+            "required": ["titel", "kurztitel", "date", "autoren", "institutionen"],
+        }
 
         body_prompt = """Extrahiere aus dem gesamttext des folgenden Gesetzes eine Liste an schlagworten, die inhaltlich bedeutsam sind sowie eine Zusammenfassung in 150-250 Worten. 
         Gib außerdem eine "Meinung" an als einen Wert zwischen 1(grundsätzlich ablehnend) und 5(lobend), der das Meinungsbild des Dokuments wiederspiegelt
@@ -324,7 +369,7 @@ class ByStellungnahme(BayernDokument):
             hdr = await self.config.llm_connector.extract_info(
                 self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_PROMPT,
-                HEADER_SCHEMA,
+                header_schema,
                 f"hdr-stln:{self.url}",
                 self.config.cache,
             )
@@ -348,12 +393,16 @@ class ByStellungnahme(BayernDokument):
                 ]
             )
             autoren = sanitize_authors(autoren)
-            zp_referenz = datetime.datetime.fromisoformat(hdr["date"]).astimezone(
-                tz=datetime.UTC
-            )
+            if hdr["date"] != "Unbekannt":
+                zp_referenz = datetime.datetime.fromisoformat(hdr["date"]).astimezone(
+                    tz=datetime.UTC
+                )
+            else:
+                zp_referenz = self.zp_erstellt
             self.output = models.Dokument.from_dict(
                 {
                     "typ": self.typehint,
+                    "drucksnr": self.drucksnr,
                     "titel": hdr["titel"],
                     "volltext": self.full_text,
                     "autoren": autoren,
@@ -377,10 +426,6 @@ class ByStellungnahme(BayernDokument):
 
 
 class ByBeschlussempfehlung(BayernDokument):
-    def __init__(self, typehint, url, drucksnr, session, config):
-        self.drucksnr = drucksnr
-        self.trojanergefahr = None
-        return super().__init__(typehint, url, session, config)
 
     async def extract_semantics(self):
         global HEADER_SCHEMA, HEADER_PROMPT
@@ -434,7 +479,7 @@ class ByBeschlussempfehlung(BayernDokument):
             zp_referenz = datetime.datetime.fromisoformat(hdr["date"]).astimezone(
                 tz=datetime.UTC
             )
-            logger.error(f"Body Object: {bdy}")
+            logger.debug(f"Body Object: {bdy}")
             self.trojanergefahr = int(bdy["troja"])
             self.output = models.Dokument.from_dict(
                 {
@@ -463,9 +508,6 @@ class ByBeschlussempfehlung(BayernDokument):
 
 
 class ByRedeprotokoll(BayernDokument):
-    def __init__(self, typehint, url, session, config):
-        return super().__init__(typehint, url, session, config)
-
     async def extract_semantics(self):
         global HEADER_SCHEMA, HEADER_PROMPT
 
@@ -517,6 +559,7 @@ class ByRedeprotokoll(BayernDokument):
             self.output = models.Dokument.from_dict(
                 {
                     "typ": self.typehint,
+                    "drucksnr": self.drucksnr,
                     "titel": hdr["titel"],
                     "volltext": self.full_text,
                     "autoren": autoren,
@@ -539,11 +582,6 @@ class ByRedeprotokoll(BayernDokument):
 
 
 class ByMitteilung(BayernDokument):
-    def __init__(self, typehint, url, drucksnr: str, session, config):
-        self.trojanergefahr = None
-        self.drucksnr = drucksnr
-        return super().__init__(typehint, url, session, config)
-
     async def extract_semantics(self):
         global HEADER_SCHEMA, HEADER_PROMPT
 
@@ -619,9 +657,6 @@ class ByMitteilung(BayernDokument):
 
 
 class ByTagesordnung(BayernDokument):
-    def __init__(self, typehint, url, session, config):
-        return super().__init__(typehint, url, session, config)
-
     async def extract_semantics(self):
         header_prompt = """Du wirst einen Auszug aus einer Ankündigung einer Sitzung erhalten. Extrahiere daraus die Daten, die in folgendem JSON-Pseudo Code beschrieben werden:
         {'titel': 'Titel des Dokuments', 'kurztitel': 'Zusammenfassung des Titels in einfacher Sprache', 'date': 'Datum auf das sich das Dokument bezieht als YYYY-MM-DD'
@@ -721,6 +756,7 @@ class ByTagesordnung(BayernDokument):
             self.output = models.Dokument.from_dict(
                 {
                     "typ": self.typehint,
+                    "drucksnr": self.drucksnr,
                     "titel": hdr["titel"],
                     "volltext": self.full_text,
                     "autoren": autoren,
