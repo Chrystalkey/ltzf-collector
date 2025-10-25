@@ -5,7 +5,8 @@ import time
 
 import aiohttp
 import asyncio
-from openapi_client import Configuration
+
+# from openapi_client import Configuration
 from dotenv import load_dotenv
 
 from collector.config import CollectorConfiguration
@@ -24,16 +25,11 @@ async def main(config: CollectorConfiguration):
         connector=aiohttp.TCPConnector(limit_per_host=1)
     ) as session:
         scrapers: list[Scraper] = load_scrapers(config, session)
+        scraper_tasks = []
         for scraper in scrapers:
             logger.info(f"Running scraper: {scraper.__class__.__name__}")
-            try:
-                # Actually run the scraper instance
-                await scraper.run()
-            except Exception as e:
-                logger.error(
-                    f"Error while running scraper {scraper.__class__.__name__}: {e}",
-                    stack_info=True,
-                )
+            scraper_tasks.append(scraper.run())
+        asyncio.gather(*scraper_tasks)
 
 
 def load_scrapers(config, session):

@@ -1,11 +1,9 @@
 import logging
 import json
-import os
 import re
-import sys
 from typing import Any, FrozenSet, List, Tuple
 import uuid
-import datetime  # required because of the eval() call later down the line
+import datetime
 from datetime import date as dt_date
 from datetime import datetime as dt_datetime
 from urllib.parse import unquote, urlparse, parse_qs
@@ -16,7 +14,6 @@ from bs4 import BeautifulSoup
 import openapi_client.models as models
 from collector.interface import SitzungsScraper
 from collector.document import Document
-import toml
 
 logger = logging.getLogger(__name__)
 NULL_UUID = uuid.UUID("00000000-0000-0000-0000-000000000000")
@@ -32,7 +29,7 @@ sample_url = "https://www.bayern.landtag.de/ajaxcalendar.html?week=17.03.2025&cu
 # scrapes from yesterday until four weeks from now
 class BYLTSitzungScraper(SitzungsScraper):
     def __init__(self, config, session: aiohttp.ClientSession):
-        start_date = datetime.datetime.now(datetime.UTC)
+        start_date = dt_datetime.now(datetime.UTC)
         start_date -= datetime.timedelta(days=1)
         start_date = start_date - datetime.timedelta(
             days=(start_date.weekday() - 1)
@@ -291,7 +288,7 @@ Hier ist der Text:"""
             return []
 
 
-def parse_natural_date(date: str, year: int) -> datetime.date:
+def parse_natural_date(date: str, year: int) -> dt_date:
     month_dict = {
         "january": 1,
         "february": 2,
@@ -312,7 +309,7 @@ def parse_natural_date(date: str, year: int) -> datetime.date:
             split.remove("")
         number = int(split[1][:-1])  # 12
         month = split[2].lower()  # march
-        return datetime.date(year, month_dict[month], number)
+        return dt_date(year, month_dict[month], number)
     except Exception as e:
         logger.error(f"Error converting Date `{date}` into date object because: {e}!")
         return None

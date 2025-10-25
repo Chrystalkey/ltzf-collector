@@ -181,7 +181,7 @@ class BYLTScraper(VorgangsScraper):
                         "schlagworte": [],
                         "stellungnahmen": [],
                         "gremium": Gremium.from_dict(
-                        {"name": "plenum", "parlament": "BY", "wahlperiode": 19}
+                            {"name": "plenum", "parlament": "BY", "wahlperiode": 19}
                         ),
                         "typ": "postparl-kraft",
                         "trojaner": False,
@@ -372,7 +372,7 @@ class BYLTScraper(VorgangsScraper):
                     continue
                 stat.dokumente = dedup_drucks(stat.dokumente)
                 logger.debug(
-                    f"Adding New Station of class `{""+stat.typ}` to Vorgang `{vg.api_id}`"
+                    f"Adding New Station of class `{'' + stat.typ}` to Vorgang `{vg.api_id}`"
                 )
                 vg.stationen.append(stat)
             return vg

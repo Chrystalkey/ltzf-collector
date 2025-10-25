@@ -34,4 +34,4 @@ if [ ! -f "oapi-generator/openapi.yml" ]; then
     cd ..
 fi
 
-./$DIRECTORY/openapi-generator-cli generate -g python -i $DIRECTORY/openapi.yml -o $(pwd)/oapicode
+java -jar ./$DIRECTORY/openapi-generator-cli.jar generate -g python -i $DIRECTORY/openapi.yml -o $(pwd)/oapicode
