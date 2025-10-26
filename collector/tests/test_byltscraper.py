@@ -9,7 +9,9 @@ import json
 import glob
 import re
 import aiohttp
+import pytest
 from oapicode.openapi_client import models
+from bs4 import BeautifulSoup
 
 SCRAPER_NAME = "bylt_scraper"
 
@@ -17,15 +19,16 @@ SCRAPER_NAME = "bylt_scraper"
 def create_scraper(session):
     global SCRAPER_NAME
     config = CollectorConfiguration(
-        api_key="test", openai_api_key="test", testing_mode=True
+        api_key="test",
+        openai_api_key="test",
     )
-    config.testing_mode = True
     config.oapiconfig = Configuration(host="http://localhost")
     scraper = BYLTScraper(config, session)
     return scraper
 
 
-async def inner_bylt_listing_extract():
+@pytest.mark.asyncio
+async def test_bylt_listing_extract():
     async with aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(limit_per_host=1)
     ) as session:
@@ -58,7 +61,48 @@ def json_difference(a, b):
     )
 
 
-async def inner_bylt_item_extract():
+# Input offline-saved html, output a known listing
+@pytest.mark.asyncio
+async def test_soup_to_listing():
+    scraper = create_scraper()
+    data_dir = os.path.join(os.path.dirname(__file__), SCRAPER_NAME)
+    cases_html = glob.glob(os.path.join(data_dir, "list_*.html"))
+    cases_out = glob.glob(os.path.join(data_dir, "list_*.out"))
+    if len(cases_html) != len(cases_out):
+        assert False, "html/out files of list test cases should be matching"
+    cases_html.sort()
+    cases_out.sort()
+
+    for i in range(len(cases_html)):
+        with open(cases_html[i], "r") as hf:
+            with open(cases_out[i], "r") as of:
+                assert of.read() == str(
+                    scraper.soup_to_listing(BeautifulSoup(hf.read()))
+                )
+
+
+@pytest.mark.asyncio
+async def test_soup_to_item():
+    # TODO: Input offline-saved html, output a known vorgang
+    pass
+
+
+@pytest.mark.asyncio
+async def test_canary_item():
+    # TODO: Only "online" version of item test that checks if the format
+    # is the same
+    pass
+
+
+@pytest.mark.asyncio
+async def test_canary_listing():
+    # TODO: Only "online" version of listing test that checks if the format
+    # is the same
+    pass
+
+
+@pytest.mark.asyncio
+async def test_bylt_item_extract():
     async with aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(limit_per_host=1)
     ) as session:
@@ -78,32 +122,6 @@ async def inner_bylt_item_extract():
                 sanitized_item = sanitize_for_serialization(item)
                 dumped = json.dumps(sanitized_vg, indent=2, ensure_ascii=False)
 
-                assert (
-                    sanitized_vg == sanitized_item
-                ), f"Item `{item_scenario.get('url')}` does not match expected result for scenario `{file}`.\nDifference:\n{json_difference(sanitized_vg, sanitized_item)}\nOutput:\n{dumped}"
-
-
-def test_bylt_listing_extract():
-    asyncio.run(inner_bylt_listing_extract())
-
-
-def test_bylt_item_extract():
-    asyncio.run(inner_bylt_item_extract())
-
-
-def test_bylt_session_listing():
-    asyncio.run(inner_test_bylt_session_listing())
-
-
-async def inner_test_bylt_session_listing():
-    # TODO
-    pass
-
-
-def test_bylt_session_item_extract():
-    asyncio.run(inner_test_bylt_session_item_extract())
-
-
-async def inner_test_bylt_session_item_extract():
-    # TODO
-    pass
+                assert sanitized_vg == sanitized_item, (
+                    f"Item `{item_scenario.get('url')}` does not match expected result for scenario `{file}`.\nDifference:\n{json_difference(sanitized_vg, sanitized_item)}\nOutput:\n{dumped}"
+                )
