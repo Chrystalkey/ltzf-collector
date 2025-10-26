@@ -66,17 +66,8 @@ class DocumentMeta:
 
 
 class Document:
-    testing_mode = False
-
     def __init__(self, session, url, typehint: str, config):
         self.config = config
-        if config and config.testing_mode:
-            self.testing_mode = True
-            self.zp_referenz = None
-            self.fileid = str(uuid.UUID("00000000-0000-0000-0000-000000000000"))
-            self.set_testing_values()
-            return
-        self.testing_mode = False
         self.session = session
         self.url = url
         self.typehint = typehint
@@ -93,21 +84,6 @@ class Document:
         self.fileid = str(uuid.uuid4())
         self.download_success = False
         self.extraction_success = False
-
-    def set_testing_values(self):
-        self.meta = DocumentMeta.testinit()
-        self.autoren = []
-        self.schlagworte = ["test"]
-        self.trojanergefahr = 0
-        self.texte = ["test"]
-        self.zusammenfassung = "test"
-        self.meinung = 1
-        self.download_success = True
-        self.extraction_success = True
-        self.fileid = str(uuid.UUID("00000000-0000-0000-0000-000000000000"))
-        self.url = "https://www.example.com"
-        self.typehint = "entwurf"
-        self.drucksnr = "example"
 
     def to_json(self) -> str:
         return json.dumps(self.to_dict())
@@ -169,8 +145,6 @@ class Document:
 
     async def run_extraction(self):
         """Main method to download and extract information from a document"""
-        if self.testing_mode:
-            return True
         try:
             await self.download()
             self.download_success = True
@@ -191,8 +165,6 @@ class Document:
 
     async def download(self):
         """Download the document from the URL"""
-        if self.testing_mode:
-            return True
         logger.info(f"Downloading document from {self.url}")
         try:
             async with self.session.get(self.url) as response:
@@ -215,8 +187,6 @@ class Document:
 
     async def extract_metadata(self) -> DocumentMeta:
         """Extract metadata from the PDF file"""
-        if self.testing_mode:
-            return True
         logger.debug(
             f"Extracting PDF Metadata for Url {self.url}, using file {self.fileid}.pdf"
         )
@@ -289,8 +259,6 @@ class Document:
 
     async def extract_semantics(self):
         """Extract semantic information using the LLM"""
-        if self.testing_mode:
-            return True
         if not self.meta.full_text:
             logger.warning(f"No text to analyze in document {self.url}")
             self.meta.title = self._get_default_title()
