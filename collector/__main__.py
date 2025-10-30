@@ -29,13 +29,29 @@ async def main(config: CollectorConfiguration):
         for scraper in scrapers:
             logger.info(f"Running scraper: {scraper.__class__.__name__}")
             scraper_tasks.append(scraper.run())
-        asyncio.gather(*scraper_tasks)
+        logger.info(f"Running {len(scraper_tasks)} scraper tasks concurrently")
+        if not config.linearize:
+            ret = await asyncio.gather(*scraper_tasks, return_exceptions=True)
+            for r in ret:
+                if isinstance(r, Exception):
+                    print(f"Some Task failed: {r}")
+        else:
+            for t in scraper_tasks:
+                await t
 
 
 def load_scrapers(config, session):
     scrapers = []
     for filename in os.listdir(config.scrapers_dir):
         if filename.endswith("_scraper.py"):
+            if len(config.scrapers) != 0:
+                enabled = False
+                for scn in config.scrapers:
+                    if filename.startswith(scn):
+                        enabled = True
+                        break
+                if not enabled:
+                    continue
             module_name = filename[:-3]
             module_path = os.path.join(config.scrapers_dir, filename)
             spec = importlib.util.spec_from_file_location(module_name, module_path)
@@ -60,12 +76,28 @@ def load_scrapers(config, session):
 
 
 if __name__ == "__main__":
+    from argparse import ArgumentParser
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s | %(levelname)s: \t%(filename)s: \t\t%(message)s",
     )
+    parser = ArgumentParser(prog="collector", description="Bundleing Scrapers")
+    parser.add_argument("--run", nargs="*", help="Run only the scrapers specified")
+    parser.add_argument(
+        "--linearize",
+        help="Await all extraction tasks one-by-one instead of gathering",
+        action="store_true",
+    )
+    args = parser.parse_args()
+    print(args)
+    try:
+        logger.info(f"Only these scrapers will run: {args.run}")
+        config = CollectorConfiguration(None, None, args.run, args.linearize)
+    except Exception:
+        config = CollectorConfiguration(None, None)
+
     logger.info("Starting collector manager.")
-    config = CollectorConfiguration(None, None, False)
     logger.info("Configuration Complete")
     CYCLE_TIME = 3 * 60 * 60  # 3 hours
     last_run = None

@@ -20,10 +20,16 @@ class CollectorConfiguration:
     api_key: str = None
     trojan_threshold: int = None
     cache: ScraperCache = None
+    scrapers: list = []
+    linearize: bool = False
 
-    def __init__(self, api_key, openai_api_key):
+    def __init__(
+        self, api_key, openai_api_key, scrapers: list = [], linearize: bool = False
+    ):
         global logger
         unset_keys = []
+        self.scrapers = scrapers
+        self.linearize = linearize
         # Database
         self.database_url = os.getenv("LTZF_API_URL", "http://localhost:80")
         self.api_key = os.getenv("LTZF_API_KEY", api_key)

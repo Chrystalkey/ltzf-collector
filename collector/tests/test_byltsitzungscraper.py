@@ -19,9 +19,9 @@ SCRAPER_NAME = "bylt_sitzung_scraper"
 def create_scraper(session):
     global SCRAPER_NAME
     config = CollectorConfiguration(
-        api_key="test", openai_api_key="test", testing_mode=True
+        api_key="test",
+        openai_api_key="test",
     )
-    config.testing_mode = True
     config.oapiconfig = Configuration(host="http://localhost")
     scraper = BYLTSitzungScraper(config, session)
     return scraper

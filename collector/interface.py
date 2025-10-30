@@ -57,9 +57,15 @@ class Scraper(ABC):
         try:
             for lpage in self.listing_urls:
                 tasks.append(self.listing_page_extractor(lpage))
+                logging.info(f"Extracting from url `{lpage}`")
 
             # Wait for all listing page extractor tasks to complete
-            item_list = await asyncio.gather(*tasks, return_exceptions=True)
+            item_list = []
+            if self.config.linearize:
+                for t in tasks:
+                    item_list.append(await t)
+            else:
+                item_list = await asyncio.gather(*tasks, return_exceptions=True)
 
             # Handle any exceptions from listing page extractors
             for i, result in enumerate(item_list):
@@ -115,7 +121,11 @@ class Scraper(ABC):
         )
         temp_res = []
         try:
-            temp_res = await asyncio.gather(*tasks, return_exceptions=True)
+            if self.config.linearize:
+                for t in tasks:
+                    temp_res.append(await t)
+            else:
+                temp_res = await asyncio.gather(*tasks, return_exceptions=True)
         except Exception as e:
             logger.error(
                 f"{self.__class__.__name__}: Error during item extraction gathering: {e}",

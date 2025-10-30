@@ -22,13 +22,13 @@ def test_documents():
     assert success, "Expected to successfully store document"
     returned = cache.get_dokument("blub")
     assert returned is not None, "Retrieval Failed, returned None"
-    assert returned.to_json() == mock_dok.to_json(), (
-        "Retrieved Document did not match stored one"
-    )
+    assert (
+        returned.to_json() == mock_dok.to_json()
+    ), "Retrieved Document did not match stored one"
     raw_ret = cache.get_raw("dok:blub")
-    assert raw_ret is not None, (
-        "Expected Raw Key to be dok:blub, but was unable to retrieve under that name"
-    )
+    assert (
+        raw_ret is not None
+    ), "Expected Raw Key to be dok:blub, but was unable to retrieve under that name"
 
 
 def test_vorgang():
@@ -78,9 +78,9 @@ def test_vorgang():
     assert returned is not None, "Retrieval Failed, returned None"
     assert returned == mock_vg, "Retrieved Vorgang did not match stored one"
     raw_ret = cache.get_raw("vg:blub")
-    assert raw_ret is not None, (
-        "Expected Raw Key to be vg:blub, but was unable to retrieve under that name"
-    )
+    assert (
+        raw_ret is not None
+    ), "Expected Raw Key to be vg:blub, but was unable to retrieve under that name"
 
 
 def test_website():
@@ -98,6 +98,6 @@ def test_website():
     assert returned is not None, "Retrieval Failed, returned None"
     assert returned == mock_website, "Retrieved Website did not match stored one"
     raw_ret = cache.get_raw("html:blub")
-    assert raw_ret is not None, (
-        "Expected Raw Key to be html:blub, but was unable to retrieve under that name"
-    )
+    assert (
+        raw_ret is not None
+    ), "Expected Raw Key to be html:blub, but was unable to retrieve under that name"
