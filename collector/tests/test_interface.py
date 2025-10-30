@@ -5,6 +5,7 @@ import os
 import datetime
 import aiohttp
 import asyncio
+import pytest
 from uuid import uuid4
 
 
@@ -49,11 +50,12 @@ class MockBaseScraperSuccess(Scraper):
         return
 
 
-async def inner_test_process_lpurl():
+@pytest.mark.asyncio
+async def test_process_lpurl():
     config = CollectorConfiguration(
-        api_key="test", openai_api_key="test", testing_mode=True
+        api_key="test",
+        openai_api_key="test",
     )
-    config.testing_mode = True
     config.oapiconfig = Configuration(host="http://localhost")
     async with aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(limit_per_host=1)
@@ -69,15 +71,12 @@ async def inner_test_process_lpurl():
         assert set(ret) == set()
 
 
-def test_test_process_lpurl():
-    asyncio.run(inner_test_process_lpurl())
-
-
-async def inner_test_process_items():
+@pytest.mark.asyncio
+async def test_process_items():
     config = CollectorConfiguration(
-        api_key="test", openai_api_key="test", testing_mode=True
+        api_key="test",
+        openai_api_key="test",
     )
-    config.testing_mode = True
     config.oapiconfig = Configuration(host="http://localhost")
     async with aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(limit_per_host=1)
@@ -91,15 +90,12 @@ async def inner_test_process_items():
         )
 
 
-def test_test_process_items():
-    asyncio.run(inner_test_process_items())
-
-
-async def inner_test_process_results():
+@pytest.mark.asyncio
+async def test_process_results():
     config = CollectorConfiguration(
-        api_key="test", openai_api_key="test", testing_mode=True
+        api_key="test",
+        openai_api_key="test",
     )
-    config.testing_mode = True
     config.oapiconfig = Configuration(host="http://localhost")
     async with aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(limit_per_host=1)
@@ -119,15 +115,12 @@ async def inner_test_process_results():
         assert ret == (1, 4, 1)
 
 
-def test_test_process_results():
-    asyncio.run(inner_test_process_results())
-
-
-async def inner_test_log_object():
+@pytest.mark.asyncio
+async def test_log_object():
     config = CollectorConfiguration(
-        api_key="test", openai_api_key="test", testing_mode=True
+        api_key="test",
+        openai_api_key="test",
     )
-    config.testing_mode = True
     config.oapiconfig = Configuration(host="http://localhost")
     mock_vg = models.Vorgang.from_dict(
         {
@@ -151,7 +144,11 @@ async def inner_test_log_object():
                         "zp_modifiziert": datetime.datetime.now().astimezone(
                             datetime.UTC
                         ),
-                        "parlament": "BB",
+                        "gremium": {
+                            "parlament": "BB",
+                            "name": "plenum",
+                            "wahlperiode": 19,
+                        },
                         "typ": "preparl-regent",
                         "trojanergefahr": 4,
                         "dokumente": [],
@@ -169,18 +166,14 @@ async def inner_test_log_object():
         scraper = MockSitzungsScraper(config, cid, [], session)
         scraper.log_item(mock_vg)
         assert os.path.exists(nonexistent_path)
-        assert os.path.exists(f"{nonexistent_path}/{cid}.json")
-        os.remove(f"{nonexistent_path}/{cid}.json")
+        assert os.path.exists(f"{nonexistent_path}/{cid}.jsonl")
+        os.remove(f"{nonexistent_path}/{cid}.jsonl")
         os.removedirs(nonexistent_path)
 
         cid = uuid4()
         scraper = MockVorgangsScraper(config, cid, [], session)
         scraper.log_item(mock_vg)
         assert os.path.exists(nonexistent_path)
-        assert os.path.exists(f"{nonexistent_path}/{cid}.json")
-        os.remove(f"{nonexistent_path}/{cid}.json")
+        assert os.path.exists(f"{nonexistent_path}/{cid}.jsonl")
+        os.remove(f"{nonexistent_path}/{cid}.jsonl")
         os.removedirs(nonexistent_path)
-
-
-def test_log_object():
-    asyncio.run(inner_test_log_object())

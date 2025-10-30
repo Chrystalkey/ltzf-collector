@@ -1,6 +1,8 @@
 from litellm import acompletion
 import litellm
 import logging
+import time
+import asyncio
 from typing import Optional
 import json
 import jsonschema
@@ -72,6 +74,7 @@ class LLMConnector:
                 api_base=self.api_base,
                 temperature=1.0,
             )
+            response._response_headers
             return response.choices[0].message.content
         except Exception as e:
             logger.error(f"Error generating response: {e}")

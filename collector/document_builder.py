@@ -34,6 +34,7 @@ class DocumentBuilder(ABC):
 
             with open(f"{self.fileid}.pdf", "wb") as f:
                 f.write(await response.read())
+                self.download_success = True
         out = Path(f"{self.fileid}.pdf")
         if not out.exists() or out.stat().st_size == 0:
             raise Exception("Downloaded file is empty or doesn't exist")
@@ -49,6 +50,7 @@ class DocumentBuilder(ABC):
     async def extract(self):
         await self.extract_metadata()
         await self.extract_semantics()
+        self.extraction_success = True
 
     ## downloads, extracts and packages things into .output (=models.Dokument)
     ## or fetches it from cache if applicable

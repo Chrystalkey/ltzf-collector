@@ -1,5 +1,6 @@
 import re
-from collector.document_builder import *
+from collector.document_builder import DocumentBuilder
+from openapi_client import models
 import logging
 import datetime
 import hashlib
@@ -18,7 +19,7 @@ def schlagwort_format(x: list[str]) -> list:
 def dedup(x: list) -> list:
     out = []
     for val in x:
-        if not val in out:
+        if val not in out:
             out.append(val)
     return out
 
@@ -76,8 +77,8 @@ def sanitize_author(a: models.Autor) -> models.Autor:
     return a
 
 
-def sanitize_authors(l: list) -> list:
-    return dedup([sanitize_author(a) for a in l])
+def sanitize_authors(ls: list) -> list:
+    return dedup([sanitize_author(a) for a in ls])
 
 
 class BayernDokument(DocumentBuilder):
@@ -122,7 +123,7 @@ class BayernDokument(DocumentBuilder):
                     run_successful = extract.content is not None
                 except Exception as e:
                     logger.warning(
-                        f"Normal extraction failed. Retrying with force_ocr = True"
+                        f"Normal extraction failed. Retrying with force_ocr = True. Error: {e}"
                     )
                 if not run_successful:
                     extract = await extract_file(
@@ -300,7 +301,6 @@ class ByGesetzentwurf(BayernDokument):
                     "typ": self.typehint,
                     "drucksnr": self.drucksnr,
                     "titel": hdr["titel"],
-                    "drucksnr": self.drucksnr,
                     "volltext": self.full_text,
                     "autoren": autoren,
                     "schlagworte": schlagwort_format(bdy["schlagworte"]),
@@ -315,7 +315,7 @@ class ByGesetzentwurf(BayernDokument):
         except Exception as e:
             logger.error(f"Error extracting semantics: {e}")
             logger.error(
-                f"LLM Response was inadequate or contained ill-formatted fields even after retry"
+                "LLM Response was inadequate or contained ill-formatted fields even after retry"
             )
             self.corrupted = True
             raise
@@ -419,14 +419,13 @@ class ByStellungnahme(BayernDokument):
         except Exception as e:
             logger.error(f"Error extracting semantics: {e}")
             logger.error(
-                f"LLM Response was inadequate or contained ill-formatted fields even after retry"
+                "LLM Response was inadequate or contained ill-formatted fields even after retry"
             )
             self.corrupted = True
             raise
 
 
 class ByBeschlussempfehlung(BayernDokument):
-
     async def extract_semantics(self):
         global HEADER_SCHEMA, HEADER_PROMPT
 
@@ -501,7 +500,7 @@ class ByBeschlussempfehlung(BayernDokument):
         except Exception as e:
             logger.error(f"Error extracting semantics: {e}")
             logger.error(
-                f"LLM Response was inadequate or contained ill-formatted fields even after retry"
+                "LLM Response was inadequate or contained ill-formatted fields even after retry"
             )
             self.corrupted = True
             raise
@@ -575,7 +574,7 @@ class ByRedeprotokoll(BayernDokument):
         except Exception as e:
             logger.error(f"Error extracting semantics: {e}")
             logger.error(
-                f"LLM Response was inadequate or contained ill-formatted fields even after retry"
+                "LLM Response was inadequate or contained ill-formatted fields even after retry"
             )
             self.corrupted = True
             raise
@@ -650,7 +649,7 @@ class ByMitteilung(BayernDokument):
         except Exception as e:
             logger.error(f"Error extracting semantics: {e}")
             logger.error(
-                f"LLM Response was inadequate or contained ill-formatted fields even after retry"
+                "LLM Response was inadequate or contained ill-formatted fields even after retry"
             )
             self.corrupted = True
             raise
@@ -772,7 +771,7 @@ class ByTagesordnung(BayernDokument):
         except Exception as e:
             logger.error(f"Error extracting semantics: {e}")
             logger.error(
-                f"LLM Response was inadequate or contained ill-formatted fields even after retry"
+                "LLM Response was inadequate or contained ill-formatted fields even after retry"
             )
             self.corrupted = True
             raise

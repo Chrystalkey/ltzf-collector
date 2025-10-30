@@ -27,11 +27,11 @@ if [ ! -f "$DIRECTORY/openapi-generator-cli.jar" ]; then
 fi
 
 # Download YAML spec if missing
-if [ ! -f "$DIRECTORY/openapi.yml" ]; then
+if [ ! -f "oapi-generator/openapi.yml" ]; then
     echo "Downloading OApi Spec"
     cd $DIRECTORY || exit
     curl -o openapi.yml $SPEC_PATH
     cd ..
 fi
-# Run openapi-generator
+
 java -jar ./$DIRECTORY/openapi-generator-cli.jar generate -g python -i $DIRECTORY/openapi.yml -o $(pwd)/oapicode

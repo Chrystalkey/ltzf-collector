@@ -20,26 +20,25 @@ class CollectorConfiguration:
     api_key: str = None
     trojan_threshold: int = None
     cache: ScraperCache = None
-    testing_mode: int = None
-    collector_id: str = None
+    scrapers: list = []
+    linearize: bool = False
 
-    def __init__(self, api_key, openai_api_key, testing_mode=False):
+    def __init__(
+        self, api_key, openai_api_key, scrapers: list = [], linearize: bool = False
+    ):
         global logger
         unset_keys = []
+        self.scrapers = scrapers
+        self.linearize = linearize
         # Database
         self.database_url = os.getenv("LTZF_API_URL", "http://localhost:80")
         self.api_key = os.getenv("LTZF_API_KEY", api_key)
         if self.api_key is None:
             unset_keys.append("LTZF_API_KEY")
-        self.testing_mode = os.getenv("TESTING_MODE", 0) == 1 or testing_mode
         # Caching
         self.redis_host = os.getenv("REDIS_HOST", "localhost")
         self.redis_port = int(os.getenv("REDIS_PORT", "6379"))
-        if not self.testing_mode:
-            self.cache = ScraperCache(self.redis_host, self.redis_port)
-        else:
-            logger.info(f"Testing mode: {self.testing_mode}")
-            self.cache = ScraperCache(self.redis_host, self.redis_port, disabled=True)
+        self.cache = ScraperCache(self.redis_host, self.redis_port, disabled=True)
 
         # Scraperdir
         self.scrapers_dir = self.scrapers_dir or os.path.join(

@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "collector"
-version = "0.2.1"
+version = "0.2.2"
 description = "Collector bundle with a sample Scraper that is forkable and meant to be forked"
 authors = ["Benedikt Schäfer", "Noah Lokocz", "Liv Märtens"]
 readme = "README.md"
+license = "NoLicense"
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -22,6 +23,7 @@ kreuzberg = {extras = ["easyocr"], version = "^3.18.0"}
 toml = "^0.10.2"
 dotenv = "^0.9.9"
 jsonschema = "^4.25.1"
+lazy-imports = "^1.0.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"

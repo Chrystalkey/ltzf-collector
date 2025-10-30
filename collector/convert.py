@@ -1,11 +1,10 @@
 from enum import Enum
-from typing import Tuple, Optional, List, Dict, Union
 from pydantic import SecretStr
 
 import datetime
 import decimal
 import sys
-import os
+from uuid import UUID
 from openapi_client.models import *
 
 PRIMITIVE_TYPES = (float, bool, bytes, str, int)
@@ -48,6 +47,8 @@ def sanitize_for_serialization(obj):
         return obj.get_secret_value()
     elif isinstance(obj, PRIMITIVE_TYPES):
         return obj
+    elif isinstance(obj, UUID):
+        return str(obj)
     elif isinstance(obj, list):
         return [sanitize_for_serialization(sub_obj) for sub_obj in obj]
     elif isinstance(obj, tuple):

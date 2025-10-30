@@ -1,4 +1,5 @@
 .idea/
+.kreuzberg/
 public/
 target/
 .venv/

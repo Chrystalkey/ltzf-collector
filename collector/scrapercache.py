@@ -32,6 +32,7 @@ class ScraperCache:
     ):
         global logger
         self.disabled = disabled
+        print(disabled, redis_host, redis_port)
         if disabled or redis_host is None or redis_port is None:
             self.disabled = True
             logger.warning("Cacheing disabled")
@@ -83,7 +84,7 @@ class ScraperCache:
             logger.error(f"Error retrieving raw value with key `{key}`")
 
     def store_vorgang(self, key: str, value: models.Vorgang, expiry: int = None):
-        value = json.dumps(value, default=str)
+        value = json.dumps(sanitize_for_serialization(value))
         key = f"vg:{key}"
         return self.store_raw(key, value, "Vorgang")
 

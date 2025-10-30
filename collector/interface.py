@@ -16,14 +16,16 @@ from collector.config import CollectorConfiguration
 
 import openapi_client
 from openapi_client import models
-from openapi_client.api import vorgang_api
+import openapi_client.api
+import openapi_client.api.collector_schnittstellen_api
+import openapi_client.api_client
 
 logger = logging.getLogger(__name__)
 
 
 class Scraper(ABC):
     listing_urls: List[str] = []
-    collector_id: UUID = None
+    scraper_id: UUID = None
 
     config: CollectorConfiguration = None
 
@@ -37,7 +39,7 @@ class Scraper(ABC):
         listing_urls: List[str],
         session: aiohttp.ClientSession,
     ):
-        self.collector_id = collector_id
+        self.scraper_id = collector_id
         self.listing_urls = listing_urls
         self.config = config
         self.session = session
@@ -52,13 +54,21 @@ class Scraper(ABC):
     # a deduplicated, cleaned set of extracted items
     async def process_lpurls(self, lpurls: List[str]) -> Set[Any]:
         global logger
+        logger.info("Processing Listing Page URLs Now")
+
         tasks = []
         try:
             for lpage in self.listing_urls:
                 tasks.append(self.listing_page_extractor(lpage))
+                logging.info(f"Extracting from url `{lpage}`")
 
             # Wait for all listing page extractor tasks to complete
-            item_list = await asyncio.gather(*tasks, return_exceptions=True)
+            item_list = []
+            if self.config.linearize:
+                for t in tasks:
+                    item_list.append(await t)
+            else:
+                item_list = await asyncio.gather(*tasks, return_exceptions=True)
 
             # Handle any exceptions from listing page extractors
             for i, result in enumerate(item_list):
@@ -101,6 +111,7 @@ class Scraper(ABC):
         tasks = []
         processed_count = 0
         skipped_count = 0
+        logger.info("Processing Items Now")
 
         for item in items:
             # Check if item is already in cache
@@ -120,8 +131,11 @@ class Scraper(ABC):
         temp_res = []
         try:
             # temp_res = await asyncio.gather(*tasks, return_exceptions=True)
-            for task in tasks:
-                temp_res.append(await task)
+            if self.config.linearize:
+                for t in tasks:
+                    temp_res.append(await t)
+            else:
+                temp_res = await asyncio.gather(*tasks, return_exceptions=True)
         except Exception as e:
             logger.error(
                 f"{self.__class__.__name__}: Error during item extraction gathering: {e}",
@@ -246,7 +260,7 @@ class VorgangsScraper(Scraper):
         if logdir is not None:
             logger.info(f"Logging Item to {logdir}")
             try:
-                filepath = Path(logdir) / f"{self.collector_id}.json"
+                filepath = Path(logdir) / f"{self.scraper_id}.jsonl"
                 if not filepath.parent.exists():
                     logger.info(f"Creating Filepath: {filepath.parent}")
                     filepath.parent.mkdir(parents=True)
@@ -258,16 +272,18 @@ class VorgangsScraper(Scraper):
     async def send_result(self, item: models.Vorgang) -> Optional[models.Vorgang]:
         global logger
         logger.info(f"Sending Item with id `{item.api_id}` to Database")
-        logger.debug(f"Collector ID: {self.collector_id}")
+        logger.debug(f"Collector ID: {self.scraper_id}")
 
         # Save to log file if configured
         self.log_item(item)
 
         # Send to API
         with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
-            api_instance = vorgang_api.VorgangApi(api_client)
+            api_instance = openapi_client.api.collector_schnittstellen_api.CollectorSchnittstellenApi(
+                api_client
+            )
             try:
-                api_instance.vorgang_put(str(self.collector_id), item)
+                _ret = api_instance.vorgang_put(str(self.scraper_id), item)
                 logger.info("Object sent successfully")
                 return item
             except openapi_client.ApiException as e:
@@ -306,7 +322,7 @@ class SitzungsScraper(Scraper):
         if logdir is not None:
             logger.info(f"Logging Item to {logdir}")
             try:
-                filepath = Path(logdir) / f"{self.collector_id}.json"
+                filepath = Path(logdir) / f"{self.scraper_id}.jsonl"
                 if not filepath.parent.exists():
                     logger.info(f"Creating Filepath: {filepath.parent}")
                     filepath.parent.mkdir(parents=True)
@@ -323,17 +339,22 @@ class SitzungsScraper(Scraper):
     ) -> Optional[Tuple[datetime.datetime, List[models.Sitzung]]]:
         global logger
         logger.info(f"Sending Item with Date `{item[0]}` to Database")
-        logger.debug(f"Collector ID: {self.collector_id}")
+        logger.debug(f"Collector ID: {self.scraper_id}")
 
         # Save to log file if configured
         self.log_item(item)
 
         # Send to API
         with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
-            api_instance = openapi_client.DefaultApi(api_client)
+            api_instance = openapi_client.api.collector_schnittstellen_api.CollectorSchnittstellenApi(
+                api_client
+            )
             try:
                 ret = api_instance.kal_date_put(
-                    parlament=models.Parlament.BY, datum=item[0], sitzung=item[1]
+                    x_scraper_id=str(self.scraper_id),
+                    parlament=models.Parlament.BY,
+                    datum=item[0],
+                    sitzung=item[1],
                 )
                 logger.info(f"API Response: {ret}")
                 return item
