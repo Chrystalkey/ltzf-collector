@@ -24,21 +24,28 @@ class CollectorConfiguration:
     linearize: bool = False
 
     def __init__(
-        self, api_key, openai_api_key, scrapers: list = [], linearize: bool = False
+        self,
+        api_key,
+        openai_api_key,
+        scrapers: list = [],
+        linearize: bool = False,
+        redis_host: str = None,
+        redis_port: int = None,
     ):
         global logger
         unset_keys = []
         self.scrapers = scrapers
         self.linearize = linearize
+
         # Database
         self.database_url = os.getenv("LTZF_API_URL", "http://localhost:80")
         self.api_key = os.getenv("LTZF_API_KEY", api_key)
         if self.api_key is None:
             unset_keys.append("LTZF_API_KEY")
         # Caching
-        self.redis_host = os.getenv("REDIS_HOST", "localhost")
-        self.redis_port = int(os.getenv("REDIS_PORT", "6379"))
-        self.cache = ScraperCache(self.redis_host, self.redis_port, disabled=True)
+        self.redis_host = redis_host or os.getenv("REDIS_HOST", "localhost")
+        self.redis_port = redis_port or int(os.getenv("REDIS_PORT", "6379"))
+        self.cache = ScraperCache(self.redis_host, self.redis_port)
 
         # Scraperdir
         self.scrapers_dir = self.scrapers_dir or os.path.join(

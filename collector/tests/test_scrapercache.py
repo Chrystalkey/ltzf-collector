@@ -1,3 +1,4 @@
+import asyncio
 from collector.scrapercache import ScraperCache
 from collector.document_builder import DocumentBuilder
 from collector.config import CollectorConfiguration
@@ -36,30 +37,34 @@ class MockDoc(DocumentBuilder):
         self.extraction_success = True
         pass
 
+    async def extract(self):
+        self.download_success = True
+        self.extraction_success = True
+
 
 def test_documents():
-    config = CollectorConfiguration(api_key="test", openai_api_key="test")
+    config = CollectorConfiguration(
+        api_key="test",
+        openai_api_key="test",
+        redis_host="localhost",
+        redis_port=6379,
+    )
     config.oapiconfig = Configuration(host="http://localhost")
-    config.scrapercache = ScraperCache("localhost", 6379)
-    cache = config.scrapercache
 
     mock_dok = MockDoc(None, "blub", "entwurf", config)
-    success = cache.store_dokument("blub", mock_dok)
+    success = config.cache.store_dokument("blub", mock_dok)
     assert not success, "Expected to not Store unprocessed Document object"
 
-    mock_dok.extraction_success = True
-    mock_dok.download_success = True
-    success = cache.store_dokument("blub", mock_dok)
+    asyncio.run(mock_dok.extract())
+    success = config.cache.store_dokument("blub", mock_dok)
     assert success, "Expected to successfully store document"
-    returned = cache.get_dokument("blub")
+    returned = config.cache.get_dokument("blub")
     assert returned is not None, "Retrieval Failed, returned None"
-    assert returned.to_json() == mock_dok.to_json(), (
-        "Retrieved Document did not match stored one"
-    )
-    raw_ret = cache.get_raw("dok:blub")
-    assert raw_ret is not None, (
-        "Expected Raw Key to be dok:blub, but was unable to retrieve under that name"
-    )
+    assert returned == mock_dok.to_json(), "Retrieved Document did not match stored one"
+    raw_ret = config.cache.get_raw("dok:blub")
+    assert (
+        raw_ret is not None
+    ), "Expected Raw Key to be dok:blub, but was unable to retrieve under that name"
 
 
 def test_vorgang():
@@ -109,9 +114,9 @@ def test_vorgang():
     assert returned is not None, "Retrieval Failed, returned None"
     assert returned == mock_vg, "Retrieved Vorgang did not match stored one"
     raw_ret = cache.get_raw("vg:blub")
-    assert raw_ret is not None, (
-        "Expected Raw Key to be vg:blub, but was unable to retrieve under that name"
-    )
+    assert (
+        raw_ret is not None
+    ), "Expected Raw Key to be vg:blub, but was unable to retrieve under that name"
 
 
 def test_website():
@@ -129,6 +134,6 @@ def test_website():
     assert returned is not None, "Retrieval Failed, returned None"
     assert returned == mock_website, "Retrieved Website did not match stored one"
     raw_ret = cache.get_raw("html:blub")
-    assert raw_ret is not None, (
-        "Expected Raw Key to be html:blub, but was unable to retrieve under that name"
-    )
+    assert (
+        raw_ret is not None
+    ), "Expected Raw Key to be html:blub, but was unable to retrieve under that name"

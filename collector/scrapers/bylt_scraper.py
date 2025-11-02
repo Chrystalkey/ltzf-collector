@@ -71,9 +71,9 @@ class BYLTScraper(VorgangsScraper):
         rows = vorgangs_table.find_all("tr")
 
         btext_soup = soup.find("span", id="basistext")
-        assert btext_soup is not None, (
-            f"Error: Could not find Basistext for url {listing_item}"
-        )
+        assert (
+            btext_soup is not None
+        ), f"Error: Could not find Basistext for url {listing_item}"
         inds = btext_soup.text.split("Nr. ")[1].split(" vom")[0]
         titel = (
             soup.find("span", id="betreff")
@@ -116,9 +116,9 @@ class BYLTScraper(VorgangsScraper):
                     Autor.from_dict({"person": psn, "organisation": sanitize_orga(org)})
                 )
         vg.initiatoren = initiatoren
-        assert len(vg.initiatoren) > 0, (
-            f"Error: Could not find Initiatoren for url {listing_item}"
-        )
+        assert (
+            len(vg.initiatoren) > 0
+        ), f"Error: Could not find Initiatoren for url {listing_item}"
 
         # Helper function to check if a station is a plenary session
         def is_plenary_session(station_typ):
@@ -154,17 +154,17 @@ class BYLTScraper(VorgangsScraper):
         for row in rows:
             cells = row.find_all("td")
 
-            assert len(cells) == 2, (
-                f"Warning: Unexpectedly found more or less than exactly two gridcells in: `{row}` of url `{listing_item}`"
-            )
+            assert (
+                len(cells) == 2
+            ), f"Warning: Unexpectedly found more or less than exactly two gridcells in: `{row}` of url `{listing_item}`"
 
             # date is in the first cell. If its just an announcement, just skip it
             if cells[0].text == "Beratung / Ergebnis folgt":
                 continue
             timestamp = cells[0].text.split(".")
-            assert len(timestamp) == 3, (
-                f"Error: Unexpected date format: `{timestamp}` of url `{listing_item}`"
-            )
+            assert (
+                len(timestamp) == 3
+            ), f"Error: Unexpected date format: `{timestamp}` of url `{listing_item}`"
             timestamp = dt_datetime(
                 year=int(timestamp[2]),
                 month=int(timestamp[1]),
@@ -229,9 +229,9 @@ class BYLTScraper(VorgangsScraper):
             ## is added to the exactly preceding station
             ## has: one doklink, name des/der stellungnehmenden (=autor)
             elif cellclass == "stellungnahme":
-                assert len(vg.stationen) > 0, (
-                    "Error: Stellungnahme ohne Vorhergehenden Gesetzestext"
-                )
+                assert (
+                    len(vg.stationen) > 0
+                ), "Error: Stellungnahme ohne Vorhergehenden Gesetzestext"
                 stln_urls = extract_schrstellung(cells[1])
                 try:
                     dok = await ByStellungnahme(
@@ -263,9 +263,9 @@ class BYLTScraper(VorgangsScraper):
                         ]
 
                 stln = dok.output
-                assert len(vg.stationen) > 0, (
-                    "Error: Stellungnahme ohne Vorhergehenden Gesetzestext"
-                )
+                assert (
+                    len(vg.stationen) > 0
+                ), "Error: Stellungnahme ohne Vorhergehenden Gesetzestext"
                 vg.stationen[-1].stellungnahmen.append(stln)
                 continue
             ## Zelle mit Plenarprotokoll
@@ -548,9 +548,9 @@ def extract_singlelink(cellsoup: BeautifulSoup) -> str:
 # returns: {"typ": link, ...}
 def extract_schrstellung(cellsoup: BeautifulSoup) -> dict:
     links = cellsoup.find_all("a")
-    assert len(links) > 0 and len(links) < 3, (
-        f"Error: Unexpected number of links in Stellungnahme: {len(links)}, in cellsoup `{cellsoup}`"
-    )
+    assert (
+        len(links) > 0 and len(links) < 3
+    ), f"Error: Unexpected number of links in Stellungnahme: {len(links)}, in cellsoup `{cellsoup}`"
     if len(links) == 2:
         return {
             "lobbyregister": links[0]["href"],
