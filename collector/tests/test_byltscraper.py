@@ -41,7 +41,7 @@ async def test_soup_to_listing():
     ) as session:
         scraper = create_scraper(session)
         data_dir = os.path.join(os.path.dirname(__file__), SCRAPER_NAME)
-        cases_html = glob.glob(os.path.join(data_dir, "list_*.html"))
+        cases_html = glob.glob(os.path.join(data_dir, "list_*.htmltest"))
         cases_out = glob.glob(os.path.join(data_dir, "list_*.json"))
 
         if len(cases_html) != len(cases_out):

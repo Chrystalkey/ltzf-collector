@@ -13,18 +13,18 @@ from openapi_client.models import *
 
 from collector.interface import VorgangsScraper
 
-
 from collector.scrapers.by_dok import *
 import toml
 
 logger = logging.getLogger(__name__)
 NULL_UUID = uuid.UUID("00000000-0000-0000-0000-000000000000")
 
+CURRENT_WP = 19
+RESULT_COUNT = 100
+
 
 class BYLTScraper(VorgangsScraper):
     def __init__(self, config, session: aiohttp.ClientSession):
-        CURRENT_WP = 19
-        RESULT_COUNT = 100
         listing_urls = [
             f"https://www.bayern.landtag.de/parlament/dokumente/drucksachen?isInitialCheck=0&q=&dknr=&suchverhalten=AND&dokumentenart=Drucksache&ist_basisdokument=on&sort=date&anzahl_treffer={RESULT_COUNT}&wahlperiodeid%5B%5D={CURRENT_WP}&erfassungsdatum%5Bstart%5D=&erfassungsdatum%5Bend%5D=&dokumentenart=Drucksache&suchvorgangsarten%5B%5D=Gesetze%5C%5CGesetzentwurf&suchvorgangsarten%5B%5D=Gesetze%5C%5CStaatsvertrag&suchvorgangsarten%5B%5D=Gesetze%5C%5CHaushaltsgesetz%2C+Nachtragshaushaltsgesetz",
             f"https://www.bayern.landtag.de/parlament/dokumente/drucksachen?isInitialCheck=0&q=&dknr=&suchverhalten=AND&dokumentenart=Drucksache&ist_basisdokument=on&sort=date&anzahl_treffer={RESULT_COUNT}&wahlperiodeid%5B%5D={CURRENT_WP}&erfassungsdatum%5Bstart%5D=&erfassungsdatum%5Bend%5D=&dokumentenart=Drucksache&suchvorgangsarten%5B%5D=Gesetze%5C%5CGesetzentwurf&suchvorgangsarten%5B%5D=Gesetze%5C%5CStaatsvertrag&suchvorgangsarten%5B%5D=Gesetze%5C%5CHaushaltsgesetz%2C+Nachtragshaushaltsgesetz&page=2",
@@ -637,6 +637,9 @@ if __name__ == "__main__":
         from oapicode.openapi_client import Configuration
         import aiohttp
         import json
+        from dotenv import load_dotenv
+
+        load_dotenv()
 
         parser = ArgumentParser(
             prog="bylt scraper",
@@ -658,9 +661,12 @@ if __name__ == "__main__":
                 dic = {"origin": lurl, "result": []}
                 dic["result"] = await scraper.listing_page_extractor(lurl)
                 print(json.dumps(dic, indent=2))
+
+            scraper.item_count = len(itms)
+
             for itm in itms:
                 dic = {"origin": itm, "result": None}
                 dic["result"] = await scraper.item_extractor(itm)
-                print(json.dumps(dic, indent=2))
+                print(json.dumps(dic, indent=2, default=str))
 
     asyncio.run(minimain())
