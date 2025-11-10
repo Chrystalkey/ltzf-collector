@@ -32,7 +32,6 @@ class ScraperCache:
     ):
         global logger
         self.disabled = disabled
-        print(disabled, redis_host, redis_port)
         if disabled or redis_host is None or redis_port is None:
             self.disabled = True
             logger.warning("Cacheing disabled")

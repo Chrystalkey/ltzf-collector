@@ -1,5 +1,6 @@
 .idea/
 .kreuzberg/
+.pdf_cache/
 public/
 target/
 .venv/

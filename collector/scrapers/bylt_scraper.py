@@ -150,6 +150,7 @@ class BYLTScraper(VorgangsScraper):
             # No matching station found
             return -1
 
+        logger.debug(f"extracting {len(rows)} table rows into stations")
         # station extraction
         for row in rows:
             cells = row.find_all("td")
@@ -451,14 +452,13 @@ class BYLTScraper(VorgangsScraper):
                 f"Adding New Station of class `{'' + stat.typ}` to Vorgang `{vg.api_id}`"
             )
             vg.stationen.append(stat)
+        async with self.lock:
+            self.items_done += 1
+        logger.info(
+            f"Extraction Progress: {self.items_done}/{self.item_count} items, ({(self.items_done / self.item_count):.1%}) {listing_item}"
+        )
 
-            async with self.lock:
-                self.items_done += 1
-
-            logger.info(
-                f"Extraction Progress: {self.items_done}/{self.item_count} items, ({(self.items_done / self.item_count):.1%}) {listing_item}"
-            )
-            return vg
+        return vg
 
 
 # Cellclasses:
@@ -647,26 +647,43 @@ if __name__ == "__main__":
         )
         parser.add_argument("-l", "--listing", nargs="*")
         parser.add_argument("-i", "--item", nargs="*")
+        parser.add_argument("-n", "--nocache", action="store_true")
+        parser.add_argument("-d", "--debug-logging", action="store_true")
         args = parser.parse_args()
         lstn = [] if not args.listing else args.listing
         itms = [] if not args.item else args.item
-
+        logging.basicConfig(
+            level=(logging.DEBUG if args.debug_logging else logging.INFO),
+            format="%(asctime)s | %(levelname)-8s: %(filename)-20s: %(message)s",
+        )
         async with aiohttp.ClientSession(
             connector=aiohttp.TCPConnector(limit_per_host=1)
         ) as session:
             config = CollectorConfiguration(api_key="test", openai_api_key="test")
             config.oapiconfig = Configuration(host="http://localhost")
+            config.cache.disabled = args.nocache
             scraper = BYLTScraper(config, session)
             for lurl in lstn:
                 dic = {"origin": lurl, "result": []}
                 dic["result"] = await scraper.listing_page_extractor(lurl)
-                print(json.dumps(dic, indent=2))
+                print(json.dumps(dic, indent=2, default=str))
 
             scraper.item_count = len(itms)
 
+            def jdmp(o):
+                import uuid
+                import datetime
+
+                if isinstance(o, uuid.UUID):
+                    return str(o)
+                if isinstance(o, datetime.datetime):
+                    return o.astimezone(datetime.UTC).isoformat()
+                return json.dumps(o, indent=1, default=jdmp)
+
             for itm in itms:
                 dic = {"origin": itm, "result": None}
-                dic["result"] = await scraper.item_extractor(itm)
-                print(json.dumps(dic, indent=2, default=str))
+                dic["result"] = (await scraper.item_extractor(itm)).to_dict()
+
+                print(json.dumps(dic, indent=1, default=jdmp))
 
     asyncio.run(minimain())

@@ -59,10 +59,58 @@ async def test_soup_to_listing():
                     )
 
 
+def nullify_uuids(vg: models.Vorgang) -> models.Vorgang:
+    import uuid
+
+    NULL_UUID = uuid.UUID("00000000-0000-0000-0000-000000000000")
+
+    vg.api_id = NULL_UUID
+    for s in vg.stationen:
+        s.api_id = NULL_UUID
+        for d in s.dokumente:
+            if isinstance(d.actual_instance, str):
+                d = str(NULL_UUID)
+            else:
+                d.actual_instance.api_id = NULL_UUID
+        for d in s.stellungnahmen:
+            if isinstance(d, models.Dokument):
+                d.api_id = NULL_UUID
+            elif isinstance(d.actual_instance, str):
+                d = str(NULL_UUID)
+            else:
+                d.actual_instance.api_id = NULL_UUID
+
+
 @pytest.mark.asyncio
 async def test_soup_to_item():
+    import os
+
+    os.environ["LTZF_API_KEY"] = "xtest"
+    os.environ["OPENAI_API_KEY"] = "ytest"
     # TODO: Input offline-saved html, output a known vorgang
-    pass
+    async with aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(limit_per_host=1)
+    ) as session:
+        scraper = create_scraper(session)
+        data_dir = os.path.join(os.path.dirname(__file__), SCRAPER_NAME)
+        cases_html = glob.glob(os.path.join(data_dir, "vorgang_*.htmltest"))
+        cases_out = glob.glob(os.path.join(data_dir, "vorgang_*.json"))
+
+        if len(cases_html) != len(cases_out):
+            assert False, "html/out files of vorgang test cases should be matching"
+        cases_html.sort()
+        cases_out.sort()
+        scraper.item_count = len(cases_html)
+
+        for i in range(len(cases_html)):
+            with open(cases_html[i], "r") as hf:
+                with open(cases_out[i], "r") as ho:
+                    output = json.load(ho)
+                    soup = BeautifulSoup(hf.read(), features="lxml")
+                    out_object = models.Vorgang.from_dict(output["result"])
+                    assert nullify_uuids(
+                        await scraper.soup_to_item(output["origin"], soup)
+                    ) == nullify_uuids(out_object), f"Origin: {cases_html[i]}"
 
 
 @pytest.mark.asyncio
@@ -77,29 +125,3 @@ async def test_canary_listing():
     # TODO: Only "online" version of listing test that checks if the format
     # is the same
     pass
-
-
-# @pytest.mark.asyncio
-# async def test_bylt_item_extract():
-#    async with aiohttp.ClientSession(
-#        connector=aiohttp.TCPConnector(limit_per_host=1)
-#    ) as session:
-#        scraper = create_scraper(session)
-#
-#        test_data_dir = os.path.join(os.path.dirname(__file__), SCRAPER_NAME)
-#
-#        # Find all JSON files in the directory that start with "vg_item_"
-#        item_files = glob.glob(os.path.join(test_data_dir, "vg_item_*.json"))
-#        for file in item_files:
-#            with open(file, "r", encoding="utf-8") as f:
-#                item_scenario = json.load(f)
-#                item = models.Vorgang.from_dict(item_scenario.get("result"))
-#                vg = await scraper.item_extractor(item_scenario.get("url"))
-#                assert vg is not None
-#                sanitized_vg = sanitize_for_serialization(vg)
-#                sanitized_item = sanitize_for_serialization(item)
-#                dumped = json.dumps(sanitized_vg, indent=2, ensure_ascii=False)
-#
-#                assert sanitized_vg == sanitized_item, (
-#                    f"Item `{item_scenario.get('url')}` does not match expected result for scenario `{file}`.\nDifference:\n{json_difference(sanitized_vg, sanitized_item)}\nOutput:\n{dumped}"
-#                )

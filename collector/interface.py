@@ -39,6 +39,9 @@ class Scraper(ABC):
         listing_urls: List[str],
         session: aiohttp.ClientSession,
     ):
+        assert isinstance(config, CollectorConfiguration)
+        assert isinstance(collector_id, UUID)
+        assert isinstance(session, aiohttp.ClientSession)
         self.scraper_id = collector_id
         self.listing_urls = listing_urls
         self.config = config

@@ -22,6 +22,7 @@ class CollectorConfiguration:
     cache: ScraperCache = None
     scrapers: list = []
     linearize: bool = False
+    cache_documents: str = None
 
     def __init__(
         self,
@@ -46,6 +47,7 @@ class CollectorConfiguration:
         self.redis_host = redis_host or os.getenv("REDIS_HOST", "localhost")
         self.redis_port = redis_port or int(os.getenv("REDIS_PORT", "6379"))
         self.cache = ScraperCache(self.redis_host, self.redis_port)
+        self.cache_documents = os.getenv("DOCUMENT_CACHE")
 
         # Scraperdir
         self.scrapers_dir = self.scrapers_dir or os.path.join(

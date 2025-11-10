@@ -88,7 +88,6 @@ class BayernDokument(DocumentBuilder):
         self.hash = None
         self.zp_erstellt = None
         self.zp_modifiziert = None
-        self.fileid = uuid.uuid4()
         self.trojanergefahr = None
         self.drucksnr = None
         self.tops = None
@@ -101,7 +100,7 @@ class BayernDokument(DocumentBuilder):
     async def extract_metadata(self):
         try:
             doc_hash = None
-            with open(f"{self.fileid}.pdf", "rb") as f:
+            with open(self.local_path, "rb") as f:
                 # Calculate file hash for document identification
                 f.seek(0)
                 doc_hash = hashlib.file_digest(f, "sha256").hexdigest()
@@ -111,7 +110,7 @@ class BayernDokument(DocumentBuilder):
             try:
                 try:
                     extract = await extract_file(
-                        f"{self.fileid}.pdf",
+                        self.local_path,
                         config=ExtractionConfig(
                             force_ocr=False,
                             ocr_backend="tesseract",
@@ -127,7 +126,7 @@ class BayernDokument(DocumentBuilder):
                     )
                 if not run_successful:
                     extract = await extract_file(
-                        f"{self.fileid}.pdf",
+                        self.local_path,
                         config=ExtractionConfig(
                             force_ocr=True,
                             ocr_backend="tesseract",
@@ -174,23 +173,10 @@ class BayernDokument(DocumentBuilder):
         finally:
             self.cleanup_files()
 
-    def __del__(self):
-        self.cleanup_files()
-
-    def cleanup_files(self):
-        """Clean up any temporary files created during document processing"""
-        try:
-            if self.fileid and os.path.exists(f"{self.fileid}.pdf"):
-                os.remove(f"{self.fileid}.pdf")
-        except Exception as e:
-            logger.warning(
-                f"Failed to remove temporary PDF file. Exception ignored: {e}"
-            )
-
     def to_dict(self) -> dict:
         return {
             "output": self.output.to_dict() if self.output else None,
-            "fileid": str(self.fileid),
+            "local_path": self.local_path,
             "trojanergefahr": self.trojanergefahr,
             "tops": self.tops,
             "typehint": self.typehint,
@@ -199,10 +185,13 @@ class BayernDokument(DocumentBuilder):
 
     @classmethod
     def from_dict(cls, dic):
+        from collector.config import CollectorConfiguration
+
         logger.debug(f"called BayernDokument@from_dict with {dic}")
-        inst = cls(dic["typehint"], dic["url"], None, None)
+        config = CollectorConfiguration(None, None)
+        inst = cls(dic["typehint"], dic["url"], None, config)
         inst.output = models.Dokument.from_dict(dic["output"])
-        inst.fileid = uuid.UUID(dic["fileid"])
+        inst.local_path = dic["local_path"]
         inst.trojanergefahr = (
             int(dic["trojanergefahr"]) if dic["trojanergefahr"] else None
         )

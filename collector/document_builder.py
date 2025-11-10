@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
+import os
 import logging
+import hashlib
 import json
 import openapi_client.models as models
 
@@ -9,9 +11,12 @@ logger = logging.getLogger(__name__)
 
 class DocumentBuilder(ABC):
     def __init__(self, typehint: models.Doktyp, url, session, config):
+        assert config
+        assert url
         self.output = None
         self.config = config
         self.corrupted = False
+        self.local_path = None
         self.url = url
         self.session = session
         self.typehint = typehint
@@ -26,18 +31,30 @@ class DocumentBuilder(ABC):
         assert False, "Abstract Method Called"
 
     async def download(self) -> Path:
+        url_hash = hashlib.sha256(bytes(self.url, encoding="utf-8")).hexdigest()
+        if self.config.cache_documents:
+            base_dir = Path(self.config.cache_documents)
+            if not base_dir.exists():
+                os.mkdir(base_dir)
+                logger.info(f"Created Directory {base_dir}")
+        else:
+            base_dir = Path(".")
+        obj_path = (base_dir / f"{url_hash}.pdf").absolute()
+        self.local_path = obj_path
+
+        if self.config.cache_documents and obj_path.exists() and not obj_path.is_dir():
+            return
+
         async with self.session.get(self.url) as response:
             if response.status != 200:
                 raise Exception(
                     f"Failed to download document, status: {response.status}"
                 )
-
-            with open(f"{self.fileid}.pdf", "wb") as f:
+            with open(self.local_path, "wb") as f:
                 f.write(await response.read())
-                self.download_success = True
-        out = Path(f"{self.fileid}.pdf")
-        if not out.exists() or out.stat().st_size == 0:
+        if not obj_path.exists() or obj_path.stat().st_size == 0:
             raise Exception("Downloaded file is empty or doesn't exist")
+        self.download_success = True
 
     @abstractmethod
     async def extract_metadata(self):
@@ -72,7 +89,7 @@ class DocumentBuilder(ABC):
                 return cached
         logger.info(f"Downloading from {self.url}")
         await self.download()
-        logger.info(f"Extracting {self.fileid}.pdf / {self.url}")
+        logger.info(f"Extracting {self.local_path} / {self.url}")
         await self.extract()
         if self.corrupted:
             logger.warning(
@@ -83,6 +100,21 @@ class DocumentBuilder(ABC):
         logger.info(f"Storing {self.url} in cache")
         self.config.cache.store_dokument(self.url, self)
         return self
+
+    def __del__(self):
+        if self.config and not self.config.cache_documents:
+            self.cleanup_files()
+
+    def cleanup_files(self):
+        """Clean up any temporary files created during document processing"""
+        try:
+            if self.local_path and Path(self.local_path).exists():
+                logger.info(f"Removing {self.local_path}")
+                os.remove(self.local_path)
+        except Exception as e:
+            logger.warning(
+                f"Failed to remove temporary PDF file. Exception ignored: {e}"
+            )
 
     def to_json(self) -> dict:
         return json.dumps(self.to_dict(), default=str)
