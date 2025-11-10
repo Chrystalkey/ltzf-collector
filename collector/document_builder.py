@@ -102,10 +102,12 @@ class DocumentBuilder(ABC):
         return self
 
     def __del__(self):
-        if self.config and not self.config.cache_documents:
-            self.cleanup_files()
+        # cache_documents is not set => no persistence path is given
+        # meaning the docs should be cleaned up after using them
+        if not self.config.cache_documents:
+            self.remove_file()
 
-    def cleanup_files(self):
+    def remove_file(self):
         """Clean up any temporary files created during document processing"""
         try:
             if self.local_path and Path(self.local_path).exists():

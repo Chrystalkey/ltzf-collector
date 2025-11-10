@@ -171,7 +171,8 @@ class BayernDokument(DocumentBuilder):
         except Exception as e:
             logger.error(f"Error extracting metadata from PDF: {e}")
         finally:
-            self.cleanup_files()
+            if not self.config.cache_documents:
+                self.cleanup_files()
 
     def to_dict(self) -> dict:
         return {

@@ -647,7 +647,7 @@ if __name__ == "__main__":
         )
         parser.add_argument("-l", "--listing", nargs="*")
         parser.add_argument("-i", "--item", nargs="*")
-        parser.add_argument("-n", "--nocache", action="store_true")
+        parser.add_argument("-n", "--no-cache", action="store_true")
         parser.add_argument("-d", "--debug-logging", action="store_true")
         args = parser.parse_args()
         lstn = [] if not args.listing else args.listing
@@ -661,7 +661,7 @@ if __name__ == "__main__":
         ) as session:
             config = CollectorConfiguration(api_key="test", openai_api_key="test")
             config.oapiconfig = Configuration(host="http://localhost")
-            config.cache.disabled = args.nocache
+            config.cache.disabled = args.no_cache
             scraper = BYLTScraper(config, session)
             for lurl in lstn:
                 dic = {"origin": lurl, "result": []}
