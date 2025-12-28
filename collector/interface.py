@@ -47,6 +47,8 @@ class Scraper(ABC):
         self.config = config
         self.session = session
         self.session_headers = {}
+        self.item_count = 0
+        self.items_done = 0
         global logger
         logger.info(
             f"Initialized {self.__class__.__name__} with {len(self.listing_urls)} listing urls"
@@ -72,7 +74,7 @@ class Scraper(ABC):
                     item_list.append(await t)
             else:
                 item_list = await asyncio.gather(*tasks, return_exceptions=True)
-
+            self.item_count = len(item_list)
             # Handle any exceptions from listing page extractors
             for i, result in enumerate(item_list):
                 if isinstance(result, Exception):

@@ -44,6 +44,7 @@ class CollectorConfiguration:
         self.api_key = os.getenv("LTZF_API_KEY", api_key)
         if self.api_key is None:
             unset_keys.append("LTZF_API_KEY")
+
         # Caching
         self.redis_host = redis_host or os.getenv("REDIS_HOST", "localhost")
         self.redis_port = redis_port or int(os.getenv("REDIS_PORT", "6379"))
@@ -61,6 +62,10 @@ class CollectorConfiguration:
             self.collector_id = str(uuid4())
         else:
             self.collector_id = os.getenv("COLLECTOR_ID")
+        if os.getenv("CYCLE_TIME_S"):
+            self.cycle_time_s = int(os.getenv("CYCLE_TIME_S"))
+        else:
+            self.cycle_time_s = 3 * 60 * 60  # == 3 Stunden
 
         # OpenAPI Configuration
         self.oapiconfig = Configuration(host=self.database_url)

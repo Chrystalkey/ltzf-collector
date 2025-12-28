@@ -112,12 +112,11 @@ if __name__ == "__main__":
     if args.dump_config:
         print(vars(config))
         sys.exit(0)
-    CYCLE_TIME = 3 * 60 * 60  # 3 hours
     last_run = None
     while True:
-        if last_run is not None and time.time() - last_run < CYCLE_TIME:
+        if last_run is not None and time.time() - last_run < config.cycle_time_s:
             logger.info("Last scraping cycle finished, running again in 3 hours. Bye!")
-            time.sleep(CYCLE_TIME - (time.time() - last_run))
+            time.sleep(config.cycle_time_s - (time.time() - last_run))
             continue
         try:
             last_run = time.time()

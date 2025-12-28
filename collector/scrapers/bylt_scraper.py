@@ -32,8 +32,6 @@ class BYLTScraper(VorgangsScraper):
         super().__init__(config, uuid.uuid4(), listing_urls, session)
         # Add headers for API key authentication
         self.session.headers.update({"api-key": config.api_key})
-        self.item_count = 0
-        self.items_done = 0
         self.lock = asyncio.Lock()
 
     async def listing_page_extractor(self, url) -> list[str]:
@@ -667,8 +665,6 @@ if __name__ == "__main__":
                 dic = {"origin": lurl, "result": []}
                 dic["result"] = await scraper.listing_page_extractor(lurl)
                 print(json.dumps(dic, indent=2, default=str))
-
-            scraper.item_count = len(itms)
 
             def jdmp(o):
                 import uuid
