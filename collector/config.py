@@ -5,6 +5,7 @@ import logging
 from collector.llm_connector import LLMConnector
 from collector.scrapercache import ScraperCache
 import sys
+from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ class CollectorConfiguration:
     ):
         global logger
         unset_keys = []
-        self.scrapers = scrapers
+        self.scrapers = scrapers or []
         self.linearize = linearize
 
         # Database
@@ -55,7 +56,11 @@ class CollectorConfiguration:
         )
         # Thresholds and optionals
         self.api_obj_log = os.getenv("API_OBJ_LOG")
-        self.collector_id = os.getenv("COLLECTOR_ID")
+        if not os.getenv("COLLECTOR_ID"):
+            print("Generating new UUID for Collector Identification")
+            self.collector_id = str(uuid4())
+        else:
+            self.collector_id = os.getenv("COLLECTOR_ID")
 
         # OpenAPI Configuration
         self.oapiconfig = Configuration(host=self.database_url)

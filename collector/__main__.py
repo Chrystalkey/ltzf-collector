@@ -1,6 +1,7 @@
 import importlib.util
 import logging
 import os
+import sys
 import time
 import uuid
 
@@ -74,7 +75,7 @@ def load_scrapers(config, session):
                     and not isinstance(cls, module.__class__)
                 ):
                     logger.info(f"Found scraper: {cls.__name__}")
-                    scrapers.append(cls(coll_id, config, session))
+                    scrapers.append(cls(config, session))
     return scrapers
 
 
@@ -92,6 +93,12 @@ if __name__ == "__main__":
         help="Await all extraction tasks one-by-one instead of gathering",
         action="store_true",
     )
+    parser.add_argument(
+        "--dump-config",
+        help="Dumps the Configuration and then exits",
+        default=False,
+        action="store_true",
+    )
     args = parser.parse_args()
     print(args)
     try:
@@ -102,6 +109,9 @@ if __name__ == "__main__":
 
     logger.info("Starting collector manager.")
     logger.info("Configuration Complete")
+    if args.dump_config:
+        print(vars(config))
+        sys.exit(0)
     CYCLE_TIME = 3 * 60 * 60  # 3 hours
     last_run = None
     while True:
