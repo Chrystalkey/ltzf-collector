@@ -74,8 +74,11 @@ def load_scrapers(config, session):
                     and cls is not SitzungsScraper
                     and not isinstance(cls, module.__class__)
                 ):
-                    logger.info(f"Found scraper: {cls.__name__}")
+                    # logger.info(f"Found scraper: {cls.__name__}")
                     scrapers.append(cls(config, session))
+    ## pretty logging
+    snames = [type(s).__name__ for s in scrapers]
+    logger.info(f"Found these scrapers: {snames}")
     return scrapers
 
 
@@ -102,7 +105,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args)
     try:
-        logger.info(f"Only these scrapers will run: {args.run}")
+        if args.run:
+            logger.info(f"Only these scrapers will run: {args.run}")
+        else:
+            logger.info("All available Scrapers will be run")
         config = CollectorConfiguration(None, None, args.run, args.linearize)
     except Exception:
         config = CollectorConfiguration(None, None)

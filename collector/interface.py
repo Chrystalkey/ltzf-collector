@@ -118,7 +118,7 @@ class Scraper(ABC):
         skipped_count = 0
         logger.info("Processing Items Now")
 
-        for item in items:
+        for item in sorted(items):
             # Check if item is already in cache
             key = await self.make_cache_key(item)
             cached = await self.get_cached_result(key)

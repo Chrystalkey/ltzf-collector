@@ -76,7 +76,7 @@ class ScraperCache:
         try:
             success = self.redis_client.get(key)
             if not success:
-                logger.warning(f"{typehint} (key=`{key}`) not found in cache")
+                logger.debug(f"{typehint} (key=`{key}`) not found in cache")
                 return None
             return success
         except Exception as e:
