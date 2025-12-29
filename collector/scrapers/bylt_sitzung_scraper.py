@@ -208,21 +208,21 @@ class BYLTSitzungScraper(SitzungsScraper):
 
 def parse_natural_date(date: str, year: int) -> dt_date:
     month_dict = {
-        "january": 1,
-        "february": 2,
-        "march": 3,
+        "januar": 1,
+        "februar": 2,
+        "märz": 3,
         "april": 4,
-        "may": 5,
-        "june": 6,
-        "july": 7,
+        "mai": 5,
+        "juni": 6,
+        "juli": 7,
         "august": 8,
         "september": 9,
-        "october": 10,
+        "oktober": 10,
         "november": 11,
-        "december": 12,
+        "dezember": 12,
     }
     try:
-        split = date.split(" ")  # monday,|12.|march
+        split = date.split(" ")  # montag,|12.|märz
         while "" in split:
             split.remove("")
         number = int(split[1][:-1])  # 12
