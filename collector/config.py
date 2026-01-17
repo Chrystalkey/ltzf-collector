@@ -8,7 +8,9 @@ import sys
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
-
+import litellm
+llmlog = logging.getLogger("LiteLLM")
+llmlog.setLevel(logging.WARNING)
 
 class CollectorConfiguration:
     oapiconfig: Configuration = None
@@ -69,7 +71,7 @@ class CollectorConfiguration:
 
         # OpenAPI Configuration
         self.oapiconfig = Configuration(host=self.database_url)
-        logger.info(f"Setting API Key to {self.api_key}")
+        logger.info(f"Setting API Key to {self.api_key[:16]}")
         self.oapiconfig.api_key["apiKey"] = self.api_key
 
         # LLM Connector, currently only openai is supported

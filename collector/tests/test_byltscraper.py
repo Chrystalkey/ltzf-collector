@@ -1,5 +1,6 @@
 import asyncio
 import jsondiff
+from unittest.mock import Mock
 from collector.scrapers.bylt_scraper import BYLTScraper
 from collector.convert import sanitize_for_serialization
 from collector.config import CollectorConfiguration
@@ -14,14 +15,25 @@ from bs4 import BeautifulSoup
 
 SCRAPER_NAME = "bylt_scraper"
 
+class FakeLLMConnector:
+#    def __init__(self, gen_responses: dict, ex_responses: dict):
+#        self.gen_responses = gen_responses
+#        self.ex_responses = ex_responses
+
+    def generate(self, prompt: str, text: str) -> str:
+        return "dummy"
+    def extract_info(self, text: str, prompt: str, schema: dict, key: str, cache: ScraperCache) -> dict:
+        return {}
 
 def create_scraper(session):
     global SCRAPER_NAME
+    from collector.llm_connector import LLMConnector
     config = CollectorConfiguration(
         api_key="test",
         openai_api_key="test",
     )
     config.oapiconfig = Configuration(host="http://localhost")
+
     scraper = BYLTScraper(config, session)
     return scraper
 
@@ -79,7 +91,13 @@ def nullify_uuids(vg: models.Vorgang) -> models.Vorgang:
                 d = str(NULL_UUID)
             else:
                 d.actual_instance.api_id = NULL_UUID
-
+def sanitize_llm_output(vg: models.Vorgang) -> models.Vorgang:
+    vg.autoren = []
+    for station in vg.stationen:
+        for doc in vg.documents:
+            doc.autoren = []
+            doc.zusammenfassung = []
+            # big TODO
 
 @pytest.mark.asyncio
 async def test_soup_to_item():

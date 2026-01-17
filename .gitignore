@@ -7,6 +7,7 @@ target/
 *.zip
 *.7z
 *.tar.gz
+*.pdf
 __pycache__/
 .pytest_cache/
 
