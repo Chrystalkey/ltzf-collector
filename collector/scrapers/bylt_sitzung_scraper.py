@@ -184,8 +184,8 @@ class BYLTSitzungScraper(SitzungsScraper):
         }
         try:
             experts_raw = await self.config.llm_connector.extract_info(
-                self.full_text[0 : min(3000, len(self.full_text))],
                 prompt,
+                self.full_text[0 : min(3000, len(self.full_text))],
                 schema,
                 f"experts:{doc.url}",
                 self.config.cache,

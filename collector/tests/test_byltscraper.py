@@ -15,19 +15,25 @@ from bs4 import BeautifulSoup
 
 SCRAPER_NAME = "bylt_scraper"
 
+
 class FakeLLMConnector:
-#    def __init__(self, gen_responses: dict, ex_responses: dict):
-#        self.gen_responses = gen_responses
-#        self.ex_responses = ex_responses
+    #    def __init__(self, gen_responses: dict, ex_responses: dict):
+    #        self.gen_responses = gen_responses
+    #        self.ex_responses = ex_responses
 
     def generate(self, prompt: str, text: str) -> str:
         return "dummy"
-    def extract_info(self, text: str, prompt: str, schema: dict, key: str, cache: ScraperCache) -> dict:
+
+    def extract_info(
+        self, text: str, prompt: str, schema: dict, key: str, cache: ScraperCache
+    ) -> dict:
         return {}
+
 
 def create_scraper(session):
     global SCRAPER_NAME
     from collector.llm_connector import LLMConnector
+
     config = CollectorConfiguration(
         api_key="test",
         openai_api_key="test",
@@ -91,6 +97,8 @@ def nullify_uuids(vg: models.Vorgang) -> models.Vorgang:
                 d = str(NULL_UUID)
             else:
                 d.actual_instance.api_id = NULL_UUID
+
+
 def sanitize_llm_output(vg: models.Vorgang) -> models.Vorgang:
     vg.autoren = []
     for station in vg.stationen:
@@ -98,6 +106,7 @@ def sanitize_llm_output(vg: models.Vorgang) -> models.Vorgang:
             doc.autoren = []
             doc.zusammenfassung = []
             # big TODO
+
 
 @pytest.mark.asyncio
 async def test_soup_to_item():

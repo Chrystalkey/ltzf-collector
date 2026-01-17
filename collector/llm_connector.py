@@ -81,7 +81,7 @@ class LLMConnector:
             raise e
 
     async def extract_info(
-        self, text: str, prompt: str, schema: dict, key: str, cache: ScraperCache
+        self, prompt: str, text: str, schema: dict, key: str, cache: ScraperCache
     ) -> dict:
         global MIN_TEXT_LEN, MAX_TRIES
         effective_key = f"llm-response:{key}"

@@ -9,8 +9,10 @@ from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 import litellm
+
 llmlog = logging.getLogger("LiteLLM")
 llmlog.setLevel(logging.WARNING)
+
 
 class CollectorConfiguration:
     oapiconfig: Configuration = None

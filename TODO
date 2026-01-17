@@ -1,5 +1,3 @@
-- @LLMConnector: switch prompt-text order to make it consistent between generate and extract
-
 - logging to file
 - logging errors to file
 

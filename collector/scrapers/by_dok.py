@@ -252,15 +252,15 @@ class ByGesetzentwurf(BayernDokument):
 
         try:
             hdr = await self.config.llm_connector.extract_info(
-                self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_PROMPT,
+                self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_SCHEMA,
                 f"hdr-entwurf:{self.url}",
                 self.config.cache,
             )
             bdy = await self.config.llm_connector.extract_info(
-                self.full_text,
                 body_prompt,
+                self.full_text,
                 body_schema,
                 f"bdy-entwurf:{self.url}",
                 self.config.cache,
@@ -354,15 +354,15 @@ class ByStellungnahme(BayernDokument):
 
         try:
             hdr = await self.config.llm_connector.extract_info(
-                self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_PROMPT,
+                self.full_text[0 : min(3000, len(self.full_text))],
                 header_schema,
                 f"hdr-stln:{self.url}",
                 self.config.cache,
             )
             bdy = await self.config.llm_connector.extract_info(
-                self.full_text,
                 body_prompt,
+                self.full_text,
                 body_schema,
                 f"bdy-stln:{self.url}",
                 self.config.cache,
@@ -436,15 +436,15 @@ class ByBeschlussempfehlung(BayernDokument):
 
         try:
             hdr = await self.config.llm_connector.extract_info(
-                self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_PROMPT,
+                self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_SCHEMA,
                 f"hdr-beschlempf:{self.url}",
                 self.config.cache,
             )
             bdy = await self.config.llm_connector.extract_info(
-                self.full_text,
                 body_prompt,
+                self.full_text,
                 body_schema,
                 f"bdy-beschlempf:{self.url}",
                 self.config.cache,
@@ -512,15 +512,15 @@ class ByRedeprotokoll(BayernDokument):
 
         try:
             hdr = await self.config.llm_connector.extract_info(
-                self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_PROMPT,
+                self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_SCHEMA,
                 f"hdr-rproto:{self.url}",
                 self.config.cache,
             )
             bdy = await self.config.llm_connector.extract_info(
-                self.full_text,
                 body_prompt,
+                self.full_text,
                 body_schema,
                 f"bdy-rproto:{self.url}",
                 self.config.cache,
@@ -587,15 +587,15 @@ class ByMitteilung(BayernDokument):
 
         try:
             hdr = await self.config.llm_connector.extract_info(
-                self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_PROMPT,
+                self.full_text[0 : min(3000, len(self.full_text))],
                 HEADER_SCHEMA,
                 f"hdr-mitt:{self.url}",
                 self.config.cache,
             )
             bdy = await self.config.llm_connector.extract_info(
-                self.full_text,
                 body_prompt,
+                self.full_text,
                 body_schema,
                 f"bdy-mitt:{self.url}",
                 self.config.cache,
@@ -709,15 +709,15 @@ class ByTagesordnung(BayernDokument):
 
         try:
             hdr = await self.config.llm_connector.extract_info(
-                self.full_text[0 : min(3000, len(self.full_text))],
                 header_prompt,
+                self.full_text[0 : min(3000, len(self.full_text))],
                 header_schema,
                 f"hdr-tops:{self.url}",
                 self.config.cache,
             )
             bdy = await self.config.llm_connector.extract_info(
-                self.full_text,
                 body_prompt,
+                self.full_text,
                 body_schema,
                 f"bdy-tops:{self.url}",
                 self.config.cache,
