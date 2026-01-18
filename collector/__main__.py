@@ -83,41 +83,16 @@ def load_scrapers(config, session):
 
 
 if __name__ == "__main__":
-    from argparse import ArgumentParser
 
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s | %(levelname)-8s: %(filename)-20s: %(message)s",
     )
-    parser = ArgumentParser(prog="collector", description="Bundleing Scrapers")
-    parser.add_argument("--run", nargs="*", help="Run only the scrapers specified")
-    parser.add_argument(
-        "--linearize",
-        help="Await all extraction tasks one-by-one instead of gathering",
-        action="store_true",
-    )
-    parser.add_argument(
-        "--dump-config",
-        help="Dumps the Configuration and then exits",
-        default=False,
-        action="store_true",
-    )
-    args = parser.parse_args()
-    print(args)
-    try:
-        if args.run:
-            logger.info(f"Only these scrapers will run: {args.run}")
-        else:
-            logger.info("All available Scrapers will be run")
-        config = CollectorConfiguration(None, None, args.run, args.linearize)
-    except Exception:
-        config = CollectorConfiguration(None, None)
+
+    config = CollectorConfiguration()
 
     logger.info("Starting collector manager.")
     logger.info("Configuration Complete")
-    if args.dump_config:
-        print(vars(config))
-        sys.exit(0)
     last_run = None
     while True:
         if last_run is not None and time.time() - last_run < config.cycle_time_s:

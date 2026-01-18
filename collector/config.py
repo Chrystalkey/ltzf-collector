@@ -7,6 +7,8 @@ from collector.scrapercache import ScraperCache
 import sys
 from uuid import uuid4
 
+from argparse import ArgumentParser
+
 logger = logging.getLogger(__name__)
 import litellm
 
@@ -29,29 +31,59 @@ class CollectorConfiguration:
     linearize: bool = False
     cache_documents: str = None
 
-    def __init__(
-        self,
-        api_key,
-        openai_api_key,
-        scrapers: list = [],
-        linearize: bool = False,
-        redis_host: str = None,
-        redis_port: int = None,
-    ):
+    def __init__(self):
         global logger
         unset_keys = []
-        self.scrapers = scrapers or []
-        self.linearize = linearize
+        parser = ArgumentParser(prog="collector", description="Bundleing Scrapers")
+        parser.add_argument("--run", nargs="*", help="Run only the scrapers specified")
+        parser.add_argument(
+            "--linearize",
+            help="Await all extraction tasks one-by-one instead of gathering",
+            action="store_true",
+        )
+        parser.add_argument(
+            "--dump-config",
+            help="Dumps the Configuration and then exits",
+            default=False,
+            action="store_true",
+        )
+        parser.add_argument(
+            "--ltzf-api-url",
+            help="The URL to the Backend you want to use",
+            default=os.getenv("LTZF_API_URL", "http://localhost:80"),
+        )
+        parser.add_argument(
+            "--ltzf-api-key",
+            help="The API key for the backend",
+            default=os.getenv("LTZF_API_KEY"),
+        )
+        parser.add_argument(
+            "--redis-host", help="the redis host", default=os.getenv("REDIS_HOST")
+        )
+        parser.add_argument(
+            "--redis-port",
+            help="the redis port",
+            default=os.getenv("REDIS_PORT", "6379"),
+        )
+        args = parser.parse_args()
+
+        if args.run:
+            logger.info(f"Only these scrapers will run: {args.run}")
+            self.scrapers = args.run
+        else:
+            logger.info("All available Scrapers will be run")
+            self.scrapers = []
+        self.linearize = args.linearize
 
         # Database
-        self.database_url = os.getenv("LTZF_API_URL", "http://localhost:80")
-        self.api_key = os.getenv("LTZF_API_KEY", api_key)
-        if self.api_key is None:
+        self.database_url = args.ltzf_api_url
+        self.api_key = args.ltzf_api_key
+        if not self.api_key:
             unset_keys.append("LTZF_API_KEY")
 
         # Caching
-        self.redis_host = redis_host or os.getenv("REDIS_HOST", "localhost")
-        self.redis_port = redis_port or int(os.getenv("REDIS_PORT", "6379"))
+        self.redis_host = redis_host or args.redis_host
+        self.redis_port = redis_port or int(args.redis_port)
         self.cache = ScraperCache(self.redis_host, self.redis_port)
         self.cache_documents = os.getenv("DOCUMENT_CACHE")
 
@@ -59,6 +91,11 @@ class CollectorConfiguration:
         self.scrapers_dir = self.scrapers_dir or os.path.join(
             os.path.dirname(__file__), "scrapers"
         )
+
+        # Log Files
+        # self.logfile = os.getenv("LOG_FILE")
+        # self.errorlog= os.getenv("ERROR_FILE")
+
         # Thresholds and optionals
         self.api_obj_log = os.getenv("API_OBJ_LOG")
         if not os.getenv("COLLECTOR_ID"):
@@ -87,3 +124,8 @@ class CollectorConfiguration:
                 f"The following environment variables are not set: {', '.join(unset_keys)}"
             )
             sys.exit(1)
+
+        ## argument dump if necessary
+        if args.dump_config:
+            print(vars(self))
+            sys.exit(0)
