@@ -93,7 +93,7 @@ class ScraperCache:
         Only caches documents that were successfully downloaded and processed
         """
         if self.disabled:
-            print("Disabled: Always returning true")
+            logger.debug("Disabled: Always returning true")
             return True
         # Skip caching if document wasn't successfully processed
         if not getattr(value, "download_success", False) or not getattr(

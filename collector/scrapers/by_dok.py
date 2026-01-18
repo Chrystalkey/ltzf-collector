@@ -6,7 +6,7 @@ import datetime
 import hashlib
 import os
 import uuid
-from kreuzberg import ExtractionConfig, extract_file, TesseractConfig, PSMMode
+from kreuzberg import ExtractionConfig, extract_file, TesseractConfig
 import toml
 
 logger = logging.getLogger(__name__)
@@ -114,9 +114,7 @@ class BayernDokument(DocumentBuilder):
                         config=ExtractionConfig(
                             force_ocr=False,
                             ocr_backend="tesseract",
-                            ocr_config=TesseractConfig(
-                                language="deu", psm=PSMMode.SINGLE_BLOCK
-                            ),
+                            ocr_config=TesseractConfig(language="deu"),
                         ),
                     )
                     run_successful = extract.content is not None
@@ -130,9 +128,7 @@ class BayernDokument(DocumentBuilder):
                         config=ExtractionConfig(
                             force_ocr=True,
                             ocr_backend="tesseract",
-                            ocr_config=TesseractConfig(
-                                language="deu", psm=PSMMode.SINGLE_BLOCK
-                            ),
+                            ocr_config=TesseractConfig(language="deu"),
                         ),
                     )
             except Exception as e:
@@ -186,7 +182,7 @@ class BayernDokument(DocumentBuilder):
         from collector.config import CollectorConfiguration
 
         logger.debug(f"called BayernDokument@from_dict with {dic}")
-        config = CollectorConfiguration(None, None)
+        config = CollectorConfiguration()
         inst = cls(dic["typehint"], dic["url"], None, config)
         inst.output = models.Dokument.from_dict(dic["output"])
         inst.local_path = dic["local_path"]

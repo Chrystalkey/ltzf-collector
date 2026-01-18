@@ -18,6 +18,7 @@ class MockDoc(DocumentBuilder):
         self.zp_modifiziert = None
         self.fileid = uuid.uuid4()
         self.trojanergefahr = None
+        self.extraction_success = False
         self.drucksnr = None
         self.tops = None
         super().__init__(typehint, url, session, config)
@@ -43,12 +44,7 @@ class MockDoc(DocumentBuilder):
 
 
 def test_documents():
-    config = CollectorConfiguration(
-        api_key="test",
-        openai_api_key="test",
-        redis_host="localhost",
-        redis_port=6379,
-    )
+    config = CollectorConfiguration()
     config.oapiconfig = Configuration(host="http://localhost")
 
     mock_dok = MockDoc(None, "blub", "entwurf", config)
@@ -69,10 +65,7 @@ def test_documents():
 
 def test_vorgang():
     cache = ScraperCache("localhost", 6379)
-    config = CollectorConfiguration(
-        api_key="test",
-        openai_api_key="test",
-    )
+    config = CollectorConfiguration()
     config.oapiconfig = Configuration(host="http://localhost")
 
     mock_vg = models.Vorgang.from_dict(
@@ -121,10 +114,7 @@ def test_vorgang():
 
 def test_website():
     cache = ScraperCache("localhost", 6379)
-    config = CollectorConfiguration(
-        api_key="test",
-        openai_api_key="test",
-    )
+    config = CollectorConfiguration()
     config.oapiconfig = Configuration(host="http://localhost")
 
     mock_website = "<html>Website data as html or whatever</html>"

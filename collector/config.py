@@ -58,7 +58,9 @@ class CollectorConfiguration:
             default=os.getenv("LTZF_API_KEY"),
         )
         parser.add_argument(
-            "--redis-host", help="the redis host", default=os.getenv("REDIS_HOST")
+            "--redis-host",
+            help="the redis host",
+            default=os.getenv("REDIS_HOST", "localhost"),
         )
         parser.add_argument(
             "--redis-port",
@@ -82,8 +84,8 @@ class CollectorConfiguration:
             unset_keys.append("LTZF_API_KEY")
 
         # Caching
-        self.redis_host = redis_host or args.redis_host
-        self.redis_port = redis_port or int(args.redis_port)
+        self.redis_host = args.redis_host
+        self.redis_port = int(args.redis_port)
         self.cache = ScraperCache(self.redis_host, self.redis_port)
         self.cache_documents = os.getenv("DOCUMENT_CACHE")
 
@@ -99,7 +101,7 @@ class CollectorConfiguration:
         # Thresholds and optionals
         self.api_obj_log = os.getenv("API_OBJ_LOG")
         if not os.getenv("COLLECTOR_ID"):
-            print("Generating new UUID for Collector Identification")
+            logger.debug("Generating new UUID for Collector Identification")
             self.collector_id = str(uuid4())
         else:
             self.collector_id = os.getenv("COLLECTOR_ID")
@@ -114,7 +116,7 @@ class CollectorConfiguration:
         self.oapiconfig.api_key["apiKey"] = self.api_key
 
         # LLM Connector, currently only openai is supported
-        oai_key = os.getenv("OPENAI_API_KEY", openai_api_key)
+        oai_key = os.getenv("OPENAI_API_KEY")
         if oai_key:
             self.llm_connector = LLMConnector.from_openai(oai_key)
         else:

@@ -52,10 +52,7 @@ class MockBaseScraperSuccess(Scraper):
 
 @pytest.mark.asyncio
 async def test_process_lpurl():
-    config = CollectorConfiguration(
-        api_key="test",
-        openai_api_key="test",
-    )
+    config = CollectorConfiguration()
     config.oapiconfig = Configuration(host="http://localhost")
     async with aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(limit_per_host=1)
@@ -73,10 +70,7 @@ async def test_process_lpurl():
 
 @pytest.mark.asyncio
 async def test_process_items():
-    config = CollectorConfiguration(
-        api_key="test",
-        openai_api_key="test",
-    )
+    config = CollectorConfiguration()
     config.oapiconfig = Configuration(host="http://localhost")
     async with aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(limit_per_host=1)
@@ -92,10 +86,7 @@ async def test_process_items():
 
 @pytest.mark.asyncio
 async def test_process_results():
-    config = CollectorConfiguration(
-        api_key="test",
-        openai_api_key="test",
-    )
+    config = CollectorConfiguration()
     config.oapiconfig = Configuration(host="http://localhost")
     async with aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(limit_per_host=1)
@@ -117,10 +108,7 @@ async def test_process_results():
 
 @pytest.mark.asyncio
 async def test_log_object():
-    config = CollectorConfiguration(
-        api_key="test",
-        openai_api_key="test",
-    )
+    config = CollectorConfiguration()
     config.oapiconfig = Configuration(host="http://localhost")
     mock_vg = models.Vorgang.from_dict(
         {
