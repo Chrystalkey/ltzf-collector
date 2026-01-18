@@ -17,6 +17,11 @@ llmlog.setLevel(logging.WARNING)
 
 
 class CollectorConfiguration:
+    """
+    This class looks at the sources for configuring this program and parses them.
+    configuration options with higher volatility generally override lower-volatility ones:
+    `cli-options` override `environment variables` override `config file options`
+    """
     oapiconfig: Configuration = None
     llm_connector: LLMConnector = None
     redis_host: str = None
@@ -31,7 +36,27 @@ class CollectorConfiguration:
     linearize: bool = False
     cache_documents: str = None
 
+
+    initialization_dictionary = {}
+
     def __init__(self):
+        self.parse_config_file()
+        self.parse_environment()
+        self.parse_passed_args()
+    def display(self):
+        #TODO: make a pretty display of the configs and where they came from
+        pass
+
+    def parse_config_file(self):
+        pass
+    def parse_environment(self):
+        pass
+    def parse_passed_args(self):
+        pass
+
+    def parse(self):
+
+    def parse_args(self):
         global logger
         unset_keys = []
         parser = ArgumentParser(prog="collector", description="Bundleing Scrapers")

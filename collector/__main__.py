@@ -90,6 +90,7 @@ if __name__ == "__main__":
     )
 
     config = CollectorConfiguration()
+    config.parse_args()
 
     logger.info("Starting collector manager.")
     logger.info("Configuration Complete")

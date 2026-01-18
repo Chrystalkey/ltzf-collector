@@ -1,0 +1,35 @@
+# all directories are interpreted relative to the position of the config file or absolute
+# options that are active are required configuration options
+
+# options that are commented out are optionally configurable with the specified value being the default
+# options with two `#` (so `##`) are set to None otherwise
+
+[main]
+# linearize = false
+
+collector-uuid = "00000000-0000-0000-0000-000000000000" # arbitrary but fixed
+# cycle-time-s = 10800 # in seconds
+
+[cache]
+# redis-host = "localhost"
+# redis-port = 6379
+
+## document-cache = ".pdf_cache"
+
+[backend]
+#ltzf-api-url = "localhots:80"
+ltzf-api-key = "this-is-an-example-key"
+
+[scrapers]
+# scraper-dir = "./collector/scrapers" # relative from position of the config file
+## scrapers = [] # specific scrapers to run. if empty: all available
+
+[logging]
+## api-obj-log = "locallogs"        # logs all created objects to a directory
+## logfile = "collector.log"        # general log file, duplicates stdout
+## parsewarn = "parse-warning.log"  # logs all parsing errors for inspection
+## errorfile = "error.log"          # logs all warnings and errors
+
+[llm]
+openai-api-key = "this-is-another-example-key"
+

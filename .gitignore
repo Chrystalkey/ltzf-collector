@@ -8,6 +8,8 @@ target/
 *.7z
 *.tar.gz
 *.pdf
+*.log
+local-config.toml
 __pycache__/
 .pytest_cache/
 

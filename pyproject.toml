@@ -26,7 +26,7 @@ jsonschema = "^4.25.1"
 lazy-imports = "^1.2"
 
 [tool.poetry.group.dev.dependencies]
-black = "^25.1.0"
+black = "^26.1"
 
 [build-system]
 requires = ["poetry-core"]
