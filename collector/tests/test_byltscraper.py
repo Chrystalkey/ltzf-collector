@@ -140,9 +140,12 @@ async def test_soup_to_item():
 
                     # TODO: This is a stand-in for a correct solution.
                     # we could check more properties
-                    assert type(out_object) == type(scraped_object), f"Scenario {i+1}/{len(cases_html)}: {cases_html[i]}"
-                    assert len(out_object.stationen) == len(scraped_object.stationen), f"Scenario {i+1}/{len(cases_html)}: {cases_html[i]}"
-
+                    assert type(out_object) == type(
+                        scraped_object
+                    ), f"Scenario {i+1}/{len(cases_html)}: {cases_html[i]}"
+                    assert len(out_object.stationen) == len(
+                        scraped_object.stationen
+                    ), f"Scenario {i+1}/{len(cases_html)}: {cases_html[i]}"
 
 
 @pytest.mark.asyncio

@@ -10,6 +10,7 @@ target/
 *.pdf
 *.log
 local-config.toml
+collector.toml
 __pycache__/
 .pytest_cache/
 

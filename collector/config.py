@@ -1,158 +1,266 @@
 from openapi_client import Configuration
 from pathlib import Path
-import os
-import logging
 from collector.llm_connector import LLMConnector
 from collector.scrapercache import ScraperCache
-import sys
 from uuid import uuid4
-
 from argparse import ArgumentParser
 
+import os
+import logging
+import sys
+import toml
+
+### global logging setup
 logger = logging.getLogger(__name__)
 import litellm
 
 llmlog = logging.getLogger("LiteLLM")
 llmlog.setLevel(logging.WARNING)
+### end global logging setup
+
+
+class ConfigProp:
+    """
+    This class caputures all parsing behaviour of a single config option.
+    """
+
+    def __init__(
+        self,
+        attribute_name,
+        config_file,
+        environment=None,
+        argname=None,
+        default=None,
+        cli_setup_f=None,
+        required=False,
+    ):
+        self.attr = attribute_name
+        self.cfg = config_file
+        self.env = environment
+        self.value = default
+        # the value is set by: "default", "config file", "environment", "command line option"
+        self.value_set_by = "dft"
+
+        # the arg name is what I have to read out of `args` of the argparse lib
+        self.arg = argname
+        # the cli setup f is a lambda passed in and called like cli_setup(parser).
+        # this then sets up the argument as required for parsing
+        self.cli_setup = cli_setup_f
+
+        self.required = required
+
+    def __str__(self):
+        output = "Property: " + vars(self) + "\n"
 
 
 class CollectorConfiguration:
-    """
-    This class looks at the sources for configuring this program and parses them.
-    configuration options with higher volatility generally override lower-volatility ones:
-    `cli-options` override `environment variables` override `config file options`
-    """
-    oapiconfig: Configuration = None
-    llm_connector: LLMConnector = None
-    redis_host: str = None
-    redis_port: int = None
-    ltzfdb: str = None
-    api_obj_log: str = None
-    scrapers_dir: Path = None
-    api_key: str = None
-    trojan_threshold: int = None
-    cache: ScraperCache = None
-    scrapers: list = []
-    linearize: bool = False
-    cache_documents: str = None
-
-
-    initialization_dictionary = {}
-
     def __init__(self):
-        self.parse_config_file()
-        self.parse_environment()
-        self.parse_passed_args()
-    def display(self):
-        #TODO: make a pretty display of the configs and where they came from
-        pass
-
-    def parse_config_file(self):
-        pass
-    def parse_environment(self):
-        pass
-    def parse_passed_args(self):
-        pass
-
-    def parse(self):
-
-    def parse_args(self):
-        global logger
-        unset_keys = []
-        parser = ArgumentParser(prog="collector", description="Bundleing Scrapers")
-        parser.add_argument("--run", nargs="*", help="Run only the scrapers specified")
-        parser.add_argument(
-            "--linearize",
-            help="Await all extraction tasks one-by-one instead of gathering",
-            action="store_true",
+        configurations = []
+        # main
+        configurations.append(
+            ConfigProp(
+                "linearize",
+                "main.linearize",
+                None,
+                "linearize",
+                False,
+                lambda p: p.add_argument(
+                    "--linearize",
+                    help="Await all extraction tasks one-by-one instead of gathering",
+                    action="store_true",
+                ),
+            )
         )
+        configurations.append(
+            ConfigProp("collector_id", "main.collector-uuid", "COLLECTOR_ID")
+        )
+        configurations.append(
+            ConfigProp("cycle_time_s", "main.cycle-time-s", "CYCLE_TIME_S", None, 10800)
+        )
+
+        # cache config
+        configurations.append(
+            ConfigProp(
+                "redis_host", "cache.redis-host", "REDIS_HOST", None, "localhost"
+            )
+        )
+        configurations.append(
+            ConfigProp("redis_port", "cache.redis-port", "REDIS_PORT", None, 6379)
+        )
+        configurations.append(
+            ConfigProp("cache_documents", "cache.document-cache", "DOCUMENT_CACHE")
+        )
+
+        # backend
+        configurations.append(
+            ConfigProp(
+                "database_url",
+                "backend.ltzf-api-url",
+                "LTZF_API_URL",
+                None,
+                "http://localhost:80",
+            )
+        )
+        # special case: no default but required argument
+        configurations.append(
+            ConfigProp(
+                "api_key",
+                "backend.ltzf-api-key",
+                "LTZF_API_KEY",
+                "ltzf_api_key",
+                None,
+                lambda p: p.add_argument(
+                    "--ltzf-api-key",
+                    help="The key with which you auth yourself as collector to the backend",
+                ),
+                True,
+            )
+        )
+
+        # scraper configs
+        configurations.append(
+            ConfigProp(
+                "scrapers_dir",
+                "scrapers.scraper-dir",
+                "SCRAPER_DIR",
+                None,
+                "./collector/scrapers",
+            )
+        )
+        configurations.append(
+            ConfigProp(
+                "scrapers",
+                "scrapers.scrapers",
+                None,
+                "run",
+                [],
+                lambda p: p.add_argument(
+                    "--run", help="run only scrapers specified", nargs="*"
+                ),
+            )
+        )
+        # logging
+        configurations.append(
+            ConfigProp("api_obj_log", "logging.api-obj-log", "API_OBJ_LOG", None)
+        )
+        configurations.append(ConfigProp("logfile", "logging.logfile"))
+        configurations.append(ConfigProp("parsewarn", "logging.parsewarn"))
+        configurations.append(ConfigProp("errorfile", "logging.errorfile"))
+
+        # llm
+        configurations.append(
+            ConfigProp(
+                "openai_api_key",
+                "llm.openai-api-key",
+                "OPENAI_API_KEY",
+                "openai_api_key",
+                None,
+                lambda p: p.add_argument(
+                    "--openai-api-key", help="Your key to run an llm with"
+                ),
+                True,
+            )
+        )
+        self.configurations = configurations
+
+    def load(self):
+        parser = ArgumentParser(prog="collector", description="Bundled Scrapers")
+        parser.add_argument("--config-file", help="the config file to use")
         parser.add_argument(
             "--dump-config",
-            help="Dumps the Configuration and then exits",
-            default=False,
+            help="Await all extraction tasks one-by-one instead of gathering",
             action="store_true",
-        )
-        parser.add_argument(
-            "--ltzf-api-url",
-            help="The URL to the Backend you want to use",
-            default=os.getenv("LTZF_API_URL", "http://localhost:80"),
-        )
-        parser.add_argument(
-            "--ltzf-api-key",
-            help="The API key for the backend",
-            default=os.getenv("LTZF_API_KEY"),
-        )
-        parser.add_argument(
-            "--redis-host",
-            help="the redis host",
-            default=os.getenv("REDIS_HOST", "localhost"),
-        )
-        parser.add_argument(
-            "--redis-port",
-            help="the redis port",
-            default=os.getenv("REDIS_PORT", "6379"),
-        )
+        ),
+
+        for config in self.configurations:
+            if config.arg:
+                config.cli_setup(parser)
         args = parser.parse_args()
 
-        if args.run:
-            logger.info(f"Only these scrapers will run: {args.run}")
-            self.scrapers = args.run
+        # config file
+        config_file = None
+        if not args.config_file and Path("collector.toml").is_file():
+            config_file = "collector.toml"
+        elif args.config_file:
+            config_file = args.config_file
+        self.config_file = config_file
+
+        if config_file:
+            with open(config_file) as f:
+                loaded = toml.load(f)
+                for config in self.configurations:
+                    if config.cfg:
+                        cfg_path = config.cfg.split(".")
+
+                        if (
+                            cfg_path[0] not in loaded
+                            or cfg_path[1] not in loaded[cfg_path[0]]
+                        ):
+                            continue
+                        cfg_prop = loaded[cfg_path[0]][cfg_path[1]]
+                        if cfg_prop:
+                            config.value = cfg_prop
+                            config.value_set_by = "cfg"
+        for config in self.configurations:
+            if config.env is None:
+                continue
+            env_prop = os.getenv(config.env)
+            if env_prop:
+                if type(config.value) == type(int):
+                    config.value = int(env_prop)
+                elif type(config.value) == type(list):
+                    config.value = env_prop.split(";")
+                else:
+                    config.value = env_prop
+                config.value_set_by = "env"
+
+        for config in self.configurations:
+            if not config.arg:
+                continue
+            arg_prop = getattr(args, config.arg, None)
+            if arg_prop:
+                if type(config.value) == type(int):
+                    config.value = int(arg_prop)
+                else:
+                    config.value = arg_prop
+                config.value_set_by = "cli"
+
+        if args.dump_config:
+            logger.info(str(self))
+            sys.exit(0)
         else:
-            logger.info("All available Scrapers will be run")
-            self.scrapers = []
-        self.linearize = args.linearize
+            missing_required = []
+            for config in self.configurations:
+                if config.required and config.value is None:
+                    missing_required.append(config)
+                setattr(self, config.attr, config.value)
+            if len(missing_required) > 0:
+                output = ""
+                for mr in missing_required:
+                    output += mr.attr + ", "
+                logger.critical(f"Missing required configurations: \n{output}")
+                sys.exit(1)
 
-        # Database
-        self.database_url = args.ltzf_api_url
-        self.api_key = args.ltzf_api_key
-        if not self.api_key:
-            unset_keys.append("LTZF_API_KEY")
-
-        # Caching
-        self.redis_host = args.redis_host
-        self.redis_port = int(args.redis_port)
-        self.cache = ScraperCache(self.redis_host, self.redis_port)
-        self.cache_documents = os.getenv("DOCUMENT_CACHE")
-
-        # Scraperdir
-        self.scrapers_dir = self.scrapers_dir or os.path.join(
-            os.path.dirname(__file__), "scrapers"
-        )
-
-        # Log Files
-        # self.logfile = os.getenv("LOG_FILE")
-        # self.errorlog= os.getenv("ERROR_FILE")
-
-        # Thresholds and optionals
-        self.api_obj_log = os.getenv("API_OBJ_LOG")
-        if not os.getenv("COLLECTOR_ID"):
-            logger.debug("Generating new UUID for Collector Identification")
-            self.collector_id = str(uuid4())
-        else:
-            self.collector_id = os.getenv("COLLECTOR_ID")
-        if os.getenv("CYCLE_TIME_S"):
-            self.cycle_time_s = int(os.getenv("CYCLE_TIME_S"))
-        else:
-            self.cycle_time_s = 3 * 60 * 60  # == 3 Stunden
-
-        # OpenAPI Configuration
+            # cleanup, dont need all configs with all their cruft for the whole runtime
+            self.configurations = None
+        ### now go and initialize the secondary objects
         self.oapiconfig = Configuration(host=self.database_url)
-        logger.info(f"Setting API Key to {self.api_key[:16]}")
         self.oapiconfig.api_key["apiKey"] = self.api_key
 
-        # LLM Connector, currently only openai is supported
-        oai_key = os.getenv("OPENAI_API_KEY")
-        if oai_key:
-            self.llm_connector = LLMConnector.from_openai(oai_key)
-        else:
-            unset_keys.append("OPENAI_API_KEY")
-        if len(unset_keys) > 0:
-            logger.critical(
-                f"The following environment variables are not set: {', '.join(unset_keys)}"
-            )
-            sys.exit(1)
+        self.scrapercache = ScraperCache(self.redis_host, self.redis_port)
 
-        ## argument dump if necessary
-        if args.dump_config:
-            print(vars(self))
-            sys.exit(0)
+        self.llm_connector = LLMConnector.from_openai(self.openai_api_key)
+
+    def __str__(self):
+        output = "Configuration of Collector\n"
+        output += f"Config File: {self.config_file}\n"
+        output += "dft=default|env=environment var|cli=command line argument\n"
+        for config in self.configurations:
+            name = config.cfg or config.attr
+            missing = config.required and config.value is None
+            output += f"{config.value_set_by}{name:.>25}: {config.value}"
+            if missing:
+                output += " MISSING\n"
+            else:
+                output += "\n"
+        return output

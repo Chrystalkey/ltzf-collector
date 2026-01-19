@@ -8,8 +8,8 @@ import uuid
 import aiohttp
 import asyncio
 
-# from openapi_client import Configuration
 from dotenv import load_dotenv
+from pathlib import Path
 
 from collector.config import CollectorConfiguration
 from collector.interface import Scraper, VorgangsScraper, SitzungsScraper
@@ -44,41 +44,50 @@ async def main(config: CollectorConfiguration):
 
 def load_scrapers(config, session):
     scrapers = []
+    available_scrapers = []
     coll_id = uuid.UUID(config.collector_id)
     logger.info(f"Set Collector ID to {coll_id}")
+    scraper_path = str((Path(".") / config.scrapers_dir).absolute())
+    logger.info(f"Scraper Directory set to: {scraper_path}")
     for filename in os.listdir(config.scrapers_dir):
-        if filename.endswith("_scraper.py"):
-            if len(config.scrapers) != 0:
-                enabled = False
-                for scn in config.scrapers:
-                    if filename.startswith(scn):
-                        enabled = True
-                        break
-                if not enabled:
-                    continue
-            module_name = filename[:-3]
-            module_path = os.path.join(config.scrapers_dir, filename)
-            spec = importlib.util.spec_from_file_location(module_name, module_path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            for attr in dir(module):
-                cls = getattr(module, attr)
-                if (
-                    isinstance(cls, type)
-                    and (
-                        issubclass(cls, VorgangsScraper)
-                        or issubclass(cls, SitzungsScraper)
-                    )
-                    and cls is not Scraper
-                    and cls is not VorgangsScraper
-                    and cls is not SitzungsScraper
-                    and not isinstance(cls, module.__class__)
-                ):
-                    # logger.info(f"Found scraper: {cls.__name__}")
-                    scrapers.append(cls(config, session))
+        if not filename.endswith("_scraper.py"):
+            continue
+        module_name = filename[:-3]
+        module_path = os.path.join(config.scrapers_dir, filename)
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        for attr in dir(module):
+            cls = getattr(module, attr)
+            if not (
+                isinstance(cls, type)
+                and (
+                    issubclass(cls, VorgangsScraper) or issubclass(cls, SitzungsScraper)
+                )
+                and cls is not VorgangsScraper
+                and cls is not SitzungsScraper
+                and not isinstance(cls, module.__class__)
+            ):
+                continue
+
+            logger.info(f"Found scraper: {cls.__name__}")
+            available_scrapers.append(cls.__name__)
+
+            enabled = False or len(config.scrapers) == 0
+            for scn in config.scrapers:
+                if cls.__name__.lower().startswith(scn.lower()):
+                    enabled = True
+                    break
+            if not enabled:
+                continue
+
+            scrapers.append(cls(config, session))
+
     ## pretty logging
     snames = [type(s).__name__ for s in scrapers]
-    logger.info(f"Found these scrapers: {snames}")
+
+    logger.info(f"Found these scrapers: {", ".join(available_scrapers)}")
+    logger.info(f"Enabled Scrapers are: {", ".join(snames)}")
     return scrapers
 
 
@@ -90,7 +99,7 @@ if __name__ == "__main__":
     )
 
     config = CollectorConfiguration()
-    config.parse_args()
+    config.load()
 
     logger.info("Starting collector manager.")
     logger.info("Configuration Complete")
