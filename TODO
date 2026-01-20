@@ -1,17 +1,23 @@
+# Logging
 - logging to file
-- logging errors to file
+- logging program errors to file
+- logging parsing errors hinting at a change of the source material to a separate file
 
-- especially log soft and hard errored calls
-    - soft errors (logged / object still created)
-        - object sent unsuccessfully
-            - forbidden (can happen)
-            - connection errors
-    - hard errors (warned / logged / object not created)
-        - website parsing errors
-            - unknown website elements
-            - pdfs did not contain expected data
-        - object sent unsuccessfully
-            - Bad Request (should not happen)
-        - object creation error
-            - no text extracted from document
+
+-> info/stdout log to file
+## Errors (Object created as expected or connection errors)
+- soft errors (logged / object still created)
+    - object sent unsuccessfully
+        - forbidden (can happen)
+        - connection errors
+
+## Parsing Errors (Object not created due to format errors)
+- hard errors (warned / logged / object not created)
+    - website parsing errors
+        - unknown website elements
+        - pdfs did not contain expected data
+    - object sent unsuccessfully
+        - Bad Request (should not happen)
+    - object creation error
+        - no text extracted from document
 

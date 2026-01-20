@@ -1,5 +1,37 @@
 # Collector
 
+## Usage
+
+The configuration is largely described in the `example-config.toml`.
+
+However there are a few cli-only options you should be aware of:
+`--dump-config`  : reads the current configuration of the program as it
+would be if started now, prints it out and exits.
+
+`--linearize`    : forces the program to extract single-threaded. Useful
+for debugging, testing, and just in general checking out how it works.
+Be aware that there is some rate-limiting done program-internally, but
+this rate limits only the requests per second, not the tokens per
+second that openai uses. So you might run into trouble by running the
+scrapers in parallel. The quickest "fix" is then to pass `--linearize`.
+
+`--run [scraper]`: run only the scrapers described in there. This does a
+case-insensitive starts-with match on the class name of the scraper.
+This means `bylts` matches `ByltSitzungsScraper` and `ByltScraper`,
+`byltsc` only matches the second one. Check beforehand which scrapers
+are available.
+
+In general the Configuration is taken from three places: 
+1. the config file              _is overridden by_
+2. the environment variables    _is overridden by_
+3. the command line arguments
+
+which iteratively override each others values. This means e.g. if the
+config file configures `linearize=false` and the cli arg `--linearize`
+is passed, `linearize` is in effect.
+Check the configuration and its origin by running the collector with
+`--dump-config`
+
 ## Setting up for development
 ### Required software
 - poetry    # for the project itself
