@@ -45,6 +45,7 @@ class MockDoc(DocumentBuilder):
 
 def test_documents():
     config = CollectorConfiguration()
+    config.load_only_env()
     config.oapiconfig = Configuration(host="http://localhost")
 
     mock_dok = MockDoc(None, "blub", "entwurf", config)

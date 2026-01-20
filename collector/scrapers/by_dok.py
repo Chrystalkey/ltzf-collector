@@ -113,8 +113,6 @@ class BayernDokument(DocumentBuilder):
                         self.local_path,
                         config=ExtractionConfig(
                             force_ocr=False,
-                            ocr_backend="tesseract",
-                            ocr_config=TesseractConfig(language="deu"),
                         ),
                     )
                     run_successful = extract.content is not None
@@ -127,8 +125,6 @@ class BayernDokument(DocumentBuilder):
                         self.local_path,
                         config=ExtractionConfig(
                             force_ocr=True,
-                            ocr_backend="tesseract",
-                            ocr_config=TesseractConfig(language="deu"),
                         ),
                     )
             except Exception as e:

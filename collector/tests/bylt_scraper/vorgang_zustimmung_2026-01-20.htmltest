@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><head id="j_idt3"><link type="text/css" rel="stylesheet" href="/webangebot3/jakarta.faces.resource/theme.css.xhtml?ln=primefaces-bootstrap&amp;v=13.0.19-LTS" /><link type="text/css" rel="stylesheet" href="/webangebot3/jakarta.faces.resource/primeicons/primeicons.css.xhtml?ln=primefaces&amp;v=13.0.19-LTS" /><script src="/webangebot3/jakarta.faces.resource/faces.js.xhtml?ln=jakarta.faces"></script><script src="/webangebot3/jakarta.faces.resource/jquery/jquery.js.xhtml?ln=primefaces&amp;v=13.0.19-LTS"></script><script src="/webangebot3/jakarta.faces.resource/jquery/jquery-plugins.js.xhtml?ln=primefaces&amp;v=13.0.19-LTS"></script><script src="/webangebot3/jakarta.faces.resource/core.js.xhtml?ln=primefaces&amp;v=13.0.19-LTS"></script><link rel="stylesheet" href="/webangebot3/jakarta.faces.resource/components.css.xhtml?ln=primefaces&amp;v=13.0.19-LTS" /><script src="/webangebot3/jakarta.faces.resource/components.js.xhtml?ln=primefaces&amp;v=13.0.19-LTS"></script><script src="/webangebot3/jakarta.faces.resource/touch/touchswipe.js.xhtml?ln=primefaces&amp;v=13.0.19-LTS"></script><script type="text/javascript">if(window.PrimeFaces){PrimeFaces.settings.locale='de';PrimeFaces.settings.viewId='/views/vorgangsanzeige/vorgangsanzeige.xhtml';PrimeFaces.settings.contextPath='/webangebot3';PrimeFaces.settings.cookiesSecure=false;PrimeFaces.settings.cookiesSameSite='Strict';}</script>
+<html xmlns="http://www.w3.org/1999/xhtml"><head id="j_idt3"><link type="text/css" rel="stylesheet" href="/webangebot3/jakarta.faces.resource/theme.css.xhtml?ln=primefaces-bootstrap&amp;v=13.0.20-LTS" /><link type="text/css" rel="stylesheet" href="/webangebot3/jakarta.faces.resource/primeicons/primeicons.css.xhtml?ln=primefaces&amp;v=13.0.20-LTS" /><script src="/webangebot3/jakarta.faces.resource/faces.js.xhtml?ln=jakarta.faces"></script><script src="/webangebot3/jakarta.faces.resource/jquery/jquery.js.xhtml?ln=primefaces&amp;v=13.0.20-LTS"></script><script src="/webangebot3/jakarta.faces.resource/jquery/jquery-plugins.js.xhtml?ln=primefaces&amp;v=13.0.20-LTS"></script><script src="/webangebot3/jakarta.faces.resource/core.js.xhtml?ln=primefaces&amp;v=13.0.20-LTS"></script><link rel="stylesheet" href="/webangebot3/jakarta.faces.resource/components.css.xhtml?ln=primefaces&amp;v=13.0.20-LTS" /><script src="/webangebot3/jakarta.faces.resource/components.js.xhtml?ln=primefaces&amp;v=13.0.20-LTS"></script><script src="/webangebot3/jakarta.faces.resource/touch/touchswipe.js.xhtml?ln=primefaces&amp;v=13.0.20-LTS"></script><script type="text/javascript">if(window.PrimeFaces){PrimeFaces.settings.locale='de';PrimeFaces.settings.viewId='/views/vorgangsanzeige/vorgangsanzeige.xhtml';PrimeFaces.settings.contextPath='/webangebot3';PrimeFaces.settings.cookiesSecure=false;PrimeFaces.settings.cookiesSameSite='Strict';}</script>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Webangebot - Dokumente zum Vorgang</title>
         <link rel="shortcut icon" type="image/x-icon" href="https://www.bayern.landtag.de/favicon.ico" /><script src="/webangebot3/jakarta.faces.resource/helpers.js.xhtml?ln=js"></script><script src="/webangebot3/jakarta.faces.resource/calendarPf.js.xhtml?ln=js"></script><script src="/webangebot3/jakarta.faces.resource/de.js.xhtml?ln=js"></script><script src="/webangebot3/jakarta.faces.resource/webangebot3.js.xhtml?ln=js"></script>
@@ -11,9 +11,9 @@
                 <meta charset="utf-8"><!-- 
 	This website is powered by TYPO3 - inspiring people to share!
 	TYPO3 is a free open source Content Management Framework initially created by Kasper Skaarhoj and licensed under GNU/GPL.
-	TYPO3 is copyright 1998-2025 of Kasper Skaarhoj. Extensions are copyright of their respective owners.
+	TYPO3 is copyright 1998-2026 of Kasper Skaarhoj. Extensions are copyright of their respective owners.
 	Information and contribution at https://typo3.org/
---><meta name="generator" content="TYPO3 CMS"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="https://www.bayern.landtag.de/typo3temp/assets/compressed/merged-bafa371275d93f9550c3cb78d43c6278.css?1757432876" media="all"><script src="//cdn1.readspeaker.com/script/6241/webReader/webReader.js?pids=wr"></script><script>
+--><meta name="generator" content="TYPO3 CMS"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="https://www.bayern.landtag.de/typo3temp/assets/compressed/merged-84e184d7996a913ca32907aada4b526b.css?1763637666" media="all"><script src="//cdn1.readspeaker.com/script/6241/webReader/webReader.js?pids=wr"></script><script>
 /*<![CDATA[*/
 /*TS_inlineJS*/
 window.loginUri = 'https://www.bayern.landtag.de/';
@@ -57,7 +57,7 @@ if(-1!==document.cookie.indexOf("matomo_cookie_consent=enabled")){(window._mtm=w
 		<div class="col-md-12">
 			
 	
-    <form method="get" class="search" id="tx-solr-search-form-pi-results" action="/service/suche/" data-suggest="/service/suche/suggest.json" data-suggest-header="Top Results" accept-charset="utf-8">
+    <form method="get" class="search" id="tx-solr-search-form-pi-results" action="/service/suche/" data-suggest="/service/suche/suggest.json" data-suggest-header="Top Treffer" accept-charset="utf-8">
         <div class="search-field">
             
 
@@ -147,7 +147,7 @@ if(-1!==document.cookie.indexOf("matomo_cookie_consent=enabled")){(window._mtm=w
 <form id="pageHeader" name="pageHeader" method="post" action="/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml" enctype="application/x-www-form-urlencoded">
 <input type="hidden" name="pageHeader" value="pageHeader" />
 
-            <input type="hidden" name="_csrf" value="dbEy-U9Lj63_sGMeEL_fSW49NRxDqmbCykFGtxFKvTUs-h1UR4JTm3h8u5rS0wUrdpLrK1dYGH0lnwfvqCV3hCd8jVRKmyVn" /><input type="hidden" name="jakarta.faces.ViewState" id="j_id1:jakarta.faces.ViewState:0" value="-2610220488038219485:4577179815467103135" autocomplete="off" />
+            <input type="hidden" name="_csrf" value="6qTvdlXk4NfNh5bfVUtYK30quwtwxkk5sFQerI1VJ9FS-I2a052KRWeH0ePg4afqZmZsSUVLljMRoy8UiWcsn7hjQulhyL-v" /><input type="hidden" name="jakarta.faces.ViewState" id="j_id1:jakarta.faces.ViewState:0" value="-7783508407011899962:-4968755816942546406" autocomplete="off" />
 </form>
         <div style="height: 70px;">
             <div style="float: left;">
@@ -168,7 +168,7 @@ if(-1!==document.cookie.indexOf("matomo_cookie_consent=enabled")){(window._mtm=w
 <form id="vorgangsanzeigeForm" name="vorgangsanzeigeForm" method="post" action="/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml" enctype="application/x-www-form-urlencoded">
 <input type="hidden" name="vorgangsanzeigeForm" value="vorgangsanzeigeForm" />
 
-        <input type="hidden" name="_csrf" value="dbEy-U9Lj63_sGMeEL_fSW49NRxDqmbCykFGtxFKvTUs-h1UR4JTm3h8u5rS0wUrdpLrK1dYGH0lnwfvqCV3hCd8jVRKmyVn" /><table id="basisdokument" class="ui-panelgrid ui-widget panelGridBorderless" role="grid"><tbody><tr class="ui-widget-content"><td role="gridcell" class="ui-panelgrid-cell"><span id="basistext">Gesetzentwurf Initiativdrucksache Nr. 19/7192 vom 25.06.2025 </span>
+        <input type="hidden" name="_csrf" value="6qTvdlXk4NfNh5bfVUtYK30quwtwxkk5sFQerI1VJ9FS-I2a052KRWeH0ePg4afqZmZsSUVLljMRoy8UiWcsn7hjQulhyL-v" /><table id="basisdokument" class="ui-panelgrid ui-widget panelGridBorderless" role="grid"><tbody><tr class="ui-widget-content"><td role="gridcell" class="ui-panelgrid-cell"><span id="basistext">Gesetzentwurf Initiativdrucksache Nr. 19/7192 vom 25.06.2025 </span>
                 <br />
                 <br />
                 <br /></td></tr><tr class="ui-widget-content"><td role="gridcell" class="ui-panelgrid-cell"><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Drucksachen/Basisdrucksachen/0000006000/0000006188.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="j_idt81" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a><svg xmlns="http://www.w3.org/2000/svg" id="j_idt83" width="1" height="1" style="width: 10px !important;"></svg>
@@ -239,12 +239,17 @@ if(-1!==document.cookie.indexOf("matomo_cookie_consent=enabled")){(window._mtm=w
                     <br />
                     <br />Zustimmung
                     <br />
-                    <br /></td></tr></tbody></table></div></div><script id="vorgangsanzeigedokumente_s" type="text/javascript">$(function(){PrimeFaces.cw("DataTable","widget_vorgangsanzeigedokumente",{id:"vorgangsanzeigedokumente",groupColumnIndexes:[],disableContextMenuIfEmpty:false});});</script><input type="hidden" name="jakarta.faces.ViewState" id="j_id1:jakarta.faces.ViewState:1" value="-2610220488038219485:4577179815467103135" autocomplete="off" />
+                    <br /></td></tr><tr data-ri="11" class="ui-widget-content ui-datatable-odd"><td role="gridcell" style="text-align: center;" class="datumVorgangListe">30.10.2025</td><td role="gridcell">
+                <br />Gesetz- und Verordnungsblatt Nr. 20 Seite 542<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:11:j_idt181" width="1" height="1" style="width: 10px !important;"></svg><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/GVBl/2025/GVBl-2025-Nr-20.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:11:j_idt184" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a>
+                    <br />
+                    <br />GVBL-Auszug<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:11:j_idt189" width="1" height="1" style="width: 10px !important;"></svg><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/GVBl/2025/2025_20/GVBL-2025-20%20S%20542%2019-7192.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:11:j_idt192" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a>
+                        <br />
+                        <br /></td></tr></tbody></table></div></div><script id="vorgangsanzeigedokumente_s" type="text/javascript">$(function(){PrimeFaces.cw("DataTable","widget_vorgangsanzeigedokumente",{id:"vorgangsanzeigedokumente",groupColumnIndexes:[],disableContextMenuIfEmpty:false});});</script><input type="hidden" name="jakarta.faces.ViewState" id="j_id1:jakarta.faces.ViewState:1" value="-7783508407011899962:-4968755816942546406" autocomplete="off" />
 </form>
             </div>
         </div>
                             <div id="web3-footer">
-        <div align="right"><span style="font-size: 10px;">Version 25.10.0</span>
+        <div align="right"><span style="font-size: 10px;">Version 25.12.1</span>
         </div>
                             </div>
                         </div>
@@ -310,6 +315,9 @@ if(-1!==document.cookie.indexOf("matomo_cookie_consent=enabled")){(window._mtm=w
                     </a>
                     <a target="_blank" href="https://www.bayern.landtag.de/parlament/verwaltung/emas-umweltmanagement/">
                         <img alt="Logo: EMAS geprüftes Umweltmanagement" src="https://www.bayern.landtag.de/_assets/e000b61ecaa07296a95e5f5fdae0070a/Images/EMAS.png" width="456" height="735" />
+                    </a>
+                    <a target="_blank" href="https://www.bayern.landtag.de/parlament/verwaltung/emas-umweltmanagement/">
+                        <img alt="Logo: Handelsblatt Exzellenz Award 2024" src="https://www.bayern.landtag.de/typo3temp/assets/_processed_/9/3/csm_CHA_Exzellenz_a17ea2f030.png" width="0" height="0" />
                     </a>
                 </div>
                 <div class="col-8">

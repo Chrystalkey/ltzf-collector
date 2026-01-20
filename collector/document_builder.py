@@ -104,7 +104,9 @@ class DocumentBuilder(ABC):
     def __del__(self):
         # cache_documents is not set => no persistence path is given
         # meaning the docs should be cleaned up after using them
-        if not self.config.cache_documents:
+        # if the property doesn't even exist it means the doc was loaded from
+        # the cache / json, so no file even exists
+        if getattr(self.config, "cache_documents", None) is not None:
             self.remove_file()
 
     def remove_file(self):

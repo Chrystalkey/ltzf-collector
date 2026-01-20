@@ -47,6 +47,8 @@ def create_scraper(session):
     os.environ["LTZF_API_KEY"] = "test"
     os.environ["OPENAI_API_KEY"] = "test"
     config = CollectorConfiguration()
+    config.load_only_env()
+
     config.llm_connector = FakeLLMConnector()
     config.oapiconfig = Configuration(host="http://localhost")
 
@@ -112,6 +114,7 @@ def nullify_uuids(vg: models.Vorgang) -> models.Vorgang:
 @pytest.mark.asyncio
 async def test_soup_to_item():
     import os
+    import datetime
 
     os.environ["LTZF_API_KEY"] = "xtest"
     os.environ["OPENAI_API_KEY"] = "ytest"
@@ -124,8 +127,9 @@ async def test_soup_to_item():
         cases_html = glob.glob(os.path.join(data_dir, "vorgang_*.htmltest"))
         cases_out = glob.glob(os.path.join(data_dir, "vorgang_*.json"))
 
-        if len(cases_html) != len(cases_out):
-            assert False, "html/out files of vorgang test cases should be matching"
+        assert len(cases_html) == len(
+            cases_out
+        ), "html/out files of vorgang test cases should be matching"
         cases_html.sort()
         cases_out.sort()
         scraper.item_count = len(cases_html)
@@ -143,9 +147,18 @@ async def test_soup_to_item():
                     assert type(out_object) == type(
                         scraped_object
                     ), f"Scenario {i+1}/{len(cases_html)}: {cases_html[i]}"
+
+                    ostat = [
+                        vs.zp_start.astimezone(datetime.UTC).isoformat() + ",\n"
+                        for vs in out_object.stationen
+                    ]
+                    sstat = [
+                        vs.zp_start.astimezone(datetime.UTC).isoformat() + ",\n"
+                        for vs in scraped_object.stationen
+                    ]
                     assert len(out_object.stationen) == len(
                         scraped_object.stationen
-                    ), f"Scenario {i+1}/{len(cases_html)}: {cases_html[i]}"
+                    ), f"Scenario {i+1}/{len(cases_html)}: {cases_html[i]}\n{"".join(ostat)}\n{"".join(sstat)}"
 
 
 @pytest.mark.asyncio

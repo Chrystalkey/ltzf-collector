@@ -161,7 +161,34 @@ class CollectorConfiguration:
                 True,
             )
         )
+        self.config_file = None
+        self.dump_config = False
         self.configurations = configurations
+
+    def load_only_env(self):
+        # environment configuration
+        for config in self.configurations:
+            if config.env is None:
+                continue
+            env_prop = os.getenv(config.env)
+            if env_prop:
+                if type(config.value) == type(int):
+                    config.value = int(env_prop)
+                elif type(config.value) == type(list):
+                    config.value = env_prop.split(";")
+                else:
+                    config.value = env_prop
+                config.value_set_by = "env"
+        for config in self.configurations:
+            if config.required and config.value is None:
+                missing_required.append(config)
+            setattr(self, config.attr, config.value)
+        self.oapiconfig = Configuration(host=self.database_url)
+        self.oapiconfig.api_key["apiKey"] = self.api_key
+
+        self.cache = ScraperCache(self.redis_host, self.redis_port)
+
+        self.llm_connector = LLMConnector.from_openai(self.openai_api_key)
 
     def load(self):
         parser = ArgumentParser(prog="collector", description="Bundled Scrapers")
@@ -201,6 +228,7 @@ class CollectorConfiguration:
                         if cfg_prop:
                             config.value = cfg_prop
                             config.value_set_by = "cfg"
+        # environment configuration
         for config in self.configurations:
             if config.env is None:
                 continue
@@ -213,7 +241,7 @@ class CollectorConfiguration:
                 else:
                     config.value = env_prop
                 config.value_set_by = "env"
-
+        # passed argument configuration
         for config in self.configurations:
             if not config.arg:
                 continue
@@ -225,6 +253,7 @@ class CollectorConfiguration:
                     config.value = arg_prop
                 config.value_set_by = "cli"
 
+        # now do something with it
         if args.dump_config:
             logger.info(str(self))
             sys.exit(0)
@@ -241,13 +270,11 @@ class CollectorConfiguration:
                 logger.critical(f"Missing required configurations: \n{output}")
                 sys.exit(1)
 
-            # cleanup, dont need all configs with all their cruft for the whole runtime
-            self.configurations = None
         ### now go and initialize the secondary objects
         self.oapiconfig = Configuration(host=self.database_url)
         self.oapiconfig.api_key["apiKey"] = self.api_key
 
-        self.scrapercache = ScraperCache(self.redis_host, self.redis_port)
+        self.cache = ScraperCache(self.redis_host, self.redis_port)
 
         self.llm_connector = LLMConnector.from_openai(self.openai_api_key)
 
