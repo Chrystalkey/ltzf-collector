@@ -10,16 +10,7 @@ import logging
 import sys
 import toml
 
-### global logging setup
-logger = logging.getLogger(__name__)
-import litellm
-
-llmlog = logging.getLogger("LiteLLM")
-llmlog.setLevel(logging.WARNING)
-
-# print(logging.root.manager.loggerDict)
-# sys.exit(0)
-### end global logging setup
+logger = logging.getLogger("collector")
 
 
 class ConfigProp:

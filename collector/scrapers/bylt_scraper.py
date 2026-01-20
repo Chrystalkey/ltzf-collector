@@ -16,7 +16,7 @@ from collector.interface import VorgangsScraper
 from collector.scrapers.by_dok import *
 import toml
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("collector")
 NULL_UUID = uuid.UUID("00000000-0000-0000-0000-000000000000")
 
 CURRENT_WP = 19

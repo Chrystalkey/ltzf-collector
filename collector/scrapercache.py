@@ -9,7 +9,7 @@ import logging
 import redis
 import sys
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("collector")
 
 
 class ScraperCache:

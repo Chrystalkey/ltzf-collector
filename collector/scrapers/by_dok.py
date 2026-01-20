@@ -9,7 +9,7 @@ import uuid
 from kreuzberg import ExtractionConfig, extract_file, TesseractConfig
 import toml
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("collector")
 
 
 def schlagwort_format(x: list[str]) -> list:

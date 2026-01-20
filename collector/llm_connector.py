@@ -8,7 +8,7 @@ import json
 import jsonschema
 from collector.scrapercache import ScraperCache
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("collector")
 MIN_TEXT_LEN = 20
 MAX_TRIES = 10
 

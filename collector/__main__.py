@@ -15,7 +15,20 @@ from collector.config import CollectorConfiguration
 from collector.interface import Scraper, VorgangsScraper, SitzungsScraper
 
 load_dotenv()
-logger = logging.getLogger(__name__)
+
+### global logging setup
+logger = logging.getLogger("collector")
+errfile_logger = logging.getLogger("collector_extraction")
+parsewr_logger = logging.getLogger("collector_scraper")
+
+import litellm
+
+llmlog = logging.getLogger("LiteLLM")
+llmlog.setLevel(logging.WARNING)
+
+# print(logging.root.manager.loggerDict)
+# sys.exit(0)
+### end global logging setup
 
 
 async def main(config: CollectorConfiguration):
@@ -95,7 +108,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s | %(levelname)-8s: %(filename)-20s: %(message)s",
+        format="%(asctime)s | %(levelname)-5s: %(filename)-20s: %(message)s",
     )
 
     config = CollectorConfiguration()

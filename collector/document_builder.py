@@ -6,7 +6,7 @@ import hashlib
 import json
 import openapi_client.models as models
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("collector")
 
 
 class DocumentBuilder(ABC):

@@ -20,7 +20,7 @@ import openapi_client.api
 import openapi_client.api.collector_schnittstellen_api
 import openapi_client.api_client
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("collector")
 
 
 class Scraper(ABC):

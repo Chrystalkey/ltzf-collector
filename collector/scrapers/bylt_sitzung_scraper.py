@@ -14,7 +14,7 @@ import openapi_client.models as models
 from collector.interface import SitzungsScraper
 from collector.scrapers.by_dok import ByTagesordnung
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("collector")
 NULL_UUID = uuid.UUID("00000000-0000-0000-0000-000000000000")
 TEST_DATE = dt_datetime.fromisoformat("1940-01-01T00:00:00+00:00")
 
