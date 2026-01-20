@@ -74,7 +74,6 @@ class Scraper(ABC):
                     item_list.append(await t)
             else:
                 item_list = await asyncio.gather(*tasks, return_exceptions=True)
-            self.item_count = len(item_list)
             # Handle any exceptions from listing page extractors
             for i, result in enumerate(item_list):
                 if isinstance(result, Exception):
@@ -98,8 +97,9 @@ class Scraper(ABC):
     # for comparison
     async def helper_extract_send_item(self, item):
         """Process an item by extracting and sending it to the API"""
+        logger.info(f"Extraction started on item {item}")
         extracted_item = await self.item_extractor(item)
-        logger.info(f"Extracted Item {item}")
+        logger.info(f"Extracted finished on item {item}")
         if extracted_item:
             ## because: If sent_item is None something went wrong
             sent_item = await self.send_result(extracted_item)
@@ -129,7 +129,7 @@ class Scraper(ABC):
 
             tasks.append(self.helper_extract_send_item(item))
             processed_count += 1
-
+        self.item_count = len(tasks)
         logger.info(
             f"{self.__class__.__name__}: Processing {processed_count} items, skipping {skipped_count} cached items"
         )

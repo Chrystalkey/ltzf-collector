@@ -77,12 +77,12 @@ class DocumentBuilder(ABC):
         if cached:
             cached = self.from_json(cached)
             if cached.output.typ == self.typehint:
-                logger.info(
+                logger.debug(
                     f"Document with URL {self.url} was found in cache, serving..."
                 )
                 return cached
             elif cached.typ != self.typehint:
-                logger.info(
+                logger.warning(
                     f"Document with URL {self.url} was found in cache with another type {cached.typ} vs. {self.typehint}, serving..."
                 )
                 cached.output.typ = self.typehint
@@ -112,7 +112,11 @@ class DocumentBuilder(ABC):
     def remove_file(self):
         """Clean up any temporary files created during document processing"""
         try:
-            if self.local_path and Path(self.local_path).exists():
+            if (
+                self.local_path
+                and Path(self.local_path).exists()
+                and self.config.cache_documents is None
+            ):
                 logger.info(f"Removing {self.local_path}")
                 os.remove(self.local_path)
         except Exception as e:
