@@ -147,7 +147,21 @@ class BYLTSitzungScraper(SitzungsScraper):
             if len(internal_docs) == 0:
                 logger.warning("Sitzung was found without available number or TOP File")
                 continue
-            sitz_dict["tops"] = await self.extract_tops(internal_docs[-1])
+            # the last document is the current TOPs with all changes, amendments etc. applied.
+            # that is what we are interested in.
+            most_recent_tops = internal_docs[-1].output
+            i = 0
+
+            sitz_dict["tops"] = []
+            print(vars(most_recent_tops))
+            print(most_recent_tops.__class__.__name__)
+            for t in most_recent_tops.tops:
+                i += 1
+                print(vars(t))
+                top = models.Top.from_dict(
+                    {"nummer": i, "titel": t.titel, "dokumente": t.drucksachen}
+                )
+                sitz_dict["tops"].append(top)
             if "Anhörung" in title_line:
                 sitz_dict["experten"] = await self.extract_experts(internal_docs[-1])
             retsitz[1].append(models.Sitzung.from_dict(sitz_dict))

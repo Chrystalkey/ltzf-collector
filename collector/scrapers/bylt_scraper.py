@@ -239,41 +239,43 @@ class BYLTScraper(VorgangsScraper):
                 assert (
                     len(vg.stationen) > 0
                 ), "Error: Stellungnahme ohne Vorhergehenden Gesetzestext"
-                stln_urls = extract_schrstellung(cells[1])
-                try:
-                    dok = await ByStellungnahme(
-                        models.Doktyp.STELLUNGNAHME,
-                        stln_urls["stellungnahme"],
-                        self.session,
-                        self.config,
-                    ).build()
-                except Exception as e:
-                    logger.warning("Skipping Stellungnahme since extraction failed")
-                    continue
+                stln_raw = extract_schrstellung(cells[1])
 
-                if stln_urls["autor"] is not None:
-                    if dok.output.autoren is None:
-                        dok.output.autoren = [
-                            models.Autor.from_dict(
-                                {"organisation": sanitize_orga(stln_urls["autor"])}
-                            )
-                        ]
-                    else:
-                        dok.output.autoren.append(
-                            models.Autor.from_dict(
-                                {"organisation": sanitize_orga(stln_urls["autor"])}
-                            )
-                        )
-                    if stln_urls["lobbyregister"] is not None:
-                        dok.output.autoren[-1].lobbyregister = stln_urls[
-                            "lobbyregister"
-                        ]
+                for stln_urls in stln_raw:
+                    try:
+                        dok = await ByStellungnahme(
+                            models.Doktyp.STELLUNGNAHME,
+                            stln_urls["stellungnahme"],
+                            self.session,
+                            self.config,
+                        ).build()
+                    except Exception as e:
+                        logger.warning("Skipping Stellungnahme since extraction failed")
+                        continue
 
-                stln = dok.output
-                assert (
-                    len(vg.stationen) > 0
-                ), "Error: Stellungnahme ohne Vorhergehenden Gesetzestext"
-                vg.stationen[-1].stellungnahmen.append(stln)
+                    if stln_urls["autor"] is not None:
+                        if dok.output.autoren is None:
+                            dok.output.autoren = [
+                                models.Autor.from_dict(
+                                    {"organisation": sanitize_orga(stln_urls["autor"])}
+                                )
+                            ]
+                        else:
+                            dok.output.autoren.append(
+                                models.Autor.from_dict(
+                                    {"organisation": sanitize_orga(stln_urls["autor"])}
+                                )
+                            )
+                        if stln_urls["lobbyregister"] is not None:
+                            dok.output.autoren[-1].lobbyregister = stln_urls[
+                                "lobbyregister"
+                            ]
+
+                    stln = dok.output
+                    assert (
+                        len(vg.stationen) > 0
+                    ), "Error: Stellungnahme ohne Vorhergehenden Gesetzestext"
+                    vg.stationen[-1].stellungnahmen.append(stln)
                 continue
             ## Zelle mit Plenarprotokoll
             ## has: link(plenarprotokoll), link(Auszug-plenarprotokoll), link(Videoausschnitt)
@@ -555,20 +557,34 @@ def extract_singlelink(cellsoup: BeautifulSoup) -> str:
 def extract_schrstellung(cellsoup: BeautifulSoup) -> dict:
     links = cellsoup.find_all("a")
     assert (
-        len(links) > 0 and len(links) < 3
+        len(links) > 0
     ), f"Error: Unexpected number of links in Stellungnahme: {len(links)}, in cellsoup `{cellsoup}`"
-    if len(links) == 2:
-        return {
-            "lobbyregister": links[0]["href"],
-            "stellungnahme": links[1]["href"],
-            "autor": links[0].text if links[0].text != "Download PDF" else None,
-        }
+
+    if len(links) >= 2:
+        pdf_link = None
+        authors = []
+        pdf_link = None
+        authors = []
+
+        for l in links:
+            if l.text == "Download PDF" and pdf_link is None:
+                pdf_link = l["href"]
+            elif l.text == "Download PDF":
+                assert False, f"Found two pdf links in one stln soup: `{cellsoup}`"
+            else:
+                authors.append((l.text, l["href"]))  # (name, lobbyregisterlink)
+        return [
+            {"stellungnahme": pdf_link, "autor": a[0], "lobbyregister": a[1]}
+            for a in authors
+        ]
     elif len(links) == 1:
-        return {
-            "stellungnahme": links[0]["href"],
-            "lobbyregister": "",
-            "autor": links[0].text if links[0].text != "Download PDF" else None,
-        }
+        return [
+            {
+                "stellungnahme": links[0]["href"],
+                "lobbyregister": "",
+                "autor": links[0].text if links[0].text != "Download PDF" else None,
+            }
+        ]
 
 
 def extract_plenproto(cellsoup: BeautifulSoup) -> str:

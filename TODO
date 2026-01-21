@@ -10,6 +10,7 @@
     - object sent unsuccessfully
         - forbidden (can happen)
         - connection errors
+    - special case 404: Broken links
 
 ## Parsing Errors (Object not created due to format errors)
 - hard errors (warned / logged / object not created)
