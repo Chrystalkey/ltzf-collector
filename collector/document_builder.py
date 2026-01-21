@@ -42,7 +42,8 @@ class DocumentBuilder(ABC):
         obj_path = (base_dir / f"{url_hash}.pdf").absolute()
         self.local_path = obj_path
 
-        if self.config.cache_documents and obj_path.exists() and not obj_path.is_dir():
+        if self.config.cache_documents and obj_path.exists() and obj_path.is_file():
+            self.download_success = True
             return
 
         async with self.session.get(self.url) as response:

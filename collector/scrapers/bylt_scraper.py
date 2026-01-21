@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 from openapi_client.models import *
 
 from collector.interface import VorgangsScraper
+from collector.tesseract_wrapper import check_availability
 
 from collector.scrapers.by_dok import *
 import toml
@@ -25,6 +26,13 @@ RESULT_COUNT = 100
 
 class BYLTScraper(VorgangsScraper):
     def __init__(self, config, session: aiohttp.ClientSession):
+        if not check_availability():
+            logger.critical(
+                "Error: Unable to find pdfimages and tesseract.\nPlease check your local installation"
+            )
+            raise Exception(
+                "Error: Unable to find pdfimages and tesseract.\nPlease check your local installation"
+            )
         listing_urls = [
             f"https://www.bayern.landtag.de/parlament/dokumente/drucksachen?isInitialCheck=0&q=&dknr=&suchverhalten=AND&dokumentenart=Drucksache&ist_basisdokument=on&sort=date&anzahl_treffer={RESULT_COUNT}&wahlperiodeid%5B%5D={CURRENT_WP}&erfassungsdatum%5Bstart%5D=&erfassungsdatum%5Bend%5D=&dokumentenart=Drucksache&suchvorgangsarten%5B%5D=Gesetze%5C%5CGesetzentwurf&suchvorgangsarten%5B%5D=Gesetze%5C%5CStaatsvertrag&suchvorgangsarten%5B%5D=Gesetze%5C%5CHaushaltsgesetz%2C+Nachtragshaushaltsgesetz",
             f"https://www.bayern.landtag.de/parlament/dokumente/drucksachen?isInitialCheck=0&q=&dknr=&suchverhalten=AND&dokumentenart=Drucksache&ist_basisdokument=on&sort=date&anzahl_treffer={RESULT_COUNT}&wahlperiodeid%5B%5D={CURRENT_WP}&erfassungsdatum%5Bstart%5D=&erfassungsdatum%5Bend%5D=&dokumentenart=Drucksache&suchvorgangsarten%5B%5D=Gesetze%5C%5CGesetzentwurf&suchvorgangsarten%5B%5D=Gesetze%5C%5CStaatsvertrag&suchvorgangsarten%5B%5D=Gesetze%5C%5CHaushaltsgesetz%2C+Nachtragshaushaltsgesetz&page=2",

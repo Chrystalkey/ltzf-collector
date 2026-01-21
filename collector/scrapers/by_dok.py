@@ -1,5 +1,6 @@
 import re
 from collector.document_builder import DocumentBuilder
+from collector.tesseract_wrapper import extract_ocr_text
 from openapi_client import models
 import logging
 import datetime
@@ -98,6 +99,12 @@ class BayernDokument(DocumentBuilder):
         return self
 
     async def extract_metadata(self):
+        class ExtractionResult:
+            def __init__(self):
+                self.metadata = None
+                self.content = None
+
+        extract = ExtractionResult()
         try:
             doc_hash = None
             with open(self.local_path, "rb") as f:
@@ -107,26 +114,28 @@ class BayernDokument(DocumentBuilder):
 
             # Extract text from all pages
             run_successful = False
+
             try:
-                try:
-                    extract = await extract_file(
-                        self.local_path,
-                        config=ExtractionConfig(
-                            force_ocr=False,
-                        ),
-                    )
-                    run_successful = extract.content is not None
-                except Exception as e:
-                    logger.warning(
-                        f"Normal extraction failed. Retrying with force_ocr = True. Error: {e}"
-                    )
+                kreuzberg_extract = await extract_file(
+                    self.local_path,
+                    config=ExtractionConfig(
+                        force_ocr=False,
+                    ),
+                )
+                extract.metadata = kreuzberg_extract.metadata
+                run_successful = (
+                    kreuzberg_extract.content is not None
+                    and len(kreuzberg_extract.content) > 64
+                )
+
                 if not run_successful:
-                    extract = await extract_file(
-                        self.local_path,
-                        config=ExtractionConfig(
-                            force_ocr=True,
-                        ),
+                    logger.warning(
+                        f"Normal extraction failed. Retrying with OCR. This might take a while."
                     )
+                    extract.content = extract_ocr_text(self.local_path)
+                else:
+                    extract.content = kreuzberg_extract.content
+                assert extract.content is not None
             except Exception as e:
                 logger.warning(
                     f"No text extracted from PDF or extraction failed for document: {self.url}"
