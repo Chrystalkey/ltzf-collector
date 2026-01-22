@@ -40,7 +40,7 @@ LABEL maintainer="Benedikt Schäfer"
 LABEL description="Collector for the LTZF"
 LABEL version="0.2.2"
 
-RUN apt-get update && apt-get install --no-install-recommends -y tesseract-ocr tesseract-ocr-deu pandoc \
+RUN apt-get update && apt-get install --no-install-recommends -y tesseract-ocr tesseract-ocr-deu pandoc poppler-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
     

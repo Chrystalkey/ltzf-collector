@@ -37,6 +37,9 @@ Check the configuration and its origin by running the collector with
 - poetry    # for the project itself
 - jre >= 17 # for the oapi generator
 - maven     # for the oapi generator
+- tesseract # for the fallback image text extraction 
+- pdfimages # from poppler-utils also for fall back img txt extraction
+
 
 ### Environment Configuration
 The configuration is done via environment variables. 
