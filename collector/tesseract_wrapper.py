@@ -74,29 +74,37 @@ def pdf_to_img(pdf_path: Path) -> list[Path]:
     return [f for f in files if f.stat().st_size >= max_sz / 10]
 
 
+# run tesseract command with the image it is given.
+# does not do any changes to the image and has one special case:
+# that is when tesseract does not get enough characters
+def determine_rotation(image: Path) -> int:
+    rot_deg = None
+    with subprocess.Popen(
+        ["tesseract", "--psm", "0", imgp.absolute(), "-"],
+        stdout=subprocess.PIPE,
+        encoding="utf-8",
+    ) as p:
+        o, e = p.communicate(timeout=5)
+        lines = o.split("\n")
+        for l in lines:
+            if l.startswith("Rotate: "):
+                rot_deg = int(l.split(" ")[1])
+                break
+        if rot_deg is None and "Too few characters." not in o:
+            logger.error(
+                f"Unable to determine page direction due to unknown Tesseract output:\n{o}"
+            )
+            return None
+    return rot_deg
+
+
 def sanitize_images(images: list[Path]) -> list[Path]:
-    for imgp in images:
-        # let tesseract guess the best rotation
-        rot_deg = None
-        with subprocess.Popen(
-            ["tesseract", "--psm", "0", imgp.absolute(), "-"],
-            stdout=subprocess.PIPE,
-            encoding="utf-8",
-        ) as p:
-            o, e = p.communicate(timeout=5)
-            lines = o.split("\n")
-            for l in lines:
-                if l.startswith("Rotate: "):
-                    rot_deg = int(l.split(" ")[1])
-                    break
-            if rot_deg is None:
-                logger.error(
-                    f"Unable to determine page direction due to unknown Tesseract output:\n{o}"
-                )
-                return None
-        # then rotate according to that
-        img = Image.open(imgp.absolute())
-        img.rotate(360 - rot_deg).save(imgp.absolute())
+    #    for imgp in images:
+    #        # let tesseract guess the best rotation
+    #        determine_rotation(imgp)
+    #        # then rotate according to that
+    #        img = Image.open(imgp.absolute())
+    #        img.rotate(360 - rot_deg).save(imgp.absolute())
     return images
 
 
@@ -104,7 +112,7 @@ def img_to_txt(images: list[Path]) -> list[str]:
     # run tesseract -l deu images[i] images[i].txt
     strings = []
     for img in sorted(images):
-        p = subprocess.run(["tesseract", "-l", "deu", img, img])
+        p = subprocess.run(["tesseract", "-l", "deu", "--psm", "1", img, img])
         if p.returncode != 0:
             logger.error("Error extracting {img}")
             return None
@@ -124,4 +132,5 @@ def filter_useful_str(strings: list[str]) -> list[str]:
 
 if __name__ == "__main__":
     print(check_availability())
-    print(extract_ocr_text(Path("/home/crystalkey/Downloads/0000000041.pdf")))
+    #    print(extract_ocr_text(Path("/home/crystalkey/Downloads/0000000041.pdf")))
+    print(extract_ocr_text(Path("/home/crystalkey/Downloads/0000000003.pdf")))

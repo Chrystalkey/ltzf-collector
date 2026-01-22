@@ -194,6 +194,7 @@ class BayernDokument(DocumentBuilder):
         inst.trojanergefahr = (
             int(dic["trojanergefahr"]) if dic["trojanergefahr"] else None
         )
+        print(dic["tops"])
         inst.tops = dic["tops"]
         return inst
 
@@ -653,7 +654,7 @@ class ByTagesordnung(BayernDokument):
         "date": "Datum auf das sich das Dokument bezieht als YYYY-MM-DD"
         "institutionen": ["liste von institutionen von denen das dokument stammt"], // wahrscheinlich der Ausschuss / das Gremium
         "nummer": <Nummer der Sitzung als Integer>, 
-        "public": <boolean ob die Sitzung öffentlich stattfindet>, 
+        "public": <boolean ob die Sitzung öffentlich stattfindet>, // falls keine Info dazu explizit vorliegt, trage true ein
         }
         sollten sich einige Informationen nicht extrahieren lassen, füge keinen Eintrag hinzu oder füge 'Unbekannt' ein, was passender erscheint.
         !Halluziniere unter keinen Umständen nicht vorhandene Informationen!
@@ -732,7 +733,14 @@ class ByTagesordnung(BayernDokument):
             zp_referenz = datetime.datetime.fromisoformat(hdr["date"]).astimezone(
                 tz=datetime.UTC
             )
-            self.tops = bdy["tops"]
+            top_models = []
+            i = 0
+            for t in bdy["tops"]:
+                i += 1
+                top_models.append(
+                    {"nummer": i, "titel": t["titel"], "dokumente": t["drucksachen"]}
+                )
+            self.tops = top_models
             self.output = models.Dokument.from_dict(
                 {
                     "typ": self.typehint,

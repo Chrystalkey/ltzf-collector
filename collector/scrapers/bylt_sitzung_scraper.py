@@ -108,17 +108,15 @@ class BYLTSitzungScraper(SitzungsScraper):
                 grname = split[0].strip()
             else:
                 grname = title_line
-            gremium = models.Gremium.from_dict(
-                {
-                    "parlament": "BY",
-                    "wahlperiode": 19,
-                    "name": grname,
-                }
-            )
+            gremium = {
+                "parlament": "BY",
+                "wahlperiode": 19,
+                "name": grname,
+            }
             sitz_dict = {
                 "api_id": str(uuid.uuid4()),
                 "titel": title,
-                "termin": full_termin,
+                "termin": full_termin.isoformat(),
                 "gremium": gremium,
                 "nummer": None,  # is extracted from document link(s) below
                 "public": True,  # no idea how to extract that
@@ -141,7 +139,11 @@ class BYLTSitzungScraper(SitzungsScraper):
                 dok = await ByTagesordnung(
                     tphint, doc_link, self.session, self.config
                 ).build()
-                sitz_dict["dokumente"].append(dok)
+                dokdic = dok.output.to_dict()
+                dokdic["zp_referenz"] = dokdic["zp_referenz"].isoformat()
+                dokdic["zp_modifiziert"] = dokdic["zp_modifiziert"].isoformat()
+                sitz_dict["dokumente"].append(dokdic)
+
                 internal_docs.append(dok)
             ## extract TOPS from the last TOPList
             if len(internal_docs) == 0:
@@ -152,16 +154,7 @@ class BYLTSitzungScraper(SitzungsScraper):
             most_recent_tops = internal_docs[-1].output
             i = 0
 
-            sitz_dict["tops"] = []
-            print(vars(most_recent_tops))
-            print(most_recent_tops.__class__.__name__)
-            for t in most_recent_tops.tops:
-                i += 1
-                print(vars(t))
-                top = models.Top.from_dict(
-                    {"nummer": i, "titel": t.titel, "dokumente": t.drucksachen}
-                )
-                sitz_dict["tops"].append(top)
+            sitz_dict["tops"] = internal_docs[-1].tops
             if "Anhörung" in title_line:
                 sitz_dict["experten"] = await self.extract_experts(internal_docs[-1])
             retsitz[1].append(models.Sitzung.from_dict(sitz_dict))
