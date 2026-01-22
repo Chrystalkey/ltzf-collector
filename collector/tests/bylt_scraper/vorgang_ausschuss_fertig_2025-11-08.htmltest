@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head id="j_idt3"><link type="text/css" rel="stylesheet" href="/webangebot3/jakarta.faces.resource/theme.css.xhtml?ln=primefaces-bootstrap&amp;v=13.0.19-LTS" /><link type="text/css" rel="stylesheet" href="/webangebot3/jakarta.faces.resource/primeicons/primeicons.css.xhtml?ln=primefaces&amp;v=13.0.19-LTS" /><script src="/webangebot3/jakarta.faces.resource/faces.js.xhtml?ln=jakarta.faces"></script><script src="/webangebot3/jakarta.faces.resource/jquery/jquery.js.xhtml?ln=primefaces&amp;v=13.0.19-LTS"></script><script src="/webangebot3/jakarta.faces.resource/jquery/jquery-plugins.js.xhtml?ln=primefaces&amp;v=13.0.19-LTS"></script><script src="/webangebot3/jakarta.faces.resource/core.js.xhtml?ln=primefaces&amp;v=13.0.19-LTS"></script><link rel="stylesheet" href="/webangebot3/jakarta.faces.resource/components.css.xhtml?ln=primefaces&amp;v=13.0.19-LTS" /><script src="/webangebot3/jakarta.faces.resource/components.js.xhtml?ln=primefaces&amp;v=13.0.19-LTS"></script><script src="/webangebot3/jakarta.faces.resource/touch/touchswipe.js.xhtml?ln=primefaces&amp;v=13.0.19-LTS"></script><script type="text/javascript">if(window.PrimeFaces){PrimeFaces.settings.locale='de';PrimeFaces.settings.viewId='/views/vorgangsanzeige/vorgangsanzeige.xhtml';PrimeFaces.settings.contextPath='/webangebot3';PrimeFaces.settings.cookiesSecure=false;PrimeFaces.settings.cookiesSameSite='Strict';}</script>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Webangebot - Dokumente zum Vorgang</title>
+        <link rel="shortcut icon" type="image/x-icon" href="https://www.bayern.landtag.de/favicon.ico" /><script src="/webangebot3/jakarta.faces.resource/helpers.js.xhtml?ln=js"></script><script src="/webangebot3/jakarta.faces.resource/calendarPf.js.xhtml?ln=js"></script><script src="/webangebot3/jakarta.faces.resource/de.js.xhtml?ln=js"></script><script src="/webangebot3/jakarta.faces.resource/webangebot3.js.xhtml?ln=js"></script>
+        
+        
+        <link type="text/css" rel="stylesheet" href="/webangebot3/resources/css/webangebot3.css" media="screen" />
+                    <script type="text/javascript">function Focus(){};function fontSizer(){};</script>
+                    <!-- htmlhead.html begin -->
+                <meta charset="utf-8"><!-- 
+	This website is powered by TYPO3 - inspiring people to share!
+	TYPO3 is a free open source Content Management Framework initially created by Kasper Skaarhoj and licensed under GNU/GPL.
+	TYPO3 is copyright 1998-2025 of Kasper Skaarhoj. Extensions are copyright of their respective owners.
+	Information and contribution at https://typo3.org/
+--><meta name="generator" content="TYPO3 CMS"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="https://www.bayern.landtag.de/typo3temp/assets/compressed/merged-bafa371275d93f9550c3cb78d43c6278.css?1757432876" media="all"><script src="//cdn1.readspeaker.com/script/6241/webReader/webReader.js?pids=wr"></script><script>
+/*<![CDATA[*/
+/*TS_inlineJS*/
+window.loginUri = 'https://www.bayern.landtag.de/';
+window.matomoSiteId = '1';
+if(-1!==document.cookie.indexOf("matomo_cookie_consent=enabled")){(window._mtm=window._mtm||[]).push({"mtm.startTime":new Date().getTime(),event:"mtm.Start"});var e,t=document,m=t.createElement("script"),a=t.getElementsByTagName("script")[0];m.async=!0,m.src="https://www.bayern.landtag.de/matomo/js/container_Wsfw7b6F.js",a.parentNode.insertBefore(m,a)}
+
+/*]]>*/
+</script><link rel="stylesheet" type="text/css" href="https://www.bayern.landtag.de/_assets/e000b61ecaa07296a95e5f5fdae0070a/Css/print.css" media="print"><link rel="me" href="https://social.bund.de/@BayerischerLandtag"><link rel="canonical" href="https://www.bayern.landtag.de/service/default-rahmenseite-web3/"><!-- htmlhead.html end --></head><body onload="focusOnElement('', '');">
+        <div id="wrapper">
+                    <script type="text/javascript">var a=document.getElementsByTagName("body")[0];a.setAttribute("id","page-top");a.setAttribute("class","sub-content sub-content-external");</script>
+                    <!-- pagehead.html begin -->
+                <ul id="skipnav" title="Seiten-Navigation">
+    <li><a href="#main-nav">Direkt zur Hauptnavigation</a></li>
+    <li><a href="#main">Direkt zum Inhalt</a></li>
+    <li><a href="#service-menu">Direkt zur Servicenavigation</a></li>
+    <li><a href="#footer">Direkt zum Fußbereich</a></li>
+</ul>
+<header id="header">
+    <div class="header-row">
+        <div class="container">
+            <div class="row">
+                <div class="col-4">
+                    <div class="logo">
+                        
+                                <a href="https://www.bayern.landtag.de/">
+                                    <img src="https://www.bayern.landtag.de/_assets/e000b61ecaa07296a95e5f5fdae0070a/Images/BLT_Logo.svg" alt="Bayerisches Staatswappen, Link zur Startseite des Bayerischen Landtags"/>
+                                </a>
+                            
+                    </div>
+                </div>
+                <div class="col-8">
+                    <nav class="meta-nav" id="service-menu" aria-label="Metanavigation">
+                        <ul>
+                            <li class="icons"><a id="readspeaker-button" target="_blank" title="Inhalt vorlesen lassen" href="https://www.bayern.landtag.de//app-eu.readspeaker.com/cgi-bin/rsent?customerid=6241&amp;lang=de_de&amp;voice=de_marlene&amp;readid=rs_content&amp;url="><span class="icon-lautsprecher"></span><span class="visible-xs">Vorlesen</span></a></li><li><a href="https://www.bayern.landtag.de/leichte-sprache/grusswort/">Leichte Sprache</a></li><li class="hidden"><a href="https://www.bayern.landtag.de/service/default-rahmenseite-web3/">Deutsch</a></li><li><span title="Information in german only" class="noTranslationAvailable">English</span></li><li><a href="https://www.bayern.landtag.de/service/sitemap/">Sitemap</a></li><li><a href="https://www.bayern.landtag.de/service/login/">Login</a></li><li><a href="https://www.bayern.landtag.de/service/kontakt/">Kontakt</a></li>
+                        </ul>
+                    </nav>
+                    <button class="Search"><span>Suche</span></button>
+                    
+<div class="tx_solr container">
+	<div class="row">
+		<div class="col-md-12">
+			
+	
+    <form method="get" class="search" id="tx-solr-search-form-pi-results" action="/service/suche/" data-suggest="/service/suche/suggest.json" data-suggest-header="Top Results" accept-charset="utf-8">
+        <div class="search-field">
+            
+
+            <label for="search">
+                Suche
+            </label>
+            <span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
+            <input maxlength="1000" id="search" type="text" class="tx-solr-q js-solr-q tx-solr-suggest tx-solr-suggest-focus form-control"
+                   placeholder="Website &amp; Parlamentsdrucksachen durchsuchen"
+                   data-placeholdermobile="Suchbegriff"
+                   name="tx_solr[q]" value=""/>
+            <span class="button-Search icon-Icon_Search">
+                <span tabindex="-1" class="search-text">Startet die Suche</span>
+                <input type="submit" value="Startet die Suche">
+            </span>
+        </div>
+    </form>
+
+
+		</div>
+	</div>
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="menu-button">MENÜ</button>
+    <nav id="main-nav" aria-label="Hauptnavigation">
+        <ul class="level1">
+            <li tabindex="0"><a href="https://www.bayern.landtag.de/aktuelles/">Aktuelles</a><button class="icon-Plus" aria-expanded="false">&nbsp;</button><div class="navigation-container"><ul class="megamenu container"><li><a href="https://www.bayern.landtag.de/aktuelles/sitzungen/">Sitzungen</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/tagesordnungen/">Tagesordnungen</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/plenum-online/">Plenum Online</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/aus-dem-plenum/">Aus dem Plenum</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/aus-den-ausschuessen/">Aus den Ausschüssen</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/presse/">Presse</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/veranstaltungen/">Veranstaltungen</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/ausstellungen/">Ausstellungen</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/demokratiereport-bayern-2025/">Demokratiereport   Bayern 2025</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/blick-nach-europa/">Blick nach Europa</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/auszeichnungen/">Auszeichnungen</a></li><li><a href="https://www.bayern.landtag.de/veranstaltungsverteiler/">Veranstaltungsverteiler</a></li></ul></div></li><li tabindex="0"><a href="https://www.bayern.landtag.de/parlament/">Parlament</a><button class="icon-Plus" aria-expanded="false">&nbsp;</button><div class="navigation-container"><ul class="megamenu container"><li><a href="https://www.bayern.landtag.de/abgeordnete/abgeordnete-von-a-z/">Abgeordnete</a></li><li><a href="https://www.bayern.landtag.de/abgeordnete/landtagswahl-2018-1/">Landtagswahl</a></li><li><a href="https://www.bayern.landtag.de/parlament/praesidentin/">Präsidentin</a></li><li><a href="https://www.bayern.landtag.de/parlament/praesidium/">Präsidium</a></li><li><a href="https://www.bayern.landtag.de/parlament/vollversammlung/">Vollversammlung</a></li><li><a href="https://www.bayern.landtag.de/parlament/ausschuesse-gremien/">Ausschüsse & Gremien</a></li><li><a href="https://www.bayern.landtag.de/abgeordnete/fraktionen/">Fraktionen</a></li><li><a href="https://www.bayern.landtag.de/parlament/aufgaben-des-landtags/">Aufgaben des Landtags</a></li><li><a href="https://www.bayern.landtag.de/parlament/landtag-von-a-z/">Landtag von A-Z</a></li><li><a href="https://www.bayern.landtag.de/parlament/verwaltung/">Verwaltung</a></li><li><a href="https://www.bayern.landtag.de/parlament/parlamentsgeschichte/">Parlamentsgeschichte</a></li><li><a href="https://www.bayern.landtag.de/parlament/kooperationen/kooperationen-und-partnerschaften/">Kooperationen</a></li><li><a href="https://www.bayern.landtag.de/lobbyregister/">Lobbyregister</a></li></ul></div></li><li tabindex="0"><a href="https://www.bayern.landtag.de/parlament/dokumente/">Dokumente</a><button class="icon-Plus" aria-expanded="false">&nbsp;</button><div class="navigation-container"><ul class="megamenu container"><li><a href="https://www.bayern.landtag.de/parlament/dokumente/drucksachen/">Drucksachen</a></li><li><a href="https://www.bayern.landtag.de/parlament/dokumente/protokolle/">Protokolle</a></li><li><a href="https://www.bayern.landtag.de/parlament/dokumente/landtagsarchiv/">Landtagsarchiv</a></li><li><a href="https://www.bayern.landtag.de/parlament/dokumente/taetigkeitsbericht/">Tätigkeitsbericht</a></li><li><a href="https://www.bayern.landtag.de/parlament/dokumente/sach-und-sprechregister/">Sach- und Sprechregister</a></li><li><a href="https://www.bayern.landtag.de/parlament/dokumente/verkuendungsplattform/">Verkündungsplattform</a></li><li><a href="https://www.bayern.landtag.de/parlament/dokumente/haushaltsplaene/">Haushaltspläne</a></li><li><a href="https://www.bayern.landtag.de/parlament/dokumente/rechtsgrundlagen/">Rechtsgrundlagen</a></li><li><a href="https://www.bayern.landtag.de/parlament/dokumente/abonnement-service/">Abonnement-Service</a></li><li><a href="https://www.bayern.landtag.de/parlament/dokumente/anfragen-zum-plenum/">Anfragen zum Plenum</a></li><li><a href="https://www.bayern.landtag.de/parlament/dokumente/rss-feeds/">RSS-Feeds</a></li></ul></div></li><li tabindex="0"><a href="https://www.bayern.landtag.de/petitionen/">Petitionen</a><button class="icon-Plus" aria-expanded="false">&nbsp;</button><div class="navigation-container"><ul class="megamenu container"><li><a href="https://www.bayern.landtag.de/petitionen/petitionsverfahren/">Petitionsverfahren</a></li><li><a href="https://www.bayern.landtag.de/petition-einreichen/">Petition einreichen</a></li><li><a href="https://www.bayern.landtag.de/petitionen/massen-und-sammelpetitionen/">Massen- und Sammelpetitionen</a></li><li><a href="https://www.bayern.landtag.de/petitionsberichte/">Petitionsberichte</a></li><li><a href="https://www.bayern.landtag.de/petitionen/faq/">Häufige Fragen (FAQ)</a></li></ul></div></li><li tabindex="0"><a href="https://www.bayern.landtag.de/mediathek/">Mediathek</a><button class="icon-Plus" aria-expanded="false">&nbsp;</button><div class="navigation-container"><ul class="megamenu container"><li><a href="https://www.bayern.landtag.de/mediathek/videos/">Videos</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/sitzungen/livestreams/">Livestreams</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/sitzungen/plenum-videos/plenum-online-video-archiv/">Plenum Online</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/presse/pressefotos/">Bilder</a></li><li><a href="https://www.bayern.landtag.de/podcasts/">Podcasts</a></li><li><a href="https://www.bayern.landtag.de/mediathek/publikationen/">Publikationen</a></li><li><a href="https://www.bayern.landtag.de/besuch-im-landtag/kinder-jugend-und-parlament/die-isar-detektive/">Die Isar-Detektive</a></li><li><a href="https://www.bayern.landtag.de/landtag-im-flug/">Der Landtag im Flug</a></li></ul></div></li><li tabindex="0"><a href="https://www.bayern.landtag.de/besuch-im-landtag/">Besucher</a><button class="icon-Plus" aria-expanded="false">&nbsp;</button><div class="navigation-container"><ul class="megamenu container"><li><a href="https://www.bayern.landtag.de/besuch-im-landtag/sonderfuehrungen/">Sonderführungen</a></li><li><a href="https://www.bayern.landtag.de/besuch-im-landtag/einzelbesucher/">Einzelbesucher</a></li><li><a href="https://www.bayern.landtag.de/besuch-im-landtag/gruppen/">Gruppen</a></li><li><a href="https://www.bayern.landtag.de/besuch-im-landtag/abendfuehrungen/">Abendführungen</a></li><li><a href="https://www.bayern.landtag.de/besuch-im-landtag/angebote-fuer-schulen/">Angebote für Schulen</a></li><li><a href="https://www.bayern.landtag.de/besuch-im-landtag/kinder-jugend-und-parlament/">Kinder, Jugend und Parlament</a></li><li><a href="https://www.bayern.landtag.de/besuch-im-landtag/besucherfilm/">Besucherfilm</a></li><li><a href="https://www.bayern.landtag.de/besuch-im-landtag/schritt-fuer-schritt-barrierefrei/">Schritt für Schritt barrierefrei</a></li><li><a href="https://www.bayern.landtag.de/besuch-im-landtag/landtagsgaststaette/">Landtagsgaststätte</a></li><li><a href="https://www.bayern.landtag.de/maximilianeum/sitz-des-bayerischen-landtags/">Maximilianeum</a></li><li><a href="https://www.bayern.landtag.de/maximilianeum/der-landtag-im-flug/">Der Landtag im Flug</a></li></ul></div></li><li tabindex="0"><a href="https://www.bayern.landtag.de/parlament/verwaltung/karriere/">Karriere</a><button class="icon-Plus" aria-expanded="false">&nbsp;</button><div class="navigation-container"><ul class="megamenu container"><li><a href="https://www.bayern.landtag.de/parlament/verwaltung/karriere/stellenangebote/">Stellenangebote</a></li><li><a href="https://www.bayern.landtag.de/parlament/verwaltung/karriere/vielseitige-einsatzmoeglichkeiten/">Vielseitige Einsatzmöglichkeiten</a></li><li><a href="https://www.bayern.landtag.de/parlament/verwaltung/karriere/was-wir-bieten/">Was wir bieten</a></li><li><a href="https://www.bayern.landtag.de/parlament/verwaltung/karriere/wir-ueber-uns/">Wir über uns</a></li><li><a href="https://www.bayern.landtag.de/parlament/verwaltung/karriere/praktika/">Unsere Ausbildungs- und Praktikumsangebote</a></li></ul></div></li>
+        </ul>
+    </nav>
+    <div class="layer"></div>
+</header>
+
+
+
+
+<main id="main">
+    <div class="container breadcrumb">
+        
+    </div>
+    <div class="bg-white" id="rs_content">
+        <div id="xp1" class="rs_skip rs_preserve"></div>
+        <div class="container">
+            
+
+
+    <div id="specialLink" class="special-link">
+        <a href="https://www.bayern.landtag.de/aktuelles/demokratiereport-bayern-2025/" class="icon-Icon_Arrow-right">Demokratiereport- Bayern 2025</a>
+    </div>
+
+
+
+
+            
+
+
+
+
+
+            
+
+
+
+
+
+
+            <div class="row">
+                <div class="col-8">
+                    
+
+
+
+
+
+                    
+                            <!--TYPO3SEARCH_begin--><!-- pagehead.html end --><!-- navigation.html begin --><!-- navigation.html end -->
+            <div id="main1">
+                <div id="main2"><!-- rightcolumn.html begin --><!-- rightcolumn.html end -->
+                    <div id="middle">
+                        <div class="middle_inner"><!-- breadcrumb.html begin --><!-- breadcrumb.html end -->
+                            <h2 class="screenreader">
+                                <a name="anker_inhaltsbereich"></a>
+                            </h2>
+        <div id="bodycontent" class="ui-fluid"><div id="j_idt22"></div><script id="j_idt22_s" type="text/javascript">$(function(){PrimeFaces.cw("AjaxStatus","widget_j_idt22",{id:"j_idt22",delay:0,start:function(){PF('statusDialog').show()},complete:function(){PF('statusDialog').hide()}});});</script><div id="j_idt23" class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-shadow ui-hidden-container statusDialog" style="display:none"><div class="ui-dialog-content ui-widget-content" id="j_idt23_content"><img src="/webangebot3/jakarta.faces.resource/ajax-loader.gif.xhtml?ln=img" /></div></div><script id="j_idt23_s" type="text/javascript">$(function(){PrimeFaces.cw("Dialog","statusDialog",{id:"j_idt23",draggable:false,resizable:false,modal:true});});</script>
+<form id="pageHeader" name="pageHeader" method="post" action="/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml" enctype="application/x-www-form-urlencoded">
+<input type="hidden" name="pageHeader" value="pageHeader" />
+
+            <input type="hidden" name="_csrf" value="79VF3ZZjQcjcLRL4vjo1WvIuct2cDKdtXMDSgzrVdthm-xmD2uxy5fRSIKvxSXbAihcBOcVLX-WpasZAaaS2tl_sFLpXzy7i" /><input type="hidden" name="jakarta.faces.ViewState" id="j_id1:jakarta.faces.ViewState:0" value="3487387439298503853:-2314902611805546220" autocomplete="off" />
+</form>
+        <div style="height: 70px;">
+            <div style="float: left;">
+                <h2><span id="title" class="siteheading">Dokumente zum Vorgang</span>
+                </h2>
+            </div>
+            <div style="float: right;"><div id="globalMessage" class="ui-messages ui-widget" style="font-size: small;" aria-live="polite"></div><script id="globalMessage_s" type="text/javascript">$(function(){PrimeFaces.cw("Messages","widget_globalMessage",{id:"globalMessage"});});</script>
+            </div>
+        </div>
+            <div>
+    <script type="text/javascript">
+        function openWindow(metaFile, startElement)
+        {
+            open("https://www1.bayern.landtag.de/www/player/index.html?playlist="+metaFile+"&startId="+startElement,"BayerischerLandtagOndemand",
+                 "toolbar=no,location=no,directories=no,status=no, menubar=no,scrollbars=no,resizable=no,copyhistory=no,left=0,top=0");
+        }
+        </script>
+<form id="vorgangsanzeigeForm" name="vorgangsanzeigeForm" method="post" action="/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml" enctype="application/x-www-form-urlencoded">
+<input type="hidden" name="vorgangsanzeigeForm" value="vorgangsanzeigeForm" />
+
+        <input type="hidden" name="_csrf" value="79VF3ZZjQcjcLRL4vjo1WvIuct2cDKdtXMDSgzrVdthm-xmD2uxy5fRSIKvxSXbAihcBOcVLX-WpasZAaaS2tl_sFLpXzy7i" /><table id="basisdokument" class="ui-panelgrid ui-widget panelGridBorderless" role="grid"><tbody><tr class="ui-widget-content"><td role="gridcell" class="ui-panelgrid-cell"><span id="basistext">Gesetzentwurf Initiativdrucksache Nr. 19/7432 vom 09.07.2025 </span>
+                <br />
+                <br />
+                <br /></td></tr><tr class="ui-widget-content"><td role="gridcell" class="ui-panelgrid-cell"><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Drucksachen/Basisdrucksachen/0000006000/0000006345.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="j_idt81" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a><svg xmlns="http://www.w3.org/2000/svg" id="j_idt83" width="1" height="1" style="width: 10px !important;"></svg>
+                <br />
+                <br /></td></tr><tr class="ui-widget-content"><td role="gridcell" class="ui-panelgrid-cell"><span id="betreff">Gesetzentwurf der Staatsregierung zur Einführung eines Bayerischen Kinderstartgeldes</span>
+                <br />
+                <br /></td></tr><tr class="ui-widget-content"><td role="gridcell" class="ui-panelgrid-cell"><span id="abstract">Zusammenfassung des Familien- und Krippengeldes zu einem Kinderstartgeld; Berechtigte; Höhe und Auszahlung Umbenennung in Kinderstartgeldgesetz und Änderung von Art. 2, Art. 3, Art. 4, Art. 5, Art. 6, Art. 8 und Art. 9a Familiengeldgesetz Änderung von Art. 29, Art. 33 und Art. 34 und Aufhebung von Art. 23a und Art. 30 Abs. 3 Kinderbildungs- und Betreuungsgesetz Aufhebung von § 63a und Änderung von § 99 Zuständigkeitsverordnung Änderung von § 102, Einfügen des neuen § 154 und Umnummerierung des bisherigen § 154 Verordnung zur Ausführung der Sozialgesetze Änderung von § 6, Einfügen des neuen § 12 und Umnummerierung des bisherigen § 12 Vertretungsverordnung</span>
+                <br />
+                <br /></td></tr><tr class="ui-widget-content"><td role="gridcell" class="ui-panelgrid-cell"><a href="/webangebot3/views/vorgangsmappe/vorgangsmappe.xhtml?gegenstandid=161376#pagemode=bookmarks"><img src="/webangebot3/jakarta.faces.resource/folder.gif.xhtml?ln=img" /><svg xmlns="http://www.w3.org/2000/svg" id="j_idt96" width="1" height="1" style="width: 5px !important;"></svg>Vorgangsmappe</a>
+                <br />
+                <br /></td></tr><tr class="ui-widget-content"><td role="gridcell" class="ui-panelgrid-cell"><div id="j_idt100" class="ui-accordion ui-widget ui-helper-reset ui-hidden-container" role="tablist" data-widget="widget_j_idt100"><div id="j_idt100:j_idt101_header" class="ui-accordion-header ui-helper-reset ui-state-default ui-corner-all" role="tab" aria-expanded="false" aria-selected="false" tabindex="0"><span class="ui-icon ui-icon-triangle-1-e"></span>Initiatoren</div><div id="j_idt100:j_idt101" class="ui-accordion-content ui-helper-reset ui-widget-content ui-helper-hidden" role="tabpanel" aria-hidden="true"><div id="j_idt100:j_idt102" class="ui-datalist ui-widget rednerListe"><div id="j_idt100:j_idt102_content" class="ui-datalist-content ui-widget-content"><ul id="j_idt100:j_idt102_list" class="ui-datalist-data"><li class="ui-datalist-item">Staatsregierung</li></ul></div></div><script id="j_idt100:j_idt102_s" type="text/javascript">$(function(){PrimeFaces.cw("DataList","widget_j_idt100_j_idt102",{id:"j_idt100:j_idt102"});});</script></div><input id="j_idt100_active" name="j_idt100_active" type="hidden" autocomplete="off" value="null" /></div><script id="j_idt100_s" type="text/javascript">$(function(){PrimeFaces.cw("AccordionPanel","widget_j_idt100",{id:"j_idt100"});});</script></td></tr></tbody></table><div id="vorgangsanzeigedokumente" class="ui-datatable ui-widget noHeader"><div class="ui-datatable-tablewrapper"><table role="grid" style="table-layout: auto;"><thead id="vorgangsanzeigedokumente_head"><tr><th id="vorgangsanzeigedokumente:j_idt104" class="ui-state-default datumVorgangListe" scope="col" style="text-align: center;"><span class="ui-column-title"></span></th><th id="vorgangsanzeigedokumente:j_idt106" class="ui-state-default" scope="col"><span class="ui-column-title"></span></th></tr></thead><tbody id="vorgangsanzeigedokumente_data" class="ui-datatable-data ui-widget-content"><tr data-ri="0" class="ui-widget-content ui-datatable-even"><td role="gridcell" style="text-align: center;" class="datumVorgangListe">09.07.2025</td><td role="gridcell">
+                <br />Initiativdrucksache 19/7432 <svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:0:j_idt115" width="1" height="1" style="width: 10px !important;"></svg><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Drucksachen/Basisdrucksachen/0000006000/0000006345.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:0:j_idt119" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:0:j_idt121" width="1" height="1" style="width: 10px !important;"></svg>
+                    <br />
+                    <br /></td></tr><tr data-ri="1" class="ui-widget-content ui-datatable-odd"><td role="gridcell" style="text-align: center;" class="datumVorgangListe">09.07.2025</td><td role="gridcell">
+                <br />Schriftliche Stellungnahmen im Gesetzgebungsverfahren <svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:1:j_idt210" width="1" height="1" style="width: 10px !important;"></svg><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Gesetzesmaterial/0000006345/0000010213.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:1:j_idt213" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a>
+                    <br />
+                    <br /></td></tr><tr data-ri="2" class="ui-widget-content ui-datatable-even"><td role="gridcell" style="text-align: center;" class="datumVorgangListe">09.07.2025</td><td role="gridcell">
+                <br />Schriftliche Stellungnahmen im Gesetzgebungsverfahren <svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:2:j_idt210" width="1" height="1" style="width: 10px !important;"></svg><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Gesetzesmaterial/0000006345/0000010214.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:2:j_idt213" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a>
+                    <br />
+                    <br /></td></tr><tr data-ri="3" class="ui-widget-content ui-datatable-odd"><td role="gridcell" style="text-align: center;" class="datumVorgangListe">09.07.2025</td><td role="gridcell">
+                <br />Schriftliche Stellungnahmen im Gesetzgebungsverfahren <svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:3:j_idt210" width="1" height="1" style="width: 10px !important;"></svg><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Gesetzesmaterial/0000006345/0000010215.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:3:j_idt213" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a>
+                    <br />
+                    <br /></td></tr><tr data-ri="4" class="ui-widget-content ui-datatable-even"><td role="gridcell" style="text-align: center;" class="datumVorgangListe">09.07.2025</td><td role="gridcell">
+                <br />Schriftliche Stellungnahmen im Gesetzgebungsverfahren <svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:4:j_idt210" width="1" height="1" style="width: 10px !important;"></svg><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Gesetzesmaterial/0000006345/0000010216.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:4:j_idt213" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a>
+                    <br />
+                    <br /></td></tr><tr data-ri="5" class="ui-widget-content ui-datatable-odd"><td role="gridcell" style="text-align: center;" class="datumVorgangListe">09.07.2025</td><td role="gridcell">
+                <br />Schriftliche Stellungnahmen im Gesetzgebungsverfahren <svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:5:j_idt210" width="1" height="1" style="width: 10px !important;"></svg><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Gesetzesmaterial/0000006345/0000010217.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:5:j_idt213" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a>
+                    <br />
+                    <br /></td></tr><tr data-ri="6" class="ui-widget-content ui-datatable-even"><td role="gridcell" style="text-align: center;" class="datumVorgangListe">23.07.2025</td><td role="gridcell">
+                <br />Plenum
+                    <br />
+                    <br />Plenarprotokoll Nr. 57 Seite 6558-6569<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt156" width="1" height="1" style="width: 10px !important;"></svg><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Protokolle/19%20Wahlperiode%20Kopie/19%20WP%20Plenum%20Kopie/057%20PL%20230725%20ges%20endg%20Kopie.pdf#page=10"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt159" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a>
+                    <br />
+                    <br />Protokollauszug<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt164" width="1" height="1" style="width: 10px !important;"></svg><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Protokolle/19%20Wahlperiode%20Kopie/19%20WP%20Plenum%20Kopie/057/057_PL_001_gesetzentwurf-7432.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt167" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a>
+                        <br />
+                        <br /><a href="#" onclick="javascript:openWindow('https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_628/meta_vod_50482.json','1');"><img src="/webangebot3/jakarta.faces.resource/video.gif.xhtml?ln=img" title="Video zum TOP anzeigen" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt173" width="1" height="1" style="width: 5px !important;"></svg>Video zum TOP</a>
+                        <br />
+                        <br />Überweisung
+                    <br />
+                    <br /><div id="vorgangsanzeigedokumente:6:j_idt220" class="ui-accordion ui-widget ui-helper-reset ui-hidden-container" role="tablist" data-widget="widget_vorgangsanzeigedokumente_6_j_idt220"><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt221_header" class="ui-accordion-header ui-helper-reset ui-state-default ui-corner-all" role="tab" aria-expanded="false" aria-selected="false" tabindex="0"><span class="ui-icon ui-icon-triangle-1-e"></span>Redner</div><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt221" class="ui-accordion-content ui-helper-reset ui-widget-content ui-helper-hidden" role="tabpanel" aria-hidden="true"><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222" class="ui-datalist ui-widget rednerListe"><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222_content" class="ui-datalist-content ui-widget-content"><ul id="vorgangsanzeigedokumente:6:j_idt220:j_idt222_list" class="ui-datalist-data"><li class="ui-datalist-item"><img src="/webangebot3/resources/img/redner.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:0:j_idt224" width="1" height="1" style="width: 5px !important;"></svg>Ulrike Scharf (Christlich Soziale Union)<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:0:j_idt227" width="1" height="1" style="width: 10px !important;"></svg><a href="#" onclick="javascript:openWindow('https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_628/meta_vod_50482.json','1');"><img src="/webangebot3/jakarta.faces.resource/video.gif.xhtml?ln=img" title="Video anzeigen" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:0:j_idt230" width="1" height="1" style="width: 5px !important;"></svg>Video</a><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:0:pdfList" class="ui-datalist ui-widget"><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:0:pdfList_content" class="ui-datalist-content ui-widget-content"><ul id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:0:pdfList_list" class="ui-datalist-data"><li class="ui-datalist-item"><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Protokolle/19%20Wahlperiode%20Kopie/19%20WP%20Plenum%20Kopie/057%20PL%20230725%20ges%20endg%20Kopie.pdf#page=10&view=fit"><img src="/webangebot3/jakarta.faces.resource/pdf_little.gif.xhtml?ln=img" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:0:pdfList:0:j_idt234" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a></li></ul></div></div><script id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:0:pdfList_s" type="text/javascript">$(function(){PrimeFaces.cw("DataList","widget_vorgangsanzeigedokumente_6_j_idt220_j_idt222_0_pdfList",{id:"vorgangsanzeigedokumente:6:j_idt220:j_idt222:0:pdfList"});});</script></li><li class="ui-datalist-item"><img src="/webangebot3/resources/img/redner.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:1:j_idt224" width="1" height="1" style="width: 5px !important;"></svg>Franz Schmid (Alternative für Deutschland)<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:1:j_idt227" width="1" height="1" style="width: 10px !important;"></svg><a href="#" onclick="javascript:openWindow('https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_628/meta_vod_50482.json','2');"><img src="/webangebot3/jakarta.faces.resource/video.gif.xhtml?ln=img" title="Video anzeigen" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:1:j_idt230" width="1" height="1" style="width: 5px !important;"></svg>Video</a><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:1:pdfList" class="ui-datalist ui-widget"><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:1:pdfList_content" class="ui-datalist-content ui-widget-content"><ul id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:1:pdfList_list" class="ui-datalist-data"><li class="ui-datalist-item"><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Protokolle/19%20Wahlperiode%20Kopie/19%20WP%20Plenum%20Kopie/057%20PL%20230725%20ges%20endg%20Kopie.pdf#page=12&view=fit"><img src="/webangebot3/jakarta.faces.resource/pdf_little.gif.xhtml?ln=img" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:1:pdfList:0:j_idt234" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a></li></ul></div></div><script id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:1:pdfList_s" type="text/javascript">$(function(){PrimeFaces.cw("DataList","widget_vorgangsanzeigedokumente_6_j_idt220_j_idt222_1_pdfList",{id:"vorgangsanzeigedokumente:6:j_idt220:j_idt222:1:pdfList"});});</script></li><li class="ui-datalist-item"><img src="/webangebot3/resources/img/redner.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:2:j_idt224" width="1" height="1" style="width: 5px !important;"></svg>Melanie Huml (Christlich Soziale Union)<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:2:j_idt227" width="1" height="1" style="width: 10px !important;"></svg><a href="#" onclick="javascript:openWindow('https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_628/meta_vod_50482.json','3');"><img src="/webangebot3/jakarta.faces.resource/video.gif.xhtml?ln=img" title="Video anzeigen" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:2:j_idt230" width="1" height="1" style="width: 5px !important;"></svg>Video</a><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:2:pdfList" class="ui-datalist ui-widget"><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:2:pdfList_content" class="ui-datalist-content ui-widget-content"><ul id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:2:pdfList_list" class="ui-datalist-data"><li class="ui-datalist-item"><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Protokolle/19%20Wahlperiode%20Kopie/19%20WP%20Plenum%20Kopie/057%20PL%20230725%20ges%20endg%20Kopie.pdf#page=13&view=fit"><img src="/webangebot3/jakarta.faces.resource/pdf_little.gif.xhtml?ln=img" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:2:pdfList:0:j_idt234" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a></li></ul></div></div><script id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:2:pdfList_s" type="text/javascript">$(function(){PrimeFaces.cw("DataList","widget_vorgangsanzeigedokumente_6_j_idt220_j_idt222_2_pdfList",{id:"vorgangsanzeigedokumente:6:j_idt220:j_idt222:2:pdfList"});});</script></li><li class="ui-datalist-item"><img src="/webangebot3/resources/img/redner_zr.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:3:j_idt224" width="1" height="1" style="width: 5px !important;"></svg>Johannes Becher (BÜNDNIS 90/DIE GRÜNEN)<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:3:j_idt227" width="1" height="1" style="width: 10px !important;"></svg><a href="#" onclick="javascript:openWindow('https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_628/meta_vod_50482.json','4');"><img src="/webangebot3/jakarta.faces.resource/video.gif.xhtml?ln=img" title="Video anzeigen" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:3:j_idt230" width="1" height="1" style="width: 5px !important;"></svg>Video</a><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:3:pdfList" class="ui-datalist ui-widget"><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:3:pdfList_content" class="ui-datalist-content ui-widget-content"><ul id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:3:pdfList_list" class="ui-datalist-data"><li class="ui-datalist-item"><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Protokolle/19%20Wahlperiode%20Kopie/19%20WP%20Plenum%20Kopie/057%20PL%20230725%20ges%20endg%20Kopie.pdf#page=15&view=fit"><img src="/webangebot3/jakarta.faces.resource/pdf_little.gif.xhtml?ln=img" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:3:pdfList:0:j_idt234" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a></li></ul></div></div><script id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:3:pdfList_s" type="text/javascript">$(function(){PrimeFaces.cw("DataList","widget_vorgangsanzeigedokumente_6_j_idt220_j_idt222_3_pdfList",{id:"vorgangsanzeigedokumente:6:j_idt220:j_idt222:3:pdfList"});});</script></li><li class="ui-datalist-item"><img src="/webangebot3/resources/img/redner.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:4:j_idt224" width="1" height="1" style="width: 5px !important;"></svg>Melanie Huml (Christlich Soziale Union)<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:4:j_idt227" width="1" height="1" style="width: 10px !important;"></svg><a href="#" onclick="javascript:openWindow('https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_628/meta_vod_50482.json','5');"><img src="/webangebot3/jakarta.faces.resource/video.gif.xhtml?ln=img" title="Video anzeigen" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:4:j_idt230" width="1" height="1" style="width: 5px !important;"></svg>Video</a><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:4:pdfList" class="ui-datalist ui-widget"><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:4:pdfList_content" class="ui-datalist-content ui-widget-content"><ul id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:4:pdfList_list" class="ui-datalist-data"><li class="ui-datalist-item"><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Protokolle/19%20Wahlperiode%20Kopie/19%20WP%20Plenum%20Kopie/057%20PL%20230725%20ges%20endg%20Kopie.pdf#page=16&view=fit"><img src="/webangebot3/jakarta.faces.resource/pdf_little.gif.xhtml?ln=img" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:4:pdfList:0:j_idt234" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a></li></ul></div></div><script id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:4:pdfList_s" type="text/javascript">$(function(){PrimeFaces.cw("DataList","widget_vorgangsanzeigedokumente_6_j_idt220_j_idt222_4_pdfList",{id:"vorgangsanzeigedokumente:6:j_idt220:j_idt222:4:pdfList"});});</script></li><li class="ui-datalist-item"><img src="/webangebot3/resources/img/redner.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:5:j_idt224" width="1" height="1" style="width: 5px !important;"></svg>Julia Post (BÜNDNIS 90/DIE GRÜNEN)<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:5:j_idt227" width="1" height="1" style="width: 10px !important;"></svg><a href="#" onclick="javascript:openWindow('https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_628/meta_vod_50482.json','6');"><img src="/webangebot3/jakarta.faces.resource/video.gif.xhtml?ln=img" title="Video anzeigen" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:5:j_idt230" width="1" height="1" style="width: 5px !important;"></svg>Video</a><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:5:pdfList" class="ui-datalist ui-widget"><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:5:pdfList_content" class="ui-datalist-content ui-widget-content"><ul id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:5:pdfList_list" class="ui-datalist-data"><li class="ui-datalist-item"><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Protokolle/19%20Wahlperiode%20Kopie/19%20WP%20Plenum%20Kopie/057%20PL%20230725%20ges%20endg%20Kopie.pdf#page=16&view=fit"><img src="/webangebot3/jakarta.faces.resource/pdf_little.gif.xhtml?ln=img" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:5:pdfList:0:j_idt234" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a></li></ul></div></div><script id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:5:pdfList_s" type="text/javascript">$(function(){PrimeFaces.cw("DataList","widget_vorgangsanzeigedokumente_6_j_idt220_j_idt222_5_pdfList",{id:"vorgangsanzeigedokumente:6:j_idt220:j_idt222:5:pdfList"});});</script></li><li class="ui-datalist-item"><img src="/webangebot3/resources/img/redner.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:6:j_idt224" width="1" height="1" style="width: 5px !important;"></svg>Anton Rittel (Freie Wähler)<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:6:j_idt227" width="1" height="1" style="width: 10px !important;"></svg><a href="#" onclick="javascript:openWindow('https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_628/meta_vod_50482.json','7');"><img src="/webangebot3/jakarta.faces.resource/video.gif.xhtml?ln=img" title="Video anzeigen" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:6:j_idt230" width="1" height="1" style="width: 5px !important;"></svg>Video</a><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:6:pdfList" class="ui-datalist ui-widget"><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:6:pdfList_content" class="ui-datalist-content ui-widget-content"><ul id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:6:pdfList_list" class="ui-datalist-data"><li class="ui-datalist-item"><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Protokolle/19%20Wahlperiode%20Kopie/19%20WP%20Plenum%20Kopie/057%20PL%20230725%20ges%20endg%20Kopie.pdf#page=18&view=fit"><img src="/webangebot3/jakarta.faces.resource/pdf_little.gif.xhtml?ln=img" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:6:pdfList:0:j_idt234" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a></li></ul></div></div><script id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:6:pdfList_s" type="text/javascript">$(function(){PrimeFaces.cw("DataList","widget_vorgangsanzeigedokumente_6_j_idt220_j_idt222_6_pdfList",{id:"vorgangsanzeigedokumente:6:j_idt220:j_idt222:6:pdfList"});});</script></li><li class="ui-datalist-item"><img src="/webangebot3/resources/img/redner_zr.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:7:j_idt224" width="1" height="1" style="width: 5px !important;"></svg>Franz Schmid (Alternative für Deutschland)<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:7:j_idt227" width="1" height="1" style="width: 10px !important;"></svg><a href="#" onclick="javascript:openWindow('https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_628/meta_vod_50482.json','8');"><img src="/webangebot3/jakarta.faces.resource/video.gif.xhtml?ln=img" title="Video anzeigen" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:7:j_idt230" width="1" height="1" style="width: 5px !important;"></svg>Video</a><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:7:pdfList" class="ui-datalist ui-widget"><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:7:pdfList_content" class="ui-datalist-content ui-widget-content"><ul id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:7:pdfList_list" class="ui-datalist-data"><li class="ui-datalist-item"><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Protokolle/19%20Wahlperiode%20Kopie/19%20WP%20Plenum%20Kopie/057%20PL%20230725%20ges%20endg%20Kopie.pdf#page=19&view=fit"><img src="/webangebot3/jakarta.faces.resource/pdf_little.gif.xhtml?ln=img" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:7:pdfList:0:j_idt234" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a></li></ul></div></div><script id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:7:pdfList_s" type="text/javascript">$(function(){PrimeFaces.cw("DataList","widget_vorgangsanzeigedokumente_6_j_idt220_j_idt222_7_pdfList",{id:"vorgangsanzeigedokumente:6:j_idt220:j_idt222:7:pdfList"});});</script></li><li class="ui-datalist-item"><img src="/webangebot3/resources/img/redner.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:8:j_idt224" width="1" height="1" style="width: 5px !important;"></svg>Anton Rittel (Freie Wähler)<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:8:j_idt227" width="1" height="1" style="width: 10px !important;"></svg><a href="#" onclick="javascript:openWindow('https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_628/meta_vod_50482.json','9');"><img src="/webangebot3/jakarta.faces.resource/video.gif.xhtml?ln=img" title="Video anzeigen" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:8:j_idt230" width="1" height="1" style="width: 5px !important;"></svg>Video</a><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:8:pdfList" class="ui-datalist ui-widget"><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:8:pdfList_content" class="ui-datalist-content ui-widget-content"><ul id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:8:pdfList_list" class="ui-datalist-data"><li class="ui-datalist-item"><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Protokolle/19%20Wahlperiode%20Kopie/19%20WP%20Plenum%20Kopie/057%20PL%20230725%20ges%20endg%20Kopie.pdf#page=19&view=fit"><img src="/webangebot3/jakarta.faces.resource/pdf_little.gif.xhtml?ln=img" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:8:pdfList:0:j_idt234" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a></li></ul></div></div><script id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:8:pdfList_s" type="text/javascript">$(function(){PrimeFaces.cw("DataList","widget_vorgangsanzeigedokumente_6_j_idt220_j_idt222_8_pdfList",{id:"vorgangsanzeigedokumente:6:j_idt220:j_idt222:8:pdfList"});});</script></li><li class="ui-datalist-item"><img src="/webangebot3/resources/img/redner.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:9:j_idt224" width="1" height="1" style="width: 5px !important;"></svg>Doris Rauscher (Sozialdemokratische Partei Deutschland)<svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:9:j_idt227" width="1" height="1" style="width: 10px !important;"></svg><a href="#" onclick="javascript:openWindow('https://www1.bayern.landtag.de/lisp/res/metafiles/wp19/19_628/meta_vod_50482.json','10');"><img src="/webangebot3/jakarta.faces.resource/video.gif.xhtml?ln=img" title="Video anzeigen" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:9:j_idt230" width="1" height="1" style="width: 5px !important;"></svg>Video</a><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:9:pdfList" class="ui-datalist ui-widget"><div id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:9:pdfList_content" class="ui-datalist-content ui-widget-content"><ul id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:9:pdfList_list" class="ui-datalist-data"><li class="ui-datalist-item"><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Protokolle/19%20Wahlperiode%20Kopie/19%20WP%20Plenum%20Kopie/057%20PL%20230725%20ges%20endg%20Kopie.pdf#page=20&view=fit"><img src="/webangebot3/jakarta.faces.resource/pdf_little.gif.xhtml?ln=img" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:9:pdfList:0:j_idt234" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a></li></ul></div></div><script id="vorgangsanzeigedokumente:6:j_idt220:j_idt222:9:pdfList_s" type="text/javascript">$(function(){PrimeFaces.cw("DataList","widget_vorgangsanzeigedokumente_6_j_idt220_j_idt222_9_pdfList",{id:"vorgangsanzeigedokumente:6:j_idt220:j_idt222:9:pdfList"});});</script></li></ul></div></div><script id="vorgangsanzeigedokumente:6:j_idt220:j_idt222_s" type="text/javascript">$(function(){PrimeFaces.cw("DataList","widget_vorgangsanzeigedokumente_6_j_idt220_j_idt222",{id:"vorgangsanzeigedokumente:6:j_idt220:j_idt222"});});</script></div><input id="vorgangsanzeigedokumente:6:j_idt220_active" name="vorgangsanzeigedokumente:6:j_idt220_active" type="hidden" autocomplete="off" value="null" /></div><script id="vorgangsanzeigedokumente:6:j_idt220_s" type="text/javascript">$(function(){PrimeFaces.cw("AccordionPanel","widget_vorgangsanzeigedokumente_6_j_idt220",{id:"vorgangsanzeigedokumente:6:j_idt220"});});</script>
+                    <br /></td></tr><tr data-ri="7" class="ui-widget-content ui-datatable-odd"><td role="gridcell" style="text-align: center;" class="datumVorgangListe">30.10.2025</td><td role="gridcell">
+                <br />Ausschuss für Arbeit und Soziales, Jugend und Familie
+                    <br />
+                    <br />Beschlussempfehlung mit Bericht 19/8761 <svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:7:j_idt115" width="1" height="1" style="width: 10px !important;"></svg><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Drucksachen/Folgedrucksachen/0000005500/0000005669.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:7:j_idt119" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:7:j_idt121" width="1" height="1" style="width: 10px !important;"></svg>
+                    <br />
+                    <br />Zustimmung in geänderter Fassung
+                    <br />
+                    <br /></td></tr><tr data-ri="8" class="ui-widget-content ui-datatable-even"><td role="gridcell" style="text-align: center;" class="datumVorgangListe">30.10.2025</td><td role="gridcell">
+                <br />Ausschuss für Staatshaushalt und Finanzfragen
+                    <br />
+                    <br />Beschlussempfehlung mit Bericht 19/8761 <svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:8:j_idt115" width="1" height="1" style="width: 10px !important;"></svg><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Drucksachen/Folgedrucksachen/0000005500/0000005669.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:8:j_idt119" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:8:j_idt121" width="1" height="1" style="width: 10px !important;"></svg>
+                    <br />
+                    <br />Zustimmung in geänderter Fassung
+                    <br />
+                    <br /></td></tr><tr data-ri="9" class="ui-widget-content ui-datatable-odd"><td role="gridcell" style="text-align: center;" class="datumVorgangListe">30.10.2025</td><td role="gridcell">
+                <br />Ausschuss für Verfassung, Recht, Parlamentsfragen und Integration
+                    <br />
+                    <br />Beschlussempfehlung mit Bericht 19/8761 <svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:9:j_idt115" width="1" height="1" style="width: 10px !important;"></svg><a href="https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Drucksachen/Folgedrucksachen/0000005500/0000005669.pdf"><img src="/webangebot3/resources/img/pdf_little.gif" /><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:9:j_idt119" width="1" height="1" style="width: 5px !important;"></svg>Download PDF</a><svg xmlns="http://www.w3.org/2000/svg" id="vorgangsanzeigedokumente:9:j_idt121" width="1" height="1" style="width: 10px !important;"></svg>
+                    <br />
+                    <br />Zustimmung in geänderter Fassung
+                    <br />
+                    <br /></td></tr><tr data-ri="10" class="ui-widget-content ui-datatable-even"><td role="gridcell" style="text-align: center;" class="datumVorgangListe">Beratung / Ergebnis folgt</td><td role="gridcell">
+                <br />Plenum
+                    <br />
+                    <br /></td></tr></tbody></table></div></div><script id="vorgangsanzeigedokumente_s" type="text/javascript">$(function(){PrimeFaces.cw("DataTable","widget_vorgangsanzeigedokumente",{id:"vorgangsanzeigedokumente",groupColumnIndexes:[],disableContextMenuIfEmpty:false});});</script><input type="hidden" name="jakarta.faces.ViewState" id="j_id1:jakarta.faces.ViewState:1" value="3487387439298503853:-2314902611805546220" autocomplete="off" />
+</form>
+            </div>
+        </div>
+                            <div id="web3-footer">
+        <div align="right"><span style="font-size: 10px;">Version 25.10.0</span>
+        </div>
+                            </div>
+                        </div>
+                        <div class="cleaner"> </div>
+                    </div>
+                </div>
+            </div><!-- footer.html begin --><!--TYPO3SEARCH_end-->
+                        
+                </div>
+                <div class="col-4">
+                    <h2 class="sr-only">Randspalte</h2>
+                    
+                </div>
+            </div>
+
+            
+        </div>
+    </div>
+</main>
+
+
+
+<footer id="footer">
+    <div class="footer-menu">
+        <div class="container">
+            <div class="row">
+                <div class="col-3">
+                    <h2>Kontakt</h2>
+                    <p>
+                        Bayerischer Landtag <br>
+                        Maximilianeum <br>
+                        Max-Planck-Straße 1 <br>
+                        81675 München
+                    </p>
+                    <p>
+                        <span class="mail"><a
+                                href="mailto:landtag@bayern.landtag.de">landtag@bayern.landtag.de</a></span><br>
+                        <span class="phone">+49 89 4126-0</span> <br>
+                        <span class="fax">+49 89 4126-1392</span>
+                    </p>
+                </div>
+                <div class="col-3">
+                    <h2>Schnellzugriff</h2>
+                    <ul><li><a href="https://www.bayern.landtag.de/aktuelles/sitzungen/">Sitzungen</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/tagesordnungen/">Tagesordnungen</a></li><li><a href="https://www.bayern.landtag.de/parlament/dokumente/drucksachen/">Drucksachen</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/plenum-online/">Plenum Online</a></li><li><a href="https://www.bayern.landtag.de/parlament/ausschuesse-gremien/">Ausschüsse & Gremien</a></li><li></li><li><a href="https://www.bayern.landtag.de/aktuelles/presse/pressemitteilungen/">Pressemitteilungen</a></li><li></li><li><a href="https://www.bayern.landtag.de/parlament/datenschutzbeauftragter/">Datenschutzbeauftragter</a></li><li><a href="https://www.bayern.landtag.de/parlament/staatsregierung/">Staatsregierung</a></li><li><a href="https://www.bayern.landtag.de/aktuelles/blick-nach-europa/europa/">Europa</a></li></ul>
+                </div>
+                <div class="col-3">
+                    <h2>Infothek</h2>
+                    <ul><li><a href="https://www.bayern.landtag.de/parlament/aufgaben-des-landtags/">Aufgaben des Landtags</a></li><li><a href="https://www.bayern.landtag.de/parlament/landtag-von-a-z/">Landtag von A-Z</a></li><li><a href="https://www.bayern.landtag.de/besuch-im-landtag/angebote-fuer-schulen/">Angebote für Schulen</a></li><li><a href="https://www.bayern.landtag.de/besuch-im-landtag/kinder-jugend-und-parlament/">Kinder, Jugend und Parlament</a></li><li><a href="https://www.bayern.landtag.de/besuch-im-landtag/besucherfilm/">Besucherfilm</a></li><li><a href="https://www.bayern.landtag.de/maximilianeum/sitz-des-bayerischen-landtags/">Maximilianeum</a></li><li></li><li><a href="https://www.bayern.landtag.de/parlament/staatssymbole/bayernhymne/">Bayernhymne</a></li><li><a href="https://www.bayern.landtag.de/parlament/staatssymbole/staatsflagge/">Staatsflagge</a></li></ul>
+                </div>
+                <div class="col-3">
+                    <h2>Service</h2>
+                    <ul><li><a href="https://www.bayern.landtag.de/maximilianeum/anfahrt/">Anfahrt</a></li><li><a href="https://www.bayern.landtag.de/service/sitemap/">Sitemap</a></li><li><a href="https://www.bayern.landtag.de/service/impressum/">Impressum</a></li><li><a href="https://www.bayern.landtag.de/service/datenschutz/">Datenschutz</a></li><li><a href="https://www.bayern.landtag.de/erklaerung-zur-barrierefreiheit/">Barrierefreiheit</a></li><li><a href="https://www.bayern.landtag.de/service/webcam/">Webcam</a></li><li></li><li><a href="https://www.bayern.landtag.de/parlament/dokumente/rss-feeds/">RSS-Feeds</a></li><li><a href="https://www.bayern.landtag.de/parlament/dokumente/abonnement-service/">Abonnement-Service</a></li><li><a href="https://www.bayern.landtag.de/mediathek/publikationen/">Publikationen</a></li><li><a href="https://www.bayern.landtag.de/parlament/verwaltung/ausschreibungen/">Ausschreibungen</a></li><li><a href="https://www.bayern.landtag.de/parlament/verwaltung/karriere/">Stellenangebote</a></li></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-service">
+        <div class="container">
+            <div class="row">
+                <div class="col-4 emas">
+                    <a target="_blank" href="https://www.bayern.landtag.de/parlament/verwaltung/audit-berufundfamilie/">
+                        <img alt="Zertifikat seit 2007: audit berufundfamilie" src="https://www.bayern.landtag.de/_assets/e000b61ecaa07296a95e5f5fdae0070a/Images/audit.png" width="706" height="735" />
+                    </a>
+                    <a target="_blank" href="https://www.bayern.landtag.de/parlament/verwaltung/emas-umweltmanagement/">
+                        <img alt="Logo: EMAS geprüftes Umweltmanagement" src="https://www.bayern.landtag.de/_assets/e000b61ecaa07296a95e5f5fdae0070a/Images/EMAS.png" width="456" height="735" />
+                    </a>
+                </div>
+                <div class="col-8">
+                    <ul class="social-media">
+                        <li><a target="_blank" href="https://x.com/Landtag_Bayern" class="icon-Icon_X"><span>X</span></a></li>
+                        <li><a target="_blank" href="https://social.bund.de/@BayerischerLandtag" class="icon-Icon_Mastodon"><span>Mastodon</span></a></li>
+                        <li><a target="_blank" href="https://www.facebook.com/Bayern.Landtag/" class="icon-Icon_Facebook"><span>Facebook</span></a></li>
+                        <li><a target="_blank" href="https://www.instagram.com/bayerischer.landtag/" class="icon-Icon_Instagram"><span>Instagram</span></a></li>
+                        <li><a target="_blank" href="https://www.youtube.com/user/BayernLandtag" class="icon-Icon_YouTube"><span>Youtube</span></a></li>
+                        <li><a target="_blank" href="https://www.linkedin.com/company/bayerischer-landtag/" class="icon-Icon_LinkedIn"><span>LinkedIn</span></a></li>
+                        <li><a target="_blank" href="https://www.tiktok.com/@bayerischer.landtag" class="icon-Icon_TikTok"><span>TikTok</span></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+<a id="scroll-top" title="zum Seitenanfang" href="#page-top"><span>Seitenanfang</span></a>
+
+<script src="https://www.bayern.landtag.de/typo3temp/assets/compressed/merged-878e951aada841f8e9603796b224de04.js?1724236894"></script>
+<script src="https://www.bayern.landtag.de/typo3temp/assets/compressed/merged-c595c2db68a1b4ac3e4a20e6f2fa911f.js?1755708603"></script>
+
+
+<!-- footer.html end -->
+        </div></body>
+</html>

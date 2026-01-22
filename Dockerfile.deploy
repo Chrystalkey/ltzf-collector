@@ -1,6 +1,8 @@
 FROM debian:bookworm-slim AS oapifile
 
-ENV OPENAPI_GENERATOR_VERSION="7.12.0"
+ENV OPENAPI_GENERATOR_VERSION="7.15.0"
+ENV SPEC_PATH="https://raw.githubusercontent.com/Chrystalkey/landtagszusammenfasser/refs/heads/main/docs/specs/openapi.yml"
+
 RUN apt update && apt install -y --no-install-recommends maven jq curl \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir /app \
@@ -12,12 +14,12 @@ WORKDIR /app
 RUN echo 'openapi: 3.0.0\ninfo:\n  title: "spec"\n  version: "0.1.0"\npaths:\n  /none:\n    get:\n      responses:\n        "200":\n          description: "success"' > openapi.yml \
     && ./openapi-generator-cli generate -g python -i ./openapi.yml -o /app/pytest \
     && rm -rf pytest
-RUN curl "https://raw.githubusercontent.com/Chrystalkey/landtagszusammenfasser/refs/heads/main/docs/specs/openapi.yml" > openapi.yml
+RUN curl $SPEC_PATH > openapi.yml
 RUN ./openapi-generator-cli generate -g python -i ./openapi.yml -o /app/oapicode-python
 
-FROM python:3.13-slim-bookworm AS builder
+FROM python:3.14-slim-bookworm AS builder
 
-RUN pip install poetry==1.4.2
+RUN pip install poetry==2.2.1
 
 ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=1 \
@@ -32,13 +34,13 @@ COPY pyproject.toml poetry.lock ./
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
-FROM python:3.13-slim-bookworm AS runtime
+FROM python:3.14-slim-bookworm AS runtime
 
 LABEL maintainer="Benedikt Schäfer"
 LABEL description="Collector for the LTZF"
-LABEL version="0.2.1"
+LABEL version="0.2.2"
 
-RUN apt-get update && apt-get install --no-install-recommends -y tesseract-ocr tesseract-ocr-deu pandoc \
+RUN apt-get update && apt-get install --no-install-recommends -y tesseract-ocr tesseract-ocr-deu pandoc poppler-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
     
@@ -53,4 +55,4 @@ COPY collector ./collector
 
 VOLUME /app/locallogs
 
-ENTRYPOINT ["python", "-m", "collector.main"]
+ENTRYPOINT ["python", "-m", "collector"]

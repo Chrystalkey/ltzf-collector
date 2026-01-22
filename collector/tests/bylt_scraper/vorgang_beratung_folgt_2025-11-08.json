@@ -1,0 +1,400 @@
+{
+ "origin": "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=162704",
+ "result": {
+  "api_id": "24d22b59-fffc-44ec-9b1e-024a2ccd72cc",
+  "titel": "Freiwerdende Mittel aus Bundesprogramm zum Umbau der Tierhaltung bei Schweinen in GAK \u00fcberf\u00fchren",
+  "kurztitel": "Freiwerdende Mittel aus Bundesprogramm zum Umbau der Tierhaltung bei Schweinen in GAK \u00fcberf\u00fchren",
+  "wahlperiode": 19,
+  "verfassungsaendernd": false,
+  "typ": "gg-land-parl",
+  "ids": [
+   {
+    "id": "19/8773",
+    "typ": "initdrucks"
+   }
+  ],
+  "links": [
+   "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=162704",
+   "https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Drucksachen/Basisdrucksachen/0000007000/0000007204.pdf"
+  ],
+  "initiatoren": [
+   {
+    "person": "Petra Therese H\u00f6gl",
+    "organisation": "Christlich Soziale Union (CSU)"
+   },
+   {
+    "person": "Tanja Schorer-Dremel",
+    "organisation": "Christlich Soziale Union (CSU)"
+   },
+   {
+    "person": "Leo Dietz",
+    "organisation": "Christlich Soziale Union (CSU)"
+   },
+   {
+    "person": "Sebastian Friesinger",
+    "organisation": "Christlich Soziale Union (CSU)"
+   },
+   {
+    "person": "Dr. Petra Loibl",
+    "organisation": "Christlich Soziale Union (CSU)"
+   },
+   {
+    "person": "Thomas Pirner",
+    "organisation": "Christlich Soziale Union (CSU)"
+   },
+   {
+    "person": "Sascha Schn\u00fcrer",
+    "organisation": "Christlich Soziale Union (CSU)"
+   },
+   {
+    "person": "Thorsten Schwab",
+    "organisation": "Christlich Soziale Union (CSU)"
+   },
+   {
+    "person": "Kristan Freiherr von Waldenfels",
+    "organisation": "Christlich Soziale Union (CSU)"
+   },
+   {
+    "person": "Florian Streibl",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Felix Locke",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Ulrike M\u00fcller",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Tobias Beck",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Martin Behringer",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Dr. Martin Brunnhuber",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Susann Enders",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Stefan Fr\u00fchbei\u00dfer",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Johann Gro\u00df",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Dipl.-Verw.Wirt (FH) Wolfgang Hauber",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Bernhard Heinisch",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Alexander Hold",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Marina Jakob",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Michael Koller",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Nikolaus Kraus",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Josef Lausch",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Christian Lindinger",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Rainer Ludwig",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Prof. Dr. Michael Piazolo",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Bernhard Pohl",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Julian Preidl",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Anton Rittel",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Markus Saller",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Martin Scharf",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Werner Schie\u00dfl",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Gabi Schmidt",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Roswitha Toso",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Dipl.-Kaufmann Roland Weigert",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Jutta Widmann",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Benno Zierer",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Felix Freiherr von Zobel",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "person": "Thomas Z\u00f6ller",
+    "organisation": "Freie W\u00e4hler (FW)"
+   },
+   {
+    "organisation": "Freie W\u00e4hler (FW)"
+   }
+  ],
+  "stationen": [
+   {
+    "zp_start": "2025-11-04T23:00:00+00:00",
+    "gremium": {
+     "parlament": "BY",
+     "wahlperiode": 19,
+     "name": "plenum"
+    },
+    "link": "https://www.bayern.landtag.de/webangebot3/views/vorgangsanzeige/vorgangsanzeige.xhtml?gegenstandid=162704",
+    "typ": "parl-initiativ",
+    "trojanergefahr": 3,
+    "schlagworte": [],
+    "dokumente": [
+     {
+      "drucksnr": "19/8773",
+      "typ": "entwurf",
+      "titel": "Freiwerdende Mittel aus Bundesprogramm zum Umbau der Tierhaltung bei Schweinen in GAK \u00fcberf\u00fchren",
+      "volltext": "19. Wahlperiode 05.11.2025 Drucksache 19/8773\nDrucksachen, Plenarprotokolle sowie die Tagesordnungen der Vollversammlung und der Aussch\u00fcsse sind im Internet unter www.bayern.landtag.de - Dokumente abrufbar. Die aktuelle\nSitzungs\u00fcbersicht steht unter www.bayern.landtag.de \u2013 Aktuelles/Sitzungen zur Verf\u00fcgung.\nAntrag\nder Abgeordneten Petra H\u00f6gl, Tanja Schorer-Dremel, Leo Dietz, Sebastian\nFriesinger, Dr. Petra Loibl, Thomas Pirner, Sascha Schn\u00fcrer, Thorsten Schwab,\nKristan Freiherr von Waldenfels CSU,\nFlorian Streibl, Felix Locke, Ulrike M\u00fcller, Tobias Beck, Martin Behringer,\nDr. Martin Brunnhuber, Susann Enders, Stefan Fr\u00fchbei\u00dfer, Johann Gro\u00df,\nWolfgang Hauber, Bernhard Heinisch, Alexander Hold, Marina Jakob, Michael\nKoller, Nikolaus Kraus, Josef Lausch, Christian Lindinger, Rainer Ludwig,\nProf. Dr. Michael Piazolo, Bernhard Pohl, Julian Preidl, Anton Rittel, Markus\nSaller, Martin Scharf, Werner Schie\u00dfl, Gabi Schmidt, Roswitha Toso, Roland\nWeigert, Jutta Widmann, Benno Zierer, Felix Freiherr von Zobel, Thomas Z\u00f6ller\nund Fraktion (FREIE W\u00c4HLER)\nFreiwerdende Mittel aus Bundesprogramm zum Umbau der Tierhaltung bei\nSchweinen in GAK \u00fcberf\u00fchren\nDer Landtag wolle beschlie\u00dfen:\nDie Staatsregierung wird aufgefordert, sich beim Bund daf\u00fcr einzusetzen, dass die Mit\u0002tel aus dem vorzeitig beendeten Bundesprogramm zur F\u00f6rderung des Umbaus der Tier\u0002haltung bei Schweinen vollst\u00e4ndig der GAK (GAK = Gemeinschaftsaufgabe \u201eVerbesse\u0002rung der Agrarstruktur und des K\u00fcstenschutzes\u201c) zur\u00fcckgef\u00fchrt werden und somit den\nL\u00e4ndern f\u00fcr die Investitionsf\u00f6rderung zur Verf\u00fcgung gestellt werden.\nBegr\u00fcndung:\nBundesminister Alois Rainer hat die Bundesprogramme zum Umbau der Tierhaltung bei\nSchweinen vorzeitig beendet und angek\u00fcndigt, den Teil der F\u00f6rderung von Investitionen\nwieder in die GAK zur\u00fcckzuf\u00fchren.\nDie GAK stellt einen F\u00f6rderrahmen des Bundes dar, innerhalb dessen die L\u00e4nder agie\u0002ren k\u00f6nnen und dabei die jeweiligen strukturellen Gegebenheiten und Besonderheiten\ndes Bundeslandes bei der Ausgestaltung von F\u00f6rderprogrammen ber\u00fccksichtigen k\u00f6n\u0002nen.\nEin solcher Ansatz ist deutlich vielversprechender als ein einheitliches Bundespro\u0002gramm, dessen F\u00f6rdervoraussetzungen f\u00fcr alle Bundesl\u00e4nder unmittelbar gelten.\nF\u00fcr diese F\u00f6rderprogramme auf Landesebene sind ausreichend finanzielle Mittel sei\u0002tens des Bundes unabdingbar. Deshalb ist beim Bund nochmals darauf hinzuwirken,\ndass letztlich die Mittel aus dem aktuellen Bundesprogramm sicher und zu 100 Prozent\nin die GAK \u00fcberf\u00fchrt werden.",
+      "zusammenfassung": "Der Antrag der Abgeordneten H\u00f6gl und weiterer Fraktionen fordert die Staatsregierung auf, sich beim Bund daf\u00fcr einzusetzen, dass Mittel aus dem vorzeitig beendeten Bundesprogramm zum Umbau der Tierhaltung bei Schweinen vollst\u00e4ndig der GAK zur\u00fcckgef\u00fchrt werden und den L\u00e4ndern f\u00fcr Investitionsf\u00f6rderung zur Verf\u00fcgung gestellt werden. Begr\u00fcndung: Bundesminister Alois Rainer hat das Programm vorzeitig beendet und angek\u00fcndigt, den Investitionsanteil wieder in die GAK zur\u00fcckzuf\u00fchren. Die GAK bietet einen F\u00f6rderrahmen, der es den L\u00e4ndern erm\u00f6glicht, F\u00f6rderungen an regionale Gegebenheiten und Besonderheiten anzupassen, statt eines einheitlichen Bundesprogramms. Eine F\u00f6rderung auf Landesebene sei dadurch vielversprechender, m\u00fcsse jedoch durch ausreichende Bundesmittel sichergestellt werden. Deshalb soll der Bund sicherstellen, dass die Mittel aus dem aktuellen Bundesprogramm zu 100 Prozent in die GAK \u00fcberf\u00fchrt werden. Auf diese Weise k\u00f6nnten die L\u00e4nder Investitionsf\u00f6rderung flexibel und zielgerichtet im Zuge der Agrarstrukturverbesserung und des K\u00fcstenschutzes gestalten, an regionale Bed\u00fcrfnisse angepasst und F\u00f6rderprogramme entsprechend ausrichten. Ziel ist eine bessere Anpassung der F\u00f6rderlandschaft an regionale Gegebenheiten statt einer bundesweit einheitlichen L\u00f6sung.",
+      "zp_modifiziert": "2025-11-06T08:39:11+00:00",
+      "zp_referenz": "2025-11-05T00:00:00+00:00",
+      "link": "https://www.bayern.landtag.de/www/ElanTextAblage_WP19/Drucksachen/Basisdrucksachen/0000007000/0000007204.pdf",
+      "hash": "9ce3f493e0f36c7a239c486930ec5c8587b832d65a5f04ed5906875a1295d05e",
+      "schlagworte": [
+       "gak (gemeinschaftsaufgabe zur verbesserung der agrarstruktur und des k\u00fcstenschutzes)",
+       "bundesprogramm zum umbau der tierhaltung bei schweinen",
+       "investitionsf\u00f6rderung",
+       "l\u00e4nderf\u00f6rderung / f\u00f6rderung auf landesebene",
+       "f\u00f6rderrahmen des bundes",
+       "strukturwandel der tierhaltung / schweinehaltung",
+       "mittelr\u00fcckf\u00fchrung / \u00fcberf\u00fchrung der mittel in die gak",
+       "alois rainer",
+       "agrarstrukturverbesserung",
+       "k\u00fcstenschutz"
+      ],
+      "autoren": [
+       {
+        "person": "Petra H\u00f6gl",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Tanja Schorer-Dremel",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Leo Dietz",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Sebastian Friesinger",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Dr. Petra Loibl",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Thomas Pirner",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Sascha Schn\u00fcrer",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Thorsten Schwab",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Kristan Freiherr von Waldenfels",
+        "organisation": "Christlich Soziale Union (CSU)"
+       },
+       {
+        "person": "Florian Streibl",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Felix Locke",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Ulrike M\u00fcller",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Tobias Beck",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Martin Behringer",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Dr. Martin Brunnhuber",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Susann Enders",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Stefan Fr\u00fchbei\u00dfer",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Johann Gro\u00df",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Wolfgang Hauber",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Bernhard Heinisch",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Alexander Hold",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Marina Jakob",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Michael Koller",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Nikolaus Kraus",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Josef Lausch",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Christian Lindinger",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Rainer Ludwig",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Prof. Dr. Michael Piazolo",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Bernhard Pohl",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Julian Preidl",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Anton Rittel",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Markus Saller",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Martin Scharf",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Werner Schie\u00dfl",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Gabi Schmidt",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Roswitha Toso",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Roland Weigert",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Jutta Widmann",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Benno Zierer",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Felix Freiherr von Zobel",
+        "organisation": "Unbekannt"
+       },
+       {
+        "person": "Thomas Z\u00f6ller",
+        "organisation": "Unbekannt"
+       },
+       {
+        "organisation": "Bayerischer Landtag"
+       }
+      ]
+     }
+    ],
+    "additional_links": [],
+    "stellungnahmen": []
+   }
+  ]
+ }
+}

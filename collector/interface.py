@@ -4,6 +4,7 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from datetime import timedelta
+import sys
 from typing import Any, List, Optional, Set, Tuple
 from uuid import UUID
 from pathlib import Path
@@ -15,13 +16,16 @@ from collector.config import CollectorConfiguration
 
 import openapi_client
 from openapi_client import models
+import openapi_client.api
+import openapi_client.api.collector_schnittstellen_api
+import openapi_client.api_client
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("collector")
 
 
 class Scraper(ABC):
     listing_urls: List[str] = []
-    collector_id: UUID = None
+    scraper_id: UUID = None
 
     config: CollectorConfiguration = None
 
@@ -35,30 +39,41 @@ class Scraper(ABC):
         listing_urls: List[str],
         session: aiohttp.ClientSession,
     ):
-        self.collector_id = collector_id
+        assert isinstance(config, CollectorConfiguration)
+        assert isinstance(collector_id, UUID)
+        assert isinstance(session, aiohttp.ClientSession)
+        self.scraper_id = collector_id
         self.listing_urls = listing_urls
         self.config = config
         self.session = session
         self.session_headers = {}
+        self.item_count = 0
+        self.items_done = 0
         global logger
         logger.info(
             f"Initialized {self.__class__.__name__} with {len(self.listing_urls)} listing urls"
         )
-        logger.info(f"Set Collector ID to {self.collector_id}")
 
     # Process Listing Page URLs
     # This takes in a list of listing page urls and outputs
     # a deduplicated, cleaned set of extracted items
     async def process_lpurls(self, lpurls: List[str]) -> Set[Any]:
         global logger
+        logger.info("Processing Listing Page URLs Now")
+
         tasks = []
         try:
             for lpage in self.listing_urls:
                 tasks.append(self.listing_page_extractor(lpage))
+                logging.info(f"Extracting from url `{lpage}`")
 
             # Wait for all listing page extractor tasks to complete
-            item_list = await asyncio.gather(*tasks, return_exceptions=True)
-
+            item_list = []
+            if self.config.linearize:
+                for t in tasks:
+                    item_list.append(await t)
+            else:
+                item_list = await asyncio.gather(*tasks, return_exceptions=True)
             # Handle any exceptions from listing page extractors
             for i, result in enumerate(item_list):
                 if isinstance(result, Exception):
@@ -82,9 +97,15 @@ class Scraper(ABC):
     # for comparison
     async def helper_extract_send_item(self, item):
         """Process an item by extracting and sending it to the API"""
+        logger.info(f"Extraction started on item {item}")
         extracted_item = await self.item_extractor(item)
+        logger.info(f"Extracted finished on item {item}")
         if extracted_item:
+            ## because: If sent_item is None something went wrong
             sent_item = await self.send_result(extracted_item)
+            ## cache the shit out of the items
+            key = await self.make_cache_key(item)
+            await self.store_extracted_result(key, extracted_item)
             return (sent_item, item)
         else:
             return None
@@ -95,10 +116,11 @@ class Scraper(ABC):
         tasks = []
         processed_count = 0
         skipped_count = 0
+        logger.info("Processing Items Now")
 
-        for item in items:
+        for item in sorted(items):
             # Check if item is already in cache
-            key = self.make_cache_key(item)
+            key = await self.make_cache_key(item)
             cached = await self.get_cached_result(key)
             if cached is not None:
                 logger.debug(f"{key} found in cache, skipping...")
@@ -107,13 +129,18 @@ class Scraper(ABC):
 
             tasks.append(self.helper_extract_send_item(item))
             processed_count += 1
-
+        self.item_count = len(tasks)
         logger.info(
             f"{self.__class__.__name__}: Processing {processed_count} items, skipping {skipped_count} cached items"
         )
         temp_res = []
         try:
-            temp_res = await asyncio.gather(*tasks, return_exceptions=True)
+            # temp_res = await asyncio.gather(*tasks, return_exceptions=True)
+            if self.config.linearize:
+                for t in tasks:
+                    temp_res.append(await t)
+            else:
+                temp_res = await asyncio.gather(*tasks, return_exceptions=True)
         except Exception as e:
             logger.error(
                 f"{self.__class__.__name__}: Error during item extraction gathering: {e}",
@@ -134,11 +161,7 @@ class Scraper(ABC):
         for result in results:
             if result and not isinstance(result, Exception) and result[0]:
                 extracted_item = result[0]
-                input_item = result[1]
                 output.append(extracted_item)
-
-                key = self.make_cache_key(input_item)
-                await self.store_extracted_result(key, extracted_item)
 
                 success_count += 1
             elif not result or (not isinstance(result, Exception) and not result[0]):
@@ -168,7 +191,7 @@ class Scraper(ABC):
         # Process + send all items them
         rset = await self.process_items(iset)
 
-        # send all items to the backend
+        # do cleanup and logging, post-action
         await self.process_results(rset)
 
     # abstract method to be implemented below. Taking in an item,
@@ -242,29 +265,31 @@ class VorgangsScraper(Scraper):
         if logdir is not None:
             logger.info(f"Logging Item to {logdir}")
             try:
-                filepath = Path(logdir) / f"{self.collector_id}.json"
+                filepath = Path(logdir) / f"{self.scraper_id}.jsonl"
                 if not filepath.parent.exists():
                     logger.info(f"Creating Filepath: {filepath.parent}")
                     filepath.parent.mkdir(parents=True)
                 with filepath.open("a", encoding="utf-8") as file:
-                    file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
+                    file.write(json.dumps(item, default=str) + ",\n")
             except Exception as e:
                 logger.error(f"Failed to write to API object log: {e}")
 
     async def send_result(self, item: models.Vorgang) -> Optional[models.Vorgang]:
         global logger
         logger.info(f"Sending Item with id `{item.api_id}` to Database")
-        logger.debug(f"Collector ID: {self.collector_id}")
+        logger.debug(f"Collector ID: {self.scraper_id}")
 
         # Save to log file if configured
         self.log_item(item)
 
         # Send to API
         with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
-            api_instance = openapi_client.DefaultApi(api_client)
+            api_instance = openapi_client.api.collector_schnittstellen_api.CollectorSchnittstellenApi(
+                api_client
+            )
             try:
-                ret = api_instance.vorgang_put(str(self.collector_id), item)
-                logger.info(f"API Response: {ret}")
+                _ret = api_instance.vorgang_put(str(self.scraper_id), item)
+                logger.info("Object sent successfully")
                 return item
             except openapi_client.ApiException as e:
                 logger.error(f"API Exception: {e}")
@@ -275,7 +300,8 @@ class VorgangsScraper(Scraper):
                     )
                     self.log_item(item, True)
                 elif e.status == 401:
-                    logger.error("Authentication failed. Check your API key.")
+                    logger.critical("Authentication failed. Check your API key.")
+                    sys.exit(1)
                 return None
             except Exception as e:
                 logger.error(f"Unexpected error sending item to API: {e}")
@@ -301,12 +327,12 @@ class SitzungsScraper(Scraper):
         if logdir is not None:
             logger.info(f"Logging Item to {logdir}")
             try:
-                filepath = Path(logdir) / f"{self.collector_id}.json"
+                filepath = Path(logdir) / f"{self.scraper_id}.jsonl"
                 if not filepath.parent.exists():
                     logger.info(f"Creating Filepath: {filepath.parent}")
                     filepath.parent.mkdir(parents=True)
                 with filepath.open("a", encoding="utf-8") as file:
-                    file.write(json.dumps(sanitize_for_serialization(item)) + ",\n")
+                    file.write(json.dumps(item, default=str) + ",\n")
             except Exception as e:
                 logger.error(f"Failed to write to API object log: {e}")
 
@@ -318,17 +344,22 @@ class SitzungsScraper(Scraper):
     ) -> Optional[Tuple[datetime.datetime, List[models.Sitzung]]]:
         global logger
         logger.info(f"Sending Item with Date `{item[0]}` to Database")
-        logger.debug(f"Collector ID: {self.collector_id}")
+        logger.debug(f"Collector ID: {self.scraper_id}")
 
         # Save to log file if configured
         self.log_item(item)
 
         # Send to API
         with openapi_client.ApiClient(self.config.oapiconfig) as api_client:
-            api_instance = openapi_client.DefaultApi(api_client)
+            api_instance = openapi_client.api.collector_schnittstellen_api.CollectorSchnittstellenApi(
+                api_client
+            )
             try:
                 ret = api_instance.kal_date_put(
-                    parlament=models.Parlament.BY, datum=item[0], sitzung=item[1]
+                    x_scraper_id=str(self.scraper_id),
+                    parlament=models.Parlament.BY,
+                    datum=item[0],
+                    sitzung=item[1],
                 )
                 logger.info(f"API Response: {ret}")
                 return item
@@ -341,7 +372,8 @@ class SitzungsScraper(Scraper):
                     )
                     self.log_item(item, True)
                 elif e.status == 401:
-                    logger.error("Authentication failed. Check your API key.")
+                    logger.critical("Authentication failed. Check your API key.")
+                    sys.exit(1)
                 return None
             except Exception as e:
                 logger.error(f"Unexpected error sending item to API: {e}")

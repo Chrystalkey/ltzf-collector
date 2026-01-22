@@ -2,15 +2,14 @@ from datetime import timedelta
 import json
 from openapi_client import models
 from collector.convert import sanitize_for_serialization
-from collector.document import Document
+from collector.document_builder import *
 from pathlib import Path
 from typing import Optional, Dict, Any
 import logging
 import redis
 import sys
 
-
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("collector")
 
 
 class ScraperCache:
@@ -76,7 +75,7 @@ class ScraperCache:
         try:
             success = self.redis_client.get(key)
             if not success:
-                logger.warning(f"{typehint} (key=`{key}`) not found in cache")
+                logger.debug(f"{typehint} (key=`{key}`) not found in cache")
                 return None
             return success
         except Exception as e:
@@ -87,16 +86,17 @@ class ScraperCache:
         key = f"vg:{key}"
         return self.store_raw(key, value, "Vorgang")
 
-    def store_dokument(self, key: str, value: Document, expiry: int = None):
+    def store_dokument(self, key: str, value: DocumentBuilder, expiry: int = None):
         """Store Document data in Redis cache
 
         Only caches documents that were successfully downloaded and processed
         """
         if self.disabled:
+            logger.debug("Disabled: Always returning true")
             return True
         # Skip caching if document wasn't successfully processed
-        if not getattr(value, "download_success", True) or not getattr(
-            value, "extraction_success", True
+        if not getattr(value, "download_success", False) or not getattr(
+            value, "extraction_success", False
         ):
             logger.warning(f"Not caching document {key} due to failed processing")
             return False
@@ -112,12 +112,14 @@ class ScraperCache:
             return None
         return models.Vorgang.from_json(ret)
 
-    def get_dokument(self, key: str) -> Optional[Document]:
+    # returns the document as json string, the caller must know the exact type
+    # since DocumentBuilder is Abstract
+    def get_dokument(self, key: str) -> Optional[str]:
         key = f"dok:{key}"
         ret = self.get_raw(key, "Dokument")
         if ret is None:
             return None
-        return Document.from_json(ret)
+        return ret
 
     def store_html(self, key: str, value: str, expiry: int = None):
         key = f"html:{key}"

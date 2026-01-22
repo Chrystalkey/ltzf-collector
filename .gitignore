@@ -1,10 +1,16 @@
 .idea/
+.kreuzberg/
+.pdf_cache/
 public/
 target/
 .venv/
 *.zip
 *.7z
 *.tar.gz
+*.pdf
+*.log
+local-config.toml
+collector.toml
 __pycache__/
 .pytest_cache/
 
@@ -15,3 +21,4 @@ www/
 temp/
 database/tests/*_dump.json
 locallogs/
+.kreuzberg/
