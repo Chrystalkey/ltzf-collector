@@ -40,8 +40,13 @@ def check_availability() -> bool:
     ) as proc:
         o, e = proc.communicate(timeout=5)
         lines = e.split("\n")
-        if not " 26." in lines[0]:
-            logger.critical(f"Expected to find pdfimages version 26 in line {lines[0]}")
+        vnum = lines[0].split(" ")[2]
+        v_maj = int(vnum.split(".")[0])
+
+        if v_maj < 20:
+            logger.critical(
+                f"Expected to find pdfimages version 20 or higher in line {lines[0]}"
+            )
             return False
     return True
 
