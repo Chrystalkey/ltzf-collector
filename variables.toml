@@ -2,4 +2,4 @@
 version="0.2.2"
 [openapi]
 oapigen-version="7.15.0"
-oapi-spec="https://raw.githubusercontent.com/Chrystalkey/landtagszusammenfasser/refs/heads/main/docs/specs/openapi.yml"
+oapi-spec="https://raw.githubusercontent.com/Chrystalkey/landtagszusammenfasser/9c20dd1913eac99bd14edcd9676e188305064f1a/docs/specs/openapi.yml"
