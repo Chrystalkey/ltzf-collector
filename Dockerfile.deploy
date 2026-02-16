@@ -1,7 +1,7 @@
 FROM debian:bookworm-slim AS oapifile
 
 ENV OPENAPI_GENERATOR_VERSION="7.15.0"
-ENV SPEC_PATH="https://raw.githubusercontent.com/Chrystalkey/landtagszusammenfasser/refs/heads/main/docs/specs/openapi.yml"
+ENV SPEC_PATH="https://raw.githubusercontent.com/Chrystalkey/landtagszusammenfasser/9c20dd1913eac99bd14edcd9676e188305064f1a/docs/specs/openapi.yml"
 
 RUN apt update && apt install -y --no-install-recommends maven jq curl \
     && rm -rf /var/lib/apt/lists/* \
