@@ -1,5 +1,11 @@
 # Collector
 
+# WE HAVE MOVED
+
+This project is now hosted here: https://codeberg.org/PaZuFa/pazufa-collector
+
+And this repository is being archived.
+
 ## Usage
 
 The configuration is largely described in the `example-config.toml`.
